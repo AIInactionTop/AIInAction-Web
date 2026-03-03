@@ -84,10 +84,10 @@ export function ChallengeActions({ challengeId, slug, likesCount, liked, complet
               <Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} />
               {likesCount}
             </Button>
-            <Button variant="outline" className="gap-2" onClick={handleFork} disabled={isPending}>
+            {/* <Button variant="outline" className="gap-2" onClick={handleFork} disabled={isPending}>
               <GitFork className="h-4 w-4" />
               {t("fork")}
-            </Button>
+            </Button> */}
             {completed ? (
               <Button variant="outline" className="gap-2 text-green-600 border-green-600/30 pointer-events-none" disabled>
                 <CheckCircle className="h-4 w-4 fill-green-600 text-white" />

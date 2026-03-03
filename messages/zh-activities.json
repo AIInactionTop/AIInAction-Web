@@ -1,0 +1,126 @@
+{
+  "activities": {
+    "heroBadge": "OpenClaw 实践挑战",
+    "heroTitle1": "用 AI Agent 重新定义",
+    "heroTitle2": "你的工作方式",
+    "heroSubtitle": "8 个真实用户案例，8 种 AI Agent 配置方案。\n选择你的角色，跟随配置指南，亲手搭建属于自己的 OpenClaw 自动化工作流。",
+    "browseCases": "浏览案例",
+    "learnOpenClaw": "了解 OpenClaw",
+    "joinChallenge": "参与挑战",
+    "statCases": "用户案例",
+    "statAgents": "Agent配置",
+    "statEfficiency": "平均效率提升",
+    "scrollDown": "向下滚动",
+    "howToParticipate": "How to participate",
+    "howTitle": "如何参与挑战",
+    "howSubtitle": "四步完成你的 OpenClaw 实践之旅",
+    "step1Title": "选择你的角色",
+    "step1Desc": "浏览下方8个真实用户案例，找到与你最匹配的角色和场景",
+    "step2Title": "阅读配置指南",
+    "step2Desc": "深入了解该角色的 Agent 配置方案、技能组合和工作流设计",
+    "step3Title": "动手配置OpenClaw",
+    "step3Desc": "按照指南在 OpenClaw 平台上实际配置你的 AI Agent 网络",
+    "step4Title": "分享你的成果",
+    "step4Desc": "将你的配置实践提交到 AI In Action，与社区一起交流进步",
+    "userCasesLabel": "User Cases",
+    "userCasesTitle": "选择你的角色，开始挑战",
+    "userCasesSubtitle": "每个案例都包含完整的 Agent 配置方案和实施指南",
+    "viewGuide": "查看配置指南",
+    "ctaTitle": "准备好开始你的",
+    "ctaTitle2": "之旅了吗？",
+    "ctaSubtitle": "OpenClaw（小龙虾 🦞）是 2026 年 GitHub 增长最快的开源 AI Agent 项目。\n无论你是开发者、营销人、创业者还是自由职业者，\n都能找到属于你的 AI 自动化方案。",
+    "ctaVisitSite": "访问 OpenClaw 官网",
+    "ctaGithub": "GitHub 开源仓库",
+    "ctaCommunity": "加入 OpenClaw 社区：openclaw.ai · Discord",
+    "cases": {
+      "luxury-trade": {
+        "title": "奢侈品买手的AI军团",
+        "subtitle": "1人=10人团队的跨境贸易革命",
+        "persona": "独立奢侈品买手",
+        "personaTag": "跨境贸易",
+        "stats": [
+          { "value": "73%", "label": "时间节省" },
+          { "value": "5", "label": "AI Agent" }
+        ],
+        "highlights": ["采购询价自动化", "客户服务7×24", "社媒矩阵运营"]
+      },
+      "content-marketing": {
+        "title": "内容营销超级个体的睡后收入",
+        "subtitle": "OpenClaw如何实现24/7无休运营",
+        "persona": "内容营销创始人",
+        "personaTag": "内容营销",
+        "stats": [
+          { "value": "70%", "label": "运营时间节省" },
+          { "value": "600%", "label": "情报更新提升" }
+        ],
+        "highlights": ["市场情报自动化", "内容分发优化", "客户沟通代理"]
+      },
+      "indie-dev": {
+        "title": "独立开发者的7×24小时AI分身",
+        "subtitle": "告别碎片化，构建全天候智能工作流",
+        "persona": "独立开发者",
+        "personaTag": "软件开发",
+        "stats": [
+          { "value": "60%", "label": "时间节省" },
+          { "value": "$0", "label": "SaaS成本" }
+        ],
+        "highlights": ["代码审查自动化", "邮件智能处理", "日程管理AI"]
+      },
+      "saas-sales": {
+        "title": "替代20万美元SDR的增长引擎",
+        "subtitle": "AI智能体实现自主LinkedIn GTM自动化",
+        "persona": "销售/市场经理",
+        "personaTag": "SaaS销售",
+        "stats": [
+          { "value": "$200K", "label": "年人力成本替代" },
+          { "value": "10x", "label": "外展规模扩展" }
+        ],
+        "highlights": ["潜在客户自动发现", "个性化外展沟通", "多步骤跟进管理"]
+      },
+      "dev-assistant": {
+        "title": "告别工具炼狱，构建AI助手网络",
+        "subtitle": "独立开发者解放60%时间的秘密",
+        "persona": "独立开发者",
+        "personaTag": "效率自动化",
+        "stats": [
+          { "value": "60%", "label": "时间节省" },
+          { "value": "~$60", "label": "月成本节省" }
+        ],
+        "highlights": ["CodeReviewBot", "MailAssistant", "ScheduleMaster"]
+      },
+      "cybersecurity": {
+        "title": "网络安全专家的7×24自动化防护",
+        "subtitle": "从手动疲劳到AI赋能的超个体转型",
+        "persona": "网络安全顾问",
+        "personaTag": "网络安全",
+        "stats": [
+          { "value": "50%+", "label": "时间节省" },
+          { "value": "1-2€", "label": "每日成本" }
+        ],
+        "highlights": ["AgentX安全助理", "自动化邮件管理", "7×24网络监控"]
+      },
+      "supermom": {
+        "title": "全职妈妈的AI超能力",
+        "subtitle": "重塑家庭与事业的平衡",
+        "persona": "全职妈妈兼创业者",
+        "personaTag": "家庭教育",
+        "stats": [
+          { "value": "90%", "label": "流程提速" },
+          { "value": "75%", "label": "规划时间节省" }
+        ],
+        "highlights": ["家庭教育Agent", "财务管理Agent", "零代码应用开发"]
+      },
+      "content-creator": {
+        "title": "独立创作者的月入破万之路",
+        "subtitle": "多智能体打造个人内容工厂",
+        "persona": "内容创作者",
+        "personaTag": "数字营销",
+        "stats": [
+          { "value": "90%", "label": "人工减少" },
+          { "value": "5x", "label": "账号翻倍" }
+        ],
+        "highlights": ["研究智能体", "内容创作智能体", "数据分析优化"]
+      }
+    }
+  }
+}

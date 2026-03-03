@@ -160,7 +160,7 @@ export default async function ChallengeDetailPage({ params }: Props) {
         </div>
 
         {/* Forked from */}
-        {challenge.forkedFrom && (
+        {/* {challenge.forkedFrom && (
           <p className="mt-2 text-sm text-muted-foreground">
             <GitFork className="inline h-3.5 w-3.5 mr-1" />
             {t("forkedFrom")}{" "}
@@ -171,7 +171,7 @@ export default async function ChallengeDetailPage({ params }: Props) {
               {challenge.forkedFrom.title}
             </Link>
           </p>
-        )}
+        )} */}
 
         <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
           {title}
@@ -183,10 +183,10 @@ export default async function ChallengeDetailPage({ params }: Props) {
         {/* Stats */}
         <div className="mt-4 flex items-center gap-4 text-sm text-muted-foreground">
           <span>{tc("likes", { count: challenge.likesCount })}</span>
-          <span className="flex items-center gap-1">
+          {/* <span className="flex items-center gap-1">
             <GitFork className="h-3.5 w-3.5" />
             {tc("forks", { count: challenge._count.forks })}
-          </span>
+          </span> */}
           <span className="flex items-center gap-1">
             <MessageCircle className="h-3.5 w-3.5" />
             {tc("comments", { count: challenge._count.comments })}

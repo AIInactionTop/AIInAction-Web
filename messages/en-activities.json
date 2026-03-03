@@ -1,0 +1,126 @@
+{
+  "activities": {
+    "heroBadge": "OpenClaw Practice Challenge",
+    "heroTitle1": "Redefine Your Work",
+    "heroTitle2": "with AI Agents",
+    "heroSubtitle": "8 real user cases, 8 AI Agent configurations.\nPick your role, follow the guide, and build your own OpenClaw automation workflow.",
+    "browseCases": "Browse Cases",
+    "learnOpenClaw": "Learn OpenClaw",
+    "joinChallenge": "Join Challenge",
+    "statCases": "User Cases",
+    "statAgents": "Agent Configs",
+    "statEfficiency": "Avg. Efficiency Gain",
+    "scrollDown": "Scroll down",
+    "howToParticipate": "How to participate",
+    "howTitle": "How to Participate",
+    "howSubtitle": "Four steps to complete your OpenClaw practice journey",
+    "step1Title": "Choose Your Role",
+    "step1Desc": "Browse the 8 real user cases below and find the role and scenario that best matches you",
+    "step2Title": "Read the Config Guide",
+    "step2Desc": "Dive deep into the Agent configuration, skill combinations, and workflow design for that role",
+    "step3Title": "Configure OpenClaw",
+    "step3Desc": "Follow the guide to configure your AI Agent network on the OpenClaw platform",
+    "step4Title": "Share Your Results",
+    "step4Desc": "Submit your configuration practice to AI In Action and exchange insights with the community",
+    "userCasesLabel": "User Cases",
+    "userCasesTitle": "Choose Your Role, Start the Challenge",
+    "userCasesSubtitle": "Each case includes a complete Agent configuration plan and implementation guide",
+    "viewGuide": "View configuration guide",
+    "ctaTitle": "Ready to Start Your",
+    "ctaTitle2": "Journey?",
+    "ctaSubtitle": "OpenClaw (🦞) is the fastest-growing open-source AI Agent project on GitHub in 2026.\nWhether you're a developer, marketer, founder, or freelancer,\nthere's an AI automation solution for you.",
+    "ctaVisitSite": "Visit OpenClaw",
+    "ctaGithub": "GitHub Repo",
+    "ctaCommunity": "Join the OpenClaw community: openclaw.ai · Discord",
+    "cases": {
+      "luxury-trade": {
+        "title": "The AI Army of a Luxury Buyer",
+        "subtitle": "1 Person = 10-Person Team Cross-Border Trade Revolution",
+        "persona": "Independent Luxury Buyer",
+        "personaTag": "Cross-Border Trade",
+        "stats": [
+          { "value": "73%", "label": "Time Saved" },
+          { "value": "5", "label": "AI Agents" }
+        ],
+        "highlights": ["Procurement Automation", "24/7 Customer Service", "Social Media Matrix"]
+      },
+      "content-marketing": {
+        "title": "Passive Income for Content Marketing Solopreneurs",
+        "subtitle": "How OpenClaw Achieves 24/7 Non-Stop Operations",
+        "persona": "Content Marketing Founder",
+        "personaTag": "Content Marketing",
+        "stats": [
+          { "value": "70%", "label": "Ops Time Saved" },
+          { "value": "600%", "label": "Intel Updates" }
+        ],
+        "highlights": ["Market Intelligence Automation", "Content Distribution", "Customer Agent"]
+      },
+      "indie-dev": {
+        "title": "The Indie Dev's 24/7 AI Clone",
+        "subtitle": "Eliminate Fragmentation, Build an Always-On Smart Workflow",
+        "persona": "Indie Developer",
+        "personaTag": "Software Dev",
+        "stats": [
+          { "value": "60%", "label": "Time Saved" },
+          { "value": "$0", "label": "SaaS Cost" }
+        ],
+        "highlights": ["Code Review Automation", "Smart Email Handling", "AI Scheduling"]
+      },
+      "saas-sales": {
+        "title": "The Growth Engine Replacing a $200K SDR",
+        "subtitle": "AI Agent Autonomously Automates LinkedIn GTM",
+        "persona": "Sales / Marketing Manager",
+        "personaTag": "SaaS Sales",
+        "stats": [
+          { "value": "$200K", "label": "Annual Labor Replaced" },
+          { "value": "10x", "label": "Outreach Scale" }
+        ],
+        "highlights": ["Auto Lead Discovery", "Personalized Outreach", "Multi-Step Follow-up"]
+      },
+      "dev-assistant": {
+        "title": "Escape Tool Hell, Build an AI Assistant Network",
+        "subtitle": "The Secret to Freeing 60% of an Indie Dev's Time",
+        "persona": "Indie Developer",
+        "personaTag": "Efficiency Automation",
+        "stats": [
+          { "value": "60%", "label": "Time Saved" },
+          { "value": "~$60", "label": "Monthly Savings" }
+        ],
+        "highlights": ["CodeReviewBot", "MailAssistant", "ScheduleMaster"]
+      },
+      "cybersecurity": {
+        "title": "The Cybersecurity Expert's 24/7 Automated Protection",
+        "subtitle": "From Manual Fatigue to AI-Empowered Super-Individual",
+        "persona": "Cybersecurity Consultant",
+        "personaTag": "Cybersecurity",
+        "stats": [
+          { "value": "50%+", "label": "Time Saved" },
+          { "value": "1-2€", "label": "Daily Cost" }
+        ],
+        "highlights": ["AgentX Security Assistant", "Automated Email Mgmt", "24/7 Network Monitor"]
+      },
+      "supermom": {
+        "title": "The Super Mom's AI Superpowers",
+        "subtitle": "Reshaping the Balance Between Family and Career",
+        "persona": "Full-Time Mom & Entrepreneur",
+        "personaTag": "Family & Education",
+        "stats": [
+          { "value": "90%", "label": "Process Speed-Up" },
+          { "value": "75%", "label": "Planning Time Saved" }
+        ],
+        "highlights": ["Family Education Agent", "Finance Mgmt Agent", "No-Code App Dev"]
+      },
+      "content-creator": {
+        "title": "The Creator's Path to $10K+/Month",
+        "subtitle": "Multi-Agent System Builds a Personal Content Factory",
+        "persona": "Content Creator",
+        "personaTag": "Digital Marketing",
+        "stats": [
+          { "value": "90%", "label": "Manual Work Cut" },
+          { "value": "5x", "label": "Account Growth" }
+        ],
+        "highlights": ["Research Agent", "Content Creation Agent", "Data Analytics Optimization"]
+      }
+    }
+  }
+}

@@ -23,6 +23,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
+import { useTranslations, useLocale } from "next-intl";
 
 const Hero3DScene = lazy(
   () => import("@/components/activities/hero-3d-scene")
@@ -53,237 +54,148 @@ const scaleIn = {
   },
 };
 
-/* ── User case data ── */
+/* ── Static case config (colors, icons, URLs) ── */
 
-const userCases = [
+const caseConfigs = [
   {
     id: "luxury-trade",
-    title: "奢侈品买手的AI军团",
-    subtitle: "1人=10人团队的跨境贸易革命",
-    persona: "独立奢侈品买手",
-    personaTag: "跨境贸易",
     name: "Vivian",
-    industry: "奢侈品批发",
     icon: ShoppingBag,
     color: "from-amber-500 to-yellow-600",
     colorBg: "bg-amber-500/10",
     colorText: "text-amber-400",
     colorBorder: "border-amber-500/30",
     glowColor: "#f59e0b",
-    stats: [
-      { value: "73%", label: "时间节省" },
-      { value: "5", label: "AI Agent" },
-    ],
-    highlights: ["采购询价自动化", "客户服务7×24", "社媒矩阵运营"],
     htmlUrl: "/usercase/openclaw-luxury-trade-configuration-guide.html",
+    htmlUrlEn: "/usercase/openclaw-luxury-trade-configuration-guide-en.html",
   },
   {
     id: "content-marketing",
-    title: "内容营销超级个体的睡后收入",
-    subtitle: "OpenClaw如何实现24/7无休运营",
-    persona: "内容营销创始人",
-    personaTag: "内容营销",
     name: "林逸飞",
-    industry: "内容营销",
     icon: Megaphone,
     color: "from-orange-500 to-amber-600",
     colorBg: "bg-orange-500/10",
     colorText: "text-orange-400",
     colorBorder: "border-orange-500/30",
     glowColor: "#f97316",
-    stats: [
-      { value: "70%", label: "运营时间节省" },
-      { value: "600%", label: "情报更新提升" },
-    ],
-    highlights: ["市场情报自动化", "内容分发优化", "客户沟通代理"],
     htmlUrl: "/usercase/content-marketing-automation.html",
+    htmlUrlEn: "/usercase/content-marketing-automation-en.html",
   },
   {
     id: "indie-dev",
-    title: "独立开发者的7×24小时AI分身",
-    subtitle: "告别碎片化，构建全天候智能工作流",
-    persona: "独立开发者",
-    personaTag: "软件开发",
     name: "张明",
-    industry: "软件开发",
     icon: Code2,
     color: "from-blue-500 to-indigo-600",
     colorBg: "bg-blue-500/10",
     colorText: "text-blue-400",
     colorBorder: "border-blue-500/30",
     glowColor: "#3b82f6",
-    stats: [
-      { value: "60%", label: "时间节省" },
-      { value: "$0", label: "SaaS成本" },
-    ],
-    highlights: ["代码审查自动化", "邮件智能处理", "日程管理AI"],
     htmlUrl: "/usercase/indie-developer-workflow.html",
+    htmlUrlEn: "/usercase/indie-developer-workflow-en.html",
   },
   {
     id: "saas-sales",
-    title: "替代20万美元SDR的增长引擎",
-    subtitle: "AI智能体实现自主LinkedIn GTM自动化",
-    persona: "销售/市场经理",
-    personaTag: "SaaS销售",
     name: "Sarah Chen",
-    industry: "SaaS",
     icon: TrendingUp,
     color: "from-purple-500 to-violet-600",
     colorBg: "bg-purple-500/10",
     colorText: "text-purple-400",
     colorBorder: "border-purple-500/30",
     glowColor: "#a855f7",
-    stats: [
-      { value: "$200K", label: "年人力成本替代" },
-      { value: "10x", label: "外展规模扩展" },
-    ],
-    highlights: ["潜在客户自动发现", "个性化外展沟通", "多步骤跟进管理"],
     htmlUrl: "/usercase/saas-sales-growth-engine.html",
+    htmlUrlEn: "/usercase/saas-sales-growth-engine-en.html",
   },
   {
     id: "dev-assistant",
-    title: "告别工具炼狱，构建AI助手网络",
-    subtitle: "独立开发者解放60%时间的秘密",
-    persona: "独立开发者",
-    personaTag: "效率自动化",
     name: "张帆",
-    industry: "软件开发",
     icon: Zap,
     color: "from-teal-500 to-cyan-600",
     colorBg: "bg-teal-500/10",
     colorText: "text-teal-400",
     colorBorder: "border-teal-500/30",
     glowColor: "#14b8a6",
-    stats: [
-      { value: "60%", label: "时间节省" },
-      { value: "~$60", label: "月成本节省" },
-    ],
-    highlights: ["CodeReviewBot", "MailAssistant", "ScheduleMaster"],
     htmlUrl: "/usercase/developer-ai-assistant-network.html",
+    htmlUrlEn: "/usercase/developer-ai-assistant-network-en.html",
   },
   {
     id: "cybersecurity",
-    title: "网络安全专家的7×24自动化防护",
-    subtitle: "从手动疲劳到AI赋能的超个体转型",
-    persona: "网络安全顾问",
-    personaTag: "网络安全",
     name: "Simon Roses Femerling",
-    industry: "网络安全",
     icon: Shield,
     color: "from-red-500 to-rose-600",
     colorBg: "bg-red-500/10",
     colorText: "text-red-400",
     colorBorder: "border-red-500/30",
     glowColor: "#ef4444",
-    stats: [
-      { value: "50%+", label: "时间节省" },
-      { value: "1-2\u20AC", label: "每日成本" },
-    ],
-    highlights: ["AgentX安全助理", "自动化邮件管理", "7×24网络监控"],
     htmlUrl: "/usercase/cybersecurity-automation.html",
+    htmlUrlEn: "/usercase/cybersecurity-automation-en.html",
   },
   {
     id: "supermom",
-    title: "全职妈妈的AI超能力",
-    subtitle: "重塑家庭与事业的平衡",
-    persona: "全职妈妈兼创业者",
-    personaTag: "家庭教育",
     name: "Jesse Genet",
-    industry: "教育科技",
     icon: Baby,
     color: "from-pink-500 to-fuchsia-600",
     colorBg: "bg-pink-500/10",
     colorText: "text-pink-400",
     colorBorder: "border-pink-500/30",
     glowColor: "#ec4899",
-    stats: [
-      { value: "90%", label: "流程提速" },
-      { value: "75%", label: "规划时间节省" },
-    ],
-    highlights: ["家庭教育Agent", "财务管理Agent", "零代码应用开发"],
     htmlUrl: "/usercase/supermom-ai-empowerment.html",
+    htmlUrlEn: "/usercase/supermom-ai-empowerment-en.html",
   },
   {
     id: "content-creator",
-    title: "独立创作者的月入破万之路",
-    subtitle: "多智能体打造个人内容工厂",
-    persona: "内容创作者",
-    personaTag: "数字营销",
     name: "张华",
-    industry: "内容创作",
     icon: Pen,
     color: "from-amber-500 to-orange-600",
     colorBg: "bg-amber-500/10",
     colorText: "text-amber-400",
     colorBorder: "border-amber-500/30",
     glowColor: "#d97706",
-    stats: [
-      { value: "90%", label: "人工减少" },
-      { value: "5x", label: "账号翻倍" },
-    ],
-    highlights: ["研究智能体", "内容创作智能体", "数据分析优化"],
     htmlUrl: "/usercase/content-creator-passive-income.html",
+    htmlUrlEn: "/usercase/content-creator-passive-income-en.html",
   },
 ];
 
-const steps = [
-  {
-    num: 1,
-    title: "选择你的角色",
-    desc: "浏览下方8个真实用户案例，找到与你最匹配的角色和场景",
-    icon: Target,
-    color: "from-violet-500 to-purple-600",
-  },
-  {
-    num: 2,
-    title: "阅读配置指南",
-    desc: "深入了解该角色的 Agent 配置方案、技能组合和工作流设计",
-    icon: Bot,
-    color: "from-blue-500 to-cyan-600",
-  },
-  {
-    num: 3,
-    title: "动手配置OpenClaw",
-    desc: "按照指南在 OpenClaw 平台上实际配置你的 AI Agent 网络",
-    icon: Rocket,
-    color: "from-orange-500 to-amber-600",
-  },
-  {
-    num: 4,
-    title: "分享你的成果",
-    desc: "将你的配置实践提交到 AI In Action，与社区一起交流进步",
-    icon: Users,
-    color: "from-emerald-500 to-teal-600",
-  },
+const stepIcons = [Target, Bot, Rocket, Users];
+const stepColors = [
+  "from-violet-500 to-purple-600",
+  "from-blue-500 to-cyan-600",
+  "from-orange-500 to-amber-600",
+  "from-emerald-500 to-teal-600",
 ];
 
 /* ── Glassmorphism Step Card ── */
 function GlassStepCard({
-  step,
+  num,
+  title,
+  desc,
+  color,
+  icon: Icon,
 }: {
-  step: (typeof steps)[number];
+  num: number;
+  title: string;
+  desc: string;
+  color: string;
+  icon: React.ComponentType<{ className?: string }>;
 }) {
   return (
     <motion.div variants={scaleIn}>
       <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl transition-all duration-500 hover:border-white/20 hover:bg-white/10 hover:shadow-2xl hover:shadow-purple-500/5">
         {/* Background gradient glow */}
         <div
-          className={`absolute -top-20 -right-20 h-40 w-40 rounded-full bg-gradient-to-br ${step.color} opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-20`}
+          className={`absolute -top-20 -right-20 h-40 w-40 rounded-full bg-gradient-to-br ${color} opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-20`}
         />
 
         <div className="relative z-10">
           <div className="mb-4 flex items-center gap-3">
             <div
-              className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${step.color} text-lg font-bold text-white shadow-lg`}
+              className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${color} text-lg font-bold text-white shadow-lg`}
             >
-              {step.num}
+              {num}
             </div>
-            <step.icon className="h-5 w-5 text-white/40 transition-colors group-hover:text-white/70" />
+            <Icon className="h-5 w-5 text-white/40 transition-colors group-hover:text-white/70" />
           </div>
-          <h3 className="font-semibold text-white/90">{step.title}</h3>
-          <p className="mt-2 text-sm leading-relaxed text-white/50">
-            {step.desc}
-          </p>
+          <h3 className="font-semibold text-white/90">{title}</h3>
+          <p className="mt-2 text-sm leading-relaxed text-white/50">{desc}</p>
         </div>
       </div>
     </motion.div>
@@ -291,7 +203,29 @@ function GlassStepCard({
 }
 
 /* ── Glowing Case Card with 3D Tilt ── */
-function GlowingCaseCard({ uc }: { uc: (typeof userCases)[number] }) {
+type CaseCardProps = {
+  config: (typeof caseConfigs)[number];
+  resolvedUrl: string;
+  title: string;
+  subtitle: string;
+  persona: string;
+  personaTag: string;
+  stats: { value: string; label: string }[];
+  highlights: string[];
+  viewGuideLabel: string;
+};
+
+function GlowingCaseCard({
+  config,
+  resolvedUrl,
+  title,
+  subtitle,
+  persona,
+  personaTag,
+  stats,
+  highlights,
+  viewGuideLabel,
+}: CaseCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const mouseX = useMotionValue(0.5);
   const mouseY = useMotionValue(0.5);
@@ -318,7 +252,7 @@ function GlowingCaseCard({ uc }: { uc: (typeof userCases)[number] }) {
   return (
     <motion.div variants={scaleIn}>
       <a
-        href={uc.htmlUrl}
+        href={resolvedUrl}
         target="_blank"
         rel="noopener noreferrer"
         className="group block h-full"
@@ -335,15 +269,15 @@ function GlowingCaseCard({ uc }: { uc: (typeof userCases)[number] }) {
           className="relative h-full"
         >
           <div
-            className={`relative h-full overflow-hidden rounded-2xl border ${uc.colorBorder} bg-black/40 backdrop-blur-xl transition-all duration-500 hover:shadow-2xl`}
+            className={`relative h-full overflow-hidden rounded-2xl border ${config.colorBorder} bg-black/40 backdrop-blur-xl transition-all duration-500 hover:shadow-2xl`}
             style={{
-              boxShadow: `0 0 0 1px ${uc.glowColor}15`,
+              boxShadow: `0 0 0 1px ${config.glowColor}15`,
             }}
           >
             {/* Animated gradient top bar */}
             <div className="relative h-1.5 overflow-hidden">
               <div
-                className={`absolute inset-0 bg-gradient-to-r ${uc.color}`}
+                className={`absolute inset-0 bg-gradient-to-r ${config.color}`}
               />
               <div
                 className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-white/30 to-transparent"
@@ -357,7 +291,7 @@ function GlowingCaseCard({ uc }: { uc: (typeof userCases)[number] }) {
             <div
               className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
               style={{
-                background: `radial-gradient(circle at 50% 0%, ${uc.glowColor}15 0%, transparent 60%)`,
+                background: `radial-gradient(circle at 50% 0%, ${config.glowColor}15 0%, transparent 60%)`,
               }}
             />
 
@@ -365,50 +299,48 @@ function GlowingCaseCard({ uc }: { uc: (typeof userCases)[number] }) {
               {/* Icon + persona badge */}
               <div className="flex items-start justify-between">
                 <div
-                  className={`flex h-12 w-12 items-center justify-center rounded-xl ${uc.colorBg} ring-1 ring-white/5`}
+                  className={`flex h-12 w-12 items-center justify-center rounded-xl ${config.colorBg} ring-1 ring-white/5`}
                 >
-                  <uc.icon className={`h-5 w-5 ${uc.colorText}`} />
+                  <config.icon className={`h-5 w-5 ${config.colorText}`} />
                 </div>
                 <Badge
                   variant="outline"
-                  className={`border-white/10 text-[10px] ${uc.colorText} backdrop-blur-sm`}
+                  className={`border-white/10 text-[10px] ${config.colorText} backdrop-blur-sm`}
                 >
-                  {uc.personaTag}
+                  {personaTag}
                 </Badge>
               </div>
 
               {/* Title */}
               <h3 className="mt-4 font-semibold leading-snug text-white/90 transition-colors group-hover:text-white">
-                {uc.title}
+                {title}
               </h3>
               <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-white/40">
-                {uc.subtitle}
+                {subtitle}
               </p>
 
               {/* Persona info */}
               <div className="mt-3 flex items-center gap-2 text-xs text-white/30">
-                <span className="font-medium text-white/60">{uc.name}</span>
+                <span className="font-medium text-white/60">{config.name}</span>
                 <span>·</span>
-                <span>{uc.persona}</span>
+                <span>{persona}</span>
               </div>
 
               {/* Stats */}
               <div className="mt-4 flex gap-6">
-                {uc.stats.map((stat) => (
+                {stats.map((stat) => (
                   <div key={stat.label}>
-                    <div className={`text-lg font-bold ${uc.colorText}`}>
+                    <div className={`text-lg font-bold ${config.colorText}`}>
                       {stat.value}
                     </div>
-                    <div className="text-[10px] text-white/30">
-                      {stat.label}
-                    </div>
+                    <div className="text-[10px] text-white/30">{stat.label}</div>
                   </div>
                 ))}
               </div>
 
               {/* Highlights */}
               <div className="mt-4 flex flex-wrap gap-1.5">
-                {uc.highlights.map((h) => (
+                {highlights.map((h) => (
                   <span
                     key={h}
                     className="inline-flex items-center gap-1 rounded-md border border-white/5 bg-white/5 px-2 py-0.5 text-[10px] text-white/40"
@@ -421,7 +353,7 @@ function GlowingCaseCard({ uc }: { uc: (typeof userCases)[number] }) {
 
               {/* CTA */}
               <div className="mt-5 flex items-center gap-1 text-sm font-medium text-white/0 transition-all duration-300 group-hover:text-white/80">
-                查看配置指南
+                {viewGuideLabel}
                 <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
               </div>
             </div>
@@ -434,6 +366,17 @@ function GlowingCaseCard({ uc }: { uc: (typeof userCases)[number] }) {
 
 /* ── Main Page ── */
 export default function ActivitiesPage() {
+  const t = useTranslations("activities");
+  const locale = useLocale();
+
+  const steps = [1, 2, 3, 4].map((num) => ({
+    num,
+    title: t(`step${num}Title` as Parameters<typeof t>[0]),
+    desc: t(`step${num}Desc` as Parameters<typeof t>[0]),
+    color: stepColors[num - 1],
+    icon: stepIcons[num - 1],
+  }));
+
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white">
       {/* Ambient background gradients */}
@@ -470,7 +413,7 @@ export default function ActivitiesPage() {
               className="mb-6 gap-1.5 border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/70 backdrop-blur-sm"
             >
               <Sparkles className="h-3.5 w-3.5 text-purple-400" />
-              OpenClaw 实践挑战
+              {t("heroBadge")}
             </Badge>
           </motion.div>
 
@@ -478,10 +421,10 @@ export default function ActivitiesPage() {
             variants={fadeUp}
             className="max-w-4xl text-center text-4xl font-bold tracking-tight sm:text-5xl lg:text-7xl"
           >
-            <span className="text-white/90">用 AI Agent 重新定义</span>
+            <span className="text-white/90">{t("heroTitle1")}</span>
             <br />
             <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-amber-400 bg-clip-text text-transparent">
-              你的工作方式
+              {t("heroTitle2")}
             </span>
           </motion.h1>
 
@@ -489,10 +432,14 @@ export default function ActivitiesPage() {
             variants={fadeUp}
             className="mx-auto mt-6 max-w-2xl text-center text-lg leading-relaxed text-white/40"
           >
-            8 个真实用户案例，8 种 AI Agent 配置方案。
-            <br />
-            选择你的角色，跟随配置指南，亲手搭建属于自己的 OpenClaw
-            自动化工作流。
+            {t("heroSubtitle")
+              .split("\n")
+              .map((line, i) => (
+                <span key={i}>
+                  {line}
+                  {i === 0 && <br />}
+                </span>
+              ))}
           </motion.p>
 
           <motion.div
@@ -505,7 +452,7 @@ export default function ActivitiesPage() {
               asChild
             >
               <a href="#cases">
-                浏览案例
+                {t("browseCases")}
                 <ArrowRight className="ml-1 h-4 w-4" />
               </a>
             </Button>
@@ -520,7 +467,7 @@ export default function ActivitiesPage() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                了解 OpenClaw
+                {t("learnOpenClaw")}
                 <ExternalLink className="ml-1 h-4 w-4" />
               </a>
             </Button>
@@ -531,7 +478,7 @@ export default function ActivitiesPage() {
               asChild
             >
               <Link href="/challenges/openclaw">
-                参与挑战
+                {t("joinChallenge")}
                 <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
             </Button>
@@ -543,33 +490,29 @@ export default function ActivitiesPage() {
             className="mx-auto mt-16 grid max-w-lg grid-cols-3 gap-8"
           >
             {[
-              { value: "8", label: "用户案例" },
-              { value: "30+", label: "Agent配置" },
-              { value: "60%+", label: "平均效率提升" },
+              { value: "8", labelKey: "statCases" as const },
+              { value: "30+", labelKey: "statAgents" as const },
+              { value: "60%+", labelKey: "statEfficiency" as const },
             ].map((stat) => (
-              <div
-                key={stat.label}
-                className="text-center"
-              >
+              <div key={stat.labelKey} className="text-center">
                 <div className="bg-gradient-to-br from-white to-white/60 bg-clip-text text-3xl font-bold tracking-tight text-transparent sm:text-4xl">
                   {stat.value}
                 </div>
-                <div className="mt-1 text-sm text-white/30">{stat.label}</div>
+                <div className="mt-1 text-sm text-white/30">
+                  {t(stat.labelKey)}
+                </div>
               </div>
             ))}
           </motion.div>
 
           {/* Scroll indicator */}
-          <motion.div
-            variants={fadeUp}
-            className="mt-12"
-          >
+          <motion.div variants={fadeUp} className="mt-12">
             <motion.div
               animate={{ y: [0, 8, 0] }}
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               className="flex flex-col items-center gap-2 text-white/20"
             >
-              <span className="text-xs">向下滚动</span>
+              <span className="text-xs">{t("scrollDown")}</span>
               <div className="h-8 w-[1px] bg-gradient-to-b from-white/20 to-transparent" />
             </motion.div>
           </motion.div>
@@ -586,10 +529,13 @@ export default function ActivitiesPage() {
             variants={stagger}
             className="text-center"
           >
-            <motion.div variants={fadeUp} className="inline-flex items-center gap-2">
+            <motion.div
+              variants={fadeUp}
+              className="inline-flex items-center gap-2"
+            >
               <div className="h-[1px] w-8 bg-gradient-to-r from-transparent to-purple-500/50" />
               <span className="text-sm font-medium uppercase tracking-wider text-purple-400/70">
-                How to participate
+                {t("howToParticipate")}
               </span>
               <div className="h-[1px] w-8 bg-gradient-to-l from-transparent to-purple-500/50" />
             </motion.div>
@@ -598,13 +544,10 @@ export default function ActivitiesPage() {
               variants={fadeUp}
               className="mt-4 text-2xl font-bold tracking-tight text-white/90 sm:text-4xl"
             >
-              如何参与挑战
+              {t("howTitle")}
             </motion.h2>
-            <motion.p
-              variants={fadeUp}
-              className="mt-3 text-white/40"
-            >
-              四步完成你的 OpenClaw 实践之旅
+            <motion.p variants={fadeUp} className="mt-3 text-white/40">
+              {t("howSubtitle")}
             </motion.p>
           </motion.div>
 
@@ -621,7 +564,7 @@ export default function ActivitiesPage() {
               className="relative z-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
             >
               {steps.map((step) => (
-                <GlassStepCard key={step.num} step={step} />
+                <GlassStepCard key={step.num} {...step} />
               ))}
             </motion.div>
           </div>
@@ -643,10 +586,13 @@ export default function ActivitiesPage() {
             variants={stagger}
             className="text-center"
           >
-            <motion.div variants={fadeUp} className="inline-flex items-center gap-2">
+            <motion.div
+              variants={fadeUp}
+              className="inline-flex items-center gap-2"
+            >
               <div className="h-[1px] w-8 bg-gradient-to-r from-transparent to-amber-500/50" />
               <span className="text-sm font-medium uppercase tracking-wider text-amber-400/70">
-                User Cases
+                {t("userCasesLabel")}
               </span>
               <div className="h-[1px] w-8 bg-gradient-to-l from-transparent to-amber-500/50" />
             </motion.div>
@@ -655,13 +601,10 @@ export default function ActivitiesPage() {
               variants={fadeUp}
               className="mt-4 text-2xl font-bold tracking-tight text-white/90 sm:text-4xl"
             >
-              选择你的角色，开始挑战
+              {t("userCasesTitle")}
             </motion.h2>
-            <motion.p
-              variants={fadeUp}
-              className="mt-3 text-white/40"
-            >
-              每个案例都包含完整的 Agent 配置方案和实施指南
+            <motion.p variants={fadeUp} className="mt-3 text-white/40">
+              {t("userCasesSubtitle")}
             </motion.p>
           </motion.div>
 
@@ -672,9 +615,38 @@ export default function ActivitiesPage() {
             variants={stagger}
             className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
           >
-            {userCases.map((uc) => (
-              <GlowingCaseCard key={uc.id} uc={uc} />
-            ))}
+              {caseConfigs.map((config) => {
+              const caseId = config.id as
+                | "luxury-trade"
+                | "content-marketing"
+                | "indie-dev"
+                | "saas-sales"
+                | "dev-assistant"
+                | "cybersecurity"
+                | "supermom"
+                | "content-creator";
+              const resolvedUrl =
+                locale === "en" ? config.htmlUrlEn : config.htmlUrl;
+              return (
+                <GlowingCaseCard
+                  key={config.id}
+                  config={config}
+                  resolvedUrl={resolvedUrl}
+                  title={t(`cases.${caseId}.title`)}
+                  subtitle={t(`cases.${caseId}.subtitle`)}
+                  persona={t(`cases.${caseId}.persona`)}
+                  personaTag={t(`cases.${caseId}.personaTag`)}
+                  stats={[0, 1].map((i) => ({
+                    value: t(`cases.${caseId}.stats.${i}.value` as Parameters<typeof t>[0]),
+                    label: t(`cases.${caseId}.stats.${i}.label` as Parameters<typeof t>[0]),
+                  }))}
+                  highlights={[0, 1, 2].map((i) =>
+                    t(`cases.${caseId}.highlights.${i}` as Parameters<typeof t>[0])
+                  )}
+                  viewGuideLabel={t("viewGuide")}
+                />
+              );
+            })}
           </motion.div>
         </div>
       </section>
@@ -692,7 +664,10 @@ export default function ActivitiesPage() {
           className="mx-auto max-w-2xl text-center"
         >
           {/* Animated glow orb */}
-          <motion.div variants={fadeUp} className="relative mx-auto mb-8 h-20 w-20">
+          <motion.div
+            variants={fadeUp}
+            className="relative mx-auto mb-8 h-20 w-20"
+          >
             <motion.div
               animate={{
                 scale: [1, 1.2, 1],
@@ -714,22 +689,25 @@ export default function ActivitiesPage() {
             variants={fadeUp}
             className="text-2xl font-bold tracking-tight text-white/90 sm:text-4xl"
           >
-            准备好开始你的{" "}
+            {t("ctaTitle")}{" "}
             <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
               OpenClaw
             </span>{" "}
-            之旅了吗？
+            {t("ctaTitle2")}
           </motion.h2>
 
           <motion.p
             variants={fadeUp}
             className="mt-4 leading-relaxed text-white/40"
           >
-            OpenClaw（小龙虾 🦞）是 2026 年 GitHub
-            增长最快的开源 AI Agent 项目。
-            <br />
-            无论你是开发者、营销人、创业者还是自由职业者，
-            都能找到属于你的 AI 自动化方案。
+            {t("ctaSubtitle")
+              .split("\n")
+              .map((line, i) => (
+                <span key={i}>
+                  {line}
+                  {i < 2 && <br />}
+                </span>
+              ))}
           </motion.p>
 
           <motion.div
@@ -760,7 +738,7 @@ export default function ActivitiesPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  访问 OpenClaw 官网
+                  {t("ctaVisitSite")}
                   <ExternalLink className="ml-1 h-4 w-4" />
                 </a>
               </Button>
@@ -777,7 +755,7 @@ export default function ActivitiesPage() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                GitHub 开源仓库
+                {t("ctaGithub")}
                 <ExternalLink className="ml-1 h-4 w-4" />
               </a>
             </Button>
@@ -787,7 +765,7 @@ export default function ActivitiesPage() {
             variants={fadeUp}
             className="mt-8 text-xs text-white/20"
           >
-            加入 OpenClaw 社区：openclaw.ai · Discord
+            {t("ctaCommunity")}
           </motion.p>
         </motion.div>
       </section>

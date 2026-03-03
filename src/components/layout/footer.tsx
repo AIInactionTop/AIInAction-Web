@@ -14,7 +14,6 @@ export function Footer() {
         { href: "/challenges" as const, label: t("challenges") },
         { href: "/paths" as const, label: t("learningPaths") },
         { href: "/showcase" as const, label: t("showcase") },
-        { href: "/about" as const, label: t("about") },
       ],
     },
     {
@@ -22,6 +21,7 @@ export function Footer() {
       links: [
         { href: "https://github.com/AIInactionTop", label: t("github"), external: true },
         { href: "/showcase" as const, label: t("projects") },
+        { href: "/about" as const, label: t("about") },
       ],
     },
     {

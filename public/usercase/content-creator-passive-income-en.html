@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>From Manual Grind to AI-Driven: How an Independent Creator Built Passive Income with OpenClaw</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --gold: #F59E0B;
+      --gold-light: #FDE68A;
+      --gold-dark: #D97706;
+      --ink: #1A1A1A;
+      --ink-light: #3D3D3D;
+      --ink-muted: #6B6B6B;
+      --cream: #FFFBEB;
+      --cream-warm: #FEF3C7;
+      --white: #FFFFFF;
+      --accent-red: #C43D3D;
+      --accent-green: #2D8B5F;
+      --code-bg: #2B2B2B;
+      --border: #FDE68A;
+      --shadow: rgba(245, 158, 11, 0.08);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      line-height: 1.8;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ===== HERO SECTION ===== */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(175deg, #1A1508 0%, #2C2210 40%, #3D2E0A 100%);
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(ellipse at 30% 50%, rgba(245, 158, 11, 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 70% 30%, rgba(253, 230, 138, 0.05) 0%, transparent 50%);
+      animation: heroFloat 20s ease-in-out infinite;
+    }
+
+    @keyframes heroFloat {
+
+      0%,
+      100% {
+        transform: translate(0, 0) rotate(0deg);
+      }
+
+      33% {
+        transform: translate(2%, -2%) rotate(1deg);
+      }
+
+      66% {
+        transform: translate(-1%, 1%) rotate(-0.5deg);
+      }
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 2rem;
+      max-width: 900px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 100px;
+      padding: 8px 20px;
+      margin-bottom: 2rem;
+      font-size: 0.85rem;
+      color: var(--gold-light);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .hero-badge::before {
+      content: '✦';
+      color: var(--gold);
+    }
+
+    .hero-title {
+      font-family: 'Noto Serif SC', serif;
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      font-weight: 900;
+      line-height: 1.2;
+      color: #FFFFFF;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-title .highlight {
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      color: rgba(255, 255, 255, 0.6);
+      font-weight: 300;
+      max-width: 700px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.8;
+    }
+
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-stat {
+      text-align: center;
+    }
+
+    .hero-stat-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--gold);
+      line-height: 1;
+    }
+
+    .hero-stat-label {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.5);
+      margin-top: 0.3rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255, 255, 255, 0.3);
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      animation: scrollBounce 2s ease-in-out infinite;
+    }
+
+    @keyframes scrollBounce {
+
+      0%,
+      100% {
+        transform: translateX(-50%) translateY(0);
+      }
+
+      50% {
+        transform: translateX(-50%) translateY(8px);
+      }
+    }
+
+    .scroll-indicator::after {
+      content: '';
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, rgba(245, 158, 11, 0.5), transparent);
+    }
+
+    /* ===== QUOTE BANNER ===== */
+    .quote-banner {
+      background: linear-gradient(135deg, #2C2210, #3D2E0A);
+      padding: 4rem 2rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .quote-banner::before {
+      content: '"';
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Playfair Display', serif;
+      font-size: 15rem;
+      color: rgba(245, 158, 11, 0.06);
+      line-height: 1;
+    }
+
+    .quote-text {
+      font-family: 'Noto Serif SC', serif;
+      font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+      color: var(--gold-light);
+      max-width: 800px;
+      margin: 0 auto 1rem;
+      font-style: italic;
+      position: relative;
+      z-index: 1;
+    }
+
+    .quote-author {
+      color: rgba(253, 230, 138, 0.6);
+      font-size: 0.9rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ===== MAIN CONTENT WRAPPER ===== */
+    .content-wrapper {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* ===== SECTION HEADERS ===== */
+    .section {
+      padding: 5rem 0;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .section-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 0.85rem;
+      color: var(--gold);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .section-title {
+      font-family: 'Noto Serif SC', serif;
+      font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 0.5rem;
+    }
+
+    .section-line {
+      width: 60px;
+      height: 2px;
+      background: linear-gradient(to right, var(--gold), var(--gold-light));
+      margin: 1rem auto;
+    }
+
+    .section-desc {
+      color: var(--ink-muted);
+      max-width: 600px;
+      margin: 0 auto;
+      font-size: 1rem;
+    }
+
+    /* ===== PROFILE CARD ===== */
+    .profile-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 3rem;
+      display: flex;
+      gap: 2.5rem;
+      align-items: center;
+      box-shadow: 0 4px 40px var(--shadow);
+      border: 1px solid var(--border);
+      margin-bottom: 3rem;
+    }
+
+    .profile-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      flex-shrink: 0;
+    }
+
+    .profile-info h3 {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+    }
+
+    .profile-role {
+      color: var(--gold-dark);
+      font-weight: 500;
+      margin-bottom: 0.8rem;
+      font-size: 0.95rem;
+    }
+
+    .profile-desc {
+      color: var(--ink-muted);
+      line-height: 1.8;
+      font-size: 0.95rem;
+    }
+
+    .profile-tags {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    .profile-tag {
+      background: var(--cream-warm);
+      color: var(--gold-dark);
+      padding: 4px 14px;
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      border: 1px solid var(--border);
+    }
+
+    /* ===== PAIN GRID ===== */
+    .pain-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .pain-card {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 2rem;
+      border: 1px solid var(--border);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pain-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(to right, var(--accent-red), transparent);
+    }
+
+    .pain-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px var(--shadow);
+    }
+
+    .pain-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .pain-card h4 {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .pain-card p {
+      color: var(--ink-muted);
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+
+    /* ===== TURNING POINT ===== */
+    .turning-point {
+      background: linear-gradient(135deg, #2C2210, #3D2E0A);
+      border-radius: 16px;
+      padding: 3rem;
+      margin: 3rem 0;
+      color: white;
+    }
+
+    .turning-point h3 {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.5rem;
+      color: var(--gold-light);
+      margin-bottom: 1rem;
+    }
+
+    .turning-point p {
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 1.5rem;
+      line-height: 1.8;
+    }
+
+    .turning-features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .turning-feature {
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .turning-feature-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .turning-feature h4 {
+      color: var(--gold-light);
+      font-size: 1rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .turning-feature p {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.85rem;
+      margin-bottom: 0;
+    }
+
+    /* ===== AGENT CARDS ===== */
+    .agent-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .agent-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 2rem;
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .agent-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(to right, var(--gold), var(--gold-light));
+    }
+
+    .agent-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px var(--shadow);
+    }
+
+    .agent-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--cream-warm);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .agent-card h4 {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+    }
+
+    .agent-role {
+      color: var(--gold-dark);
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+
+    .agent-card p {
+      color: var(--ink-muted);
+      font-size: 0.9rem;
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+
+    .agent-skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .agent-skill {
+      background: var(--cream);
+      color: var(--gold-dark);
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ===== CONFIG BLOCK ===== */
+    .config-block {
+      background: var(--code-bg);
+      border-radius: 16px;
+      overflow: hidden;
+      margin: 3rem 0;
+      box-shadow: 0 4px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .config-header {
+      background: #1E1E1E;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      border-bottom: 1px solid #3D3D3D;
+    }
+
+    .config-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .config-dot:nth-child(1) {
+      background: #FF5F57;
+    }
+
+    .config-dot:nth-child(2) {
+      background: #FFBD2E;
+    }
+
+    .config-dot:nth-child(3) {
+      background: #28CA41;
+    }
+
+    .config-filename {
+      color: #888;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      margin-left: 0.5rem;
+    }
+
+    .config-body {
+      padding: 1.5rem;
+      overflow-x: auto;
+    }
+
+    .config-body pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      line-height: 1.8;
+      color: #D4D4D4;
+    }
+
+    .config-body .comment {
+      color: #6A9955;
+    }
+
+    .config-body .key {
+      color: #F59E0B;
+    }
+
+    .config-body .value {
+      color: #CE9178;
+    }
+
+    .config-body .bracket {
+      color: #D4D4D4;
+    }
+
+    .config-body .keyword {
+      color: #569CD6;
+    }
+
+    /* ===== RESULTS BANNER ===== */
+    .results-banner {
+      background: linear-gradient(135deg, #2C2210, #3D2E0A);
+      border-radius: 16px;
+      padding: 3rem;
+      margin: 3rem 0;
+    }
+
+    .results-banner h3 {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.8rem;
+      color: var(--gold-light);
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .result-item {
+      text-align: center;
+      padding: 1.5rem;
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      border-radius: 12px;
+    }
+
+    .result-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--gold);
+      line-height: 1;
+    }
+
+    .result-label {
+      color: rgba(253, 230, 138, 0.7);
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    .result-detail {
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 0.75rem;
+      margin-top: 0.3rem;
+    }
+
+    /* ===== COMPARISON TABLE ===== */
+    .comparison-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 2rem 0;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px var(--shadow);
+    }
+
+    .comparison-table th {
+      background: linear-gradient(135deg, #2C2210, #3D2E0A);
+      color: var(--gold-light);
+      font-family: 'Noto Serif SC', serif;
+      font-weight: 600;
+      padding: 1rem 1.5rem;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    .comparison-table td {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+      background: var(--white);
+    }
+
+    .comparison-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .comparison-table .metric-name {
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .comparison-table .before {
+      color: var(--accent-red);
+    }
+
+    .comparison-table .after {
+      color: var(--accent-green);
+      font-weight: 600;
+    }
+
+    .comparison-table .improvement {
+      color: var(--gold-dark);
+      font-weight: 700;
+    }
+
+    /* ===== TIMELINE TIPS ===== */
+    .tips-list {
+      list-style: none;
+      margin-top: 2rem;
+    }
+
+    .tip-item {
+      display: flex;
+      gap: 1.5rem;
+      padding: 1.5rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tip-item:last-child {
+      border-bottom: none;
+    }
+
+    .tip-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .tip-content h4 {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.05rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .tip-content p {
+      color: var(--ink-muted);
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+
+    /* ===== CTA SECTION ===== */
+    .cta-section {
+      text-align: center;
+      padding: 5rem 2rem;
+      background: linear-gradient(175deg, var(--cream), var(--cream-warm));
+    }
+
+    .cta-section h2 {
+      font-family: 'Noto Serif SC', serif;
+      font-size: clamp(1.8rem, 3vw, 2.5rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .cta-section p {
+      color: var(--ink-muted);
+      max-width: 600px;
+      margin: 0 auto 2rem;
+      font-size: 1.05rem;
+    }
+
+    .cta-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      color: white;
+      padding: 14px 32px;
+      border-radius: 100px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 20px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--white);
+      color: var(--gold-dark);
+      padding: 14px 32px;
+      border-radius: 100px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+      border: 2px solid var(--border);
+      transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--gold);
+      transform: translateY(-2px);
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      background: #1A1508;
+      color: rgba(255, 255, 255, 0.4);
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.85rem;
+    }
+
+    .footer a {
+      color: var(--gold);
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .hero-stats {
+        gap: 1.5rem;
+      }
+
+      .hero-stat-value {
+        font-size: 2rem;
+      }
+
+      .profile-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 2rem;
+      }
+
+      .profile-tags {
+        justify-content: center;
+      }
+
+      .pain-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .agent-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .results-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .turning-features {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ===== ANIMATIONS ===== */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">OpenClaw User Case Study</div>
+      <h1 class="hero-title">
+        From Manual Grind to AI-Driven<br>
+        <span class="highlight">An Independent Creator's "Passive Income" Revolution</span>
+      </h1>
+      <p class="hero-subtitle">
+        Spend just 30 minutes a day reviewing data and setting topics — let OpenClaw handle the rest. Even when traveling abroad, your accounts keep updating and generating income.
+      </p>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-value">40%</div>
+          <div class="hero-stat-label">Delivery Cycle Compressed</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">90%</div>
+          <div class="hero-stat-label">Manual Work Reduced</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">5×</div>
+          <div class="hero-stat-label">Accounts Multiplied</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">4×</div>
+          <div class="hero-stat-label">Ad Rate Increase</div>
+        </div>
+      </div>
+    </div>
+    <div class="scroll-indicator">Explore the Full Story</div>
+  </section>
+
+  <!-- ===== QUOTE BANNER ===== -->
+  <section class="quote-banner">
+    <p class="quote-text">
+      "I only spend 30 minutes a day reviewing data and choosing topics. OpenClaw handles everything else — even when I'm traveling abroad, my accounts keep updating and generating income."
+    </p>
+    <p class="quote-author">— Zhang Hua · Independent Content Creator / Digital Marketing Consultant · OpenClaw User</p>
+  </section>
+
+  <!-- ===== PROFILE ===== -->
+  <div class="content-wrapper">
+    <section class="section fade-in">
+      <div class="section-header">
+        <span class="section-number">Chapter 01</span>
+        <h2 class="section-title">Meet the Creator</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="profile-card">
+        <div class="profile-avatar">👩‍💼</div>
+        <div class="profile-info">
+          <h3>Zhang Hua</h3>
+          <p class="profile-role">Independent Content Creator / Digital Marketing Consultant</p>
+          <p class="profile-desc">
+            A passionate independent consultant in digital marketing and content creation, with keen market insight and exceptional copywriting skills who has built a strong reputation in the industry. She provides digital marketing strategy consulting for clients and personally manages the content production and operations of multiple social media accounts, covering mainstream platforms including Xiaohongshu, WeChat Official Accounts, Twitter/X, and LinkedIn.
+          </p>
+          <div class="profile-tags">
+            <span class="profile-tag">Digital Marketing</span>
+            <span class="profile-tag">Content Creation</span>
+            <span class="profile-tag">Social Media Management</span>
+            <span class="profile-tag">Freelancer</span>
+            <span class="profile-tag">Multi-Platform Management</span>
+          </div>
+        </div>
+      </div>
+      <p style="text-align:center; color:var(--ink-muted); font-size:1rem; max-width:700px; margin:0 auto;">
+        <strong style="color:var(--gold-dark);">The Core Contradiction:</strong> Team-level business complexity with only one person to handle it. The seemingly glamorous "freelance life" hides endless overtime and tedious repetitive work — busy from morning to night, every day of the year.
+      </p>
+    </section>
+
+    <!-- ===== PAIN POINTS ===== -->
+    <section class="section fade-in">
+      <div class="section-header">
+        <span class="section-number">Chapter 02</span>
+        <h2 class="section-title">The Challenge: Trapped in Repetitive Labor</h2>
+        <div class="section-line"></div>
+        <p class="section-desc">Zhang Hua's daily work was a race against time — buried under an overwhelming volume of repetitive tasks</p>
+      </div>
+      <div class="pain-grid">
+        <div class="pain-card">
+          <div class="pain-icon">⏳</div>
+          <h4>Manual Content Creation: Time-Consuming and Exhausting</h4>
+          <p>Spending large amounts of time daily on research, brainstorming topics, and writing copy. To maintain account activity, almost all creative energy was being squeezed dry, leaving her physically and mentally exhausted.</p>
+        </div>
+        <div class="pain-card">
+          <div class="pain-icon">🔄</div>
+          <h4>Complex Multi-Platform Operations</h4>
+          <p>Each social media platform has unique publishing rules and user profiles, requiring constant switching between different backends, repeated uploads, and format adjustments.</p>
+        </div>
+        <div class="pain-card">
+          <div class="pain-icon">🔍</div>
+          <h4>Difficulty Tracking Trending Topics in Real Time</h4>
+          <p>Market trends change in an instant. One person simply cannot monitor information across the entire internet 24/7, frequently missing the optimal content window.</p>
+        </div>
+        <div class="pain-card">
+          <div class="pain-icon">📈</div>
+          <h4>Lack of Systematic Data Analysis</h4>
+          <p>Although she regularly checked platform backend data, fragmented information was difficult to turn into systematic insights, and optimization directions weren't precise enough.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TURNING POINT ===== -->
+    <section class="section fade-in">
+      <div class="section-header">
+        <span class="section-number">Chapter 03</span>
+        <h2 class="section-title">The Turning Point: Why OpenClaw?</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="turning-point">
+        <h3>The Leap from "AI-Assisted" to "AI-Driven"</h3>
+        <p>
+          Zhang Hua had tried mainstream AI tools like ChatGPT Plus and Coze — they excelled at one-time content generation, but still required her to play the role of "conductor." This was far from the "full automation" she had envisioned. Then she discovered OpenClaw.
+        </p>
+        <div class="turning-features">
+          <div class="turning-feature">
+            <div class="turning-feature-icon">🧠</div>
+            <h4>Multi-Agent Collaboration</h4>
+            <p>Multiple agents work in parallel like a well-trained team, each focused on research, creation, publishing, analytics, and more</p>
+          </div>
+          <div class="turning-feature">
+            <div class="turning-feature-icon">🔗</div>
+            <h4>Native Deep Multi-Platform Integration</h4>
+            <p>Natively connected to platforms like Xiaohongshu, WeChat Official Accounts, Twitter/X, and LinkedIn via API, enabling seamless content publishing and data feedback</p>
+          </div>
+          <div class="turning-feature">
+            <div class="turning-feature-icon">❤️‍🔥</div>
+            <h4>"Heartbeat" &amp; Proactive Automation</h4>
+            <p>The "heartbeat" mechanism enables 24/7 active monitoring and task triggering — content production and publishing can complete autonomously even while you sleep</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== AGENT SETUP ===== -->
+    <section class="section fade-in">
+      <div class="section-header">
+        <span class="section-number">Chapter 04</span>
+        <h2 class="section-title">The AI Content Factory Architecture</h2>
+        <div class="section-line"></div>
+        <p class="section-desc">Four agents with distinct roles, building a fully automated pipeline from trending research to content monetization</p>
+      </div>
+      <div class="agent-grid">
+        <div class="agent-card">
+          <div class="agent-number">01</div>
+          <h4>Research Agent</h4>
+          <div class="agent-role">Research Agent</div>
+          <p>Monitors the latest global and domestic trending topics, industry trends, and tech news around the clock. Generates structured daily hot-topic summaries and content opportunity reports.</p>
+          <div class="agent-skills">
+            <span class="agent-skill">Web Scraping</span>
+            <span class="agent-skill">API Integration</span>
+            <span class="agent-skill">Heartbeat</span>
+            <span class="agent-skill">Scheduled Runs</span>
+          </div>
+        </div>
+        <div class="agent-card">
+          <div class="agent-number">02</div>
+          <h4>Content Creation Agent</h4>
+          <div class="agent-role">Content Creation Agent</div>
+          <p>Based on the Research Agent's reports, automatically generates multi-platform content drafts. Zhang Hua spends 30 minutes each morning selecting topics; the agent completes drafts within 1-2 hours.</p>
+          <div class="agent-skills">
+            <span class="agent-skill">NLG</span>
+            <span class="agent-skill">SEO Optimization</span>
+            <span class="agent-skill">Multi-Platform Adaptation</span>
+          </div>
+        </div>
+        <div class="agent-card">
+          <div class="agent-number">03</div>
+          <h4>Social Media Publishing Agent</h4>
+          <div class="agent-role">Social Media Publishing Agent</div>
+          <p>According to preset publishing schedules, automatically publishes content to designated social media platforms, handling format differences and optimal publishing times across platforms.</p>
+          <div class="agent-skills">
+            <span class="agent-skill">Social Media API</span>
+            <span class="agent-skill">Scheduler</span>
+            <span class="agent-skill">Scheduled Publishing</span>
+          </div>
+        </div>
+        <div class="agent-card">
+          <div class="agent-number">04</div>
+          <h4>Data Analysis &amp; Optimization Agent</h4>
+          <div class="agent-role">Data Analysis &amp; Optimization Agent</div>
+          <p>Automatically collects content performance data from each platform daily, generates optimization recommendations and data reports to guide the next round of content strategy iteration.</p>
+          <div class="agent-skills">
+            <span class="agent-skill">Data Scraping</span>
+            <span class="agent-skill">NLG Report</span>
+            <span class="agent-skill">Trend Analysis</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Config Example -->
+      <div class="config-block">
+        <div class="config-header">
+          <div class="config-dot"></div>
+          <div class="config-dot"></div>
+          <div class="config-dot"></div>
+          <span class="config-filename">openclaw-config.yaml</span>
+        </div>
+        <div class="config-body">
+          <pre>
+<span class="comment"># Zhang Hua's AI Content Factory - OpenClaw Configuration</span>
+
+<span class="key">project</span>: <span class="value">"content-creator-factory"</span>
+<span class="key">owner</span>: <span class="value">"zhanghua"</span>
+
+<span class="key">agents</span>:
+  - <span class="key">name</span>: <span class="value">"research-agent"</span>
+    <span class="key">role</span>: <span class="value">"24/7 Trending Research"</span>
+    <span class="key">skills</span>:
+      - <span class="value">web_scraping</span>
+      - <span class="value">api_integration</span>
+    <span class="key">heartbeat</span>: <span class="value">"*/30 * * * *"</span>  <span class="comment"># Scans every 30 minutes</span>
+    <span class="key">sources</span>:
+      - <span class="value">weibo_trending</span>
+      - <span class="value">xiaohongshu_explore</span>
+      - <span class="value">twitter_trends</span>
+      - <span class="value">linkedin_pulse</span>
+    <span class="key">output</span>: <span class="value">"daily_hot_topics_report"</span>
+
+  - <span class="key">name</span>: <span class="value">"content-creation-agent"</span>
+    <span class="key">role</span>: <span class="value">"Multi-Platform Content Generation"</span>
+    <span class="key">skills</span>:
+      - <span class="value">natural_language_generation</span>
+      - <span class="value">seo_optimization</span>
+    <span class="key">trigger</span>: <span class="value">"on_topic_approved"</span>  <span class="comment"># Triggers after Zhang Hua confirms topic</span>
+    <span class="key">platforms</span>:
+      - <span class="key">target</span>: <span class="value">xiaohongshu</span>
+        <span class="key">style</span>: <span class="value">"lifestyle/guide"</span>
+      - <span class="key">target</span>: <span class="value">wechat_mp</span>
+        <span class="key">style</span>: <span class="value">"in-depth long-form"</span>
+      - <span class="key">target</span>: <span class="value">twitter</span>
+        <span class="key">style</span>: <span class="value">"thread/opinion"</span>
+      - <span class="key">target</span>: <span class="value">linkedin</span>
+        <span class="key">style</span>: <span class="value">"professional insights"</span>
+
+  - <span class="key">name</span>: <span class="value">"publishing-agent"</span>
+    <span class="key">role</span>: <span class="value">"Smart Multi-Platform Publishing"</span>
+    <span class="key">skills</span>:
+      - <span class="value">social_media_api</span>
+      - <span class="value">scheduler</span>
+    <span class="key">schedule</span>:
+      <span class="key">xiaohongshu</span>: <span class="value">"09:00, 12:30, 20:00"</span>
+      <span class="key">wechat_mp</span>: <span class="value">"08:00"</span>
+      <span class="key">twitter</span>: <span class="value">"10:00, 15:00, 21:00"</span>  <span class="comment"># UTC+8</span>
+      <span class="key">linkedin</span>: <span class="value">"09:30"</span>
+
+  - <span class="key">name</span>: <span class="value">"analytics-agent"</span>
+    <span class="key">role</span>: <span class="value">"Data Analysis &amp; Strategy Optimization"</span>
+    <span class="key">skills</span>:
+      - <span class="value">data_scraping</span>
+      - <span class="value">nlg_report</span>
+    <span class="key">heartbeat</span>: <span class="value">"0 22 * * *"</span>  <span class="comment"># Generates daily report every night at 10 PM</span>
+    <span class="key">output</span>: <span class="value">"daily_performance_report"</span>
+
+<span class="key">workflow</span>:
+  <span class="key">morning_routine</span>:
+    - <span class="value">research-agent → daily_report</span>
+    - <span class="value">Zhang Hua → 30-min review + topic confirmation</span>
+    - <span class="value">content-creation-agent → multi-platform drafts</span>
+    - <span class="value">publishing-agent → scheduled publishing</span>
+  <span class="key">evening_routine</span>:
+    - <span class="value">analytics-agent → daily data report + optimization recommendations</span></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== RESULTS ===== -->
+    <section class="section fade-in">
+      <div class="section-header">
+        <span class="section-number">Chapter 05</span>
+        <h2 class="section-title">Results: The Numbers Speak</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="results-banner">
+        <h3>Key Metrics Before &amp; After</h3>
+        <div class="results-grid">
+          <div class="result-item">
+            <div class="result-value">40%</div>
+            <div class="result-label">Delivery Cycle Compressed</div>
+            <div class="result-detail">3-4 hrs → 1.5-2 hrs</div>
+          </div>
+          <div class="result-item">
+            <div class="result-value">90%</div>
+            <div class="result-label">Manual Work Reduced</div>
+            <div class="result-detail">8-10 hrs/day → 0.5 hrs/day</div>
+          </div>
+          <div class="result-item">
+            <div class="result-value">5×</div>
+            <div class="result-label">Accounts Multiplied</div>
+            <div class="result-detail">2 → 10 accounts</div>
+          </div>
+          <div class="result-item">
+            <div class="result-value">4×</div>
+            <div class="result-label">Ad Rate Increase</div>
+            <div class="result-detail">¥2,000 → ¥8,000/post</div>
+          </div>
+          <div class="result-item">
+            <div class="result-value">¥10K+/mo</div>
+            <div class="result-label">Ad Revenue Breakthrough</div>
+            <div class="result-detail">Exceeded day-job salary</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comparison Table -->
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Before</th>
+            <th>After</th>
+            <th>Improvement</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="metric-name">Delivery cycle per piece</td>
+            <td class="before">3-4 hours</td>
+            <td class="after">1.5-2 hours</td>
+            <td class="improvement">40% reduction</td>
+          </tr>
+          <tr>
+            <td class="metric-name">Daily manual effort</td>
+            <td class="before">8-10 hours</td>
+            <td class="after">0.5 hours</td>
+            <td class="improvement">90%+ reduction</td>
+          </tr>
+          <tr>
+            <td class="metric-name">Number of accounts managed</td>
+            <td class="before">2</td>
+            <td class="after">10</td>
+            <td class="improvement">5× increase</td>
+          </tr>
+          <tr>
+            <td class="metric-name">Ad rate per post</td>
+            <td class="before">¥2,000</td>
+            <td class="after">¥8,000</td>
+            <td class="improvement">4× increase</td>
+          </tr>
+          <tr>
+            <td class="metric-name">Monthly ad revenue</td>
+            <td class="before">&lt; Day-job salary</td>
+            <td class="after">&gt; Day-job salary</td>
+            <td class="improvement">¥10K+ per month</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p style="text-align:center; color:var(--ink-muted); font-size:1rem; max-width:700px; margin:2rem auto 0;">
+        Today, Zhang Hua spends just 30 minutes a day reviewing OpenClaw's data reports. All the tedious work is handled efficiently by the multi-agent system. Most importantly, she has truly experienced the freedom of <strong style="color:var(--gold-dark);">"passive income while you sleep"</strong> — even when traveling abroad, her social media accounts maintain high-quality updates and stable income generation.
+      </p>
+    </section>
+
+    <!-- ===== TIPS ===== -->
+    <section class="section fade-in">
+      <div class="section-header">
+        <span class="section-number">Chapter 06</span>
+        <h2 class="section-title">Reusable Framework</h2>
+        <div class="section-line"></div>
+        <p class="section-desc">Zhang Hua's practical insights on AI-powered content creation, helping more independent creators replicate her success</p>
+      </div>
+      <ul class="tips-list">
+        <li class="tip-item">
+          <div class="tip-number">1</div>
+          <div class="tip-content">
+            <h4>Start Small, Iterate Gradually</h4>
+            <p>Start from the most time-consuming and repetitive parts, gradually introducing agents. Don't pursue full automation from the start — get one agent running first, verify the results, then expand.</p>
+          </div>
+        </li>
+        <li class="tip-item">
+          <div class="tip-number">2</div>
+          <div class="tip-content">
+            <h4>Define Agent Responsibilities Clearly, Avoid Chaos</h4>
+            <p>Set clear, single-purpose responsibilities for each OpenClaw agent. Research stays research, creation stays creation, publishing stays publishing — just like managing a real team.</p>
+          </div>
+        </li>
+        <li class="tip-item">
+          <div class="tip-number">3</div>
+          <div class="tip-content">
+            <h4>Leverage Localized Integration Tools</h4>
+            <p>For users in China, make full use of localized versions like Molili to ensure deep integration and stable operation with platforms like WeChat Official Accounts and Xiaohongshu.</p>
+          </div>
+        </li>
+        <li class="tip-item">
+          <div class="tip-number">4</div>
+          <div class="tip-content">
+            <h4>Embrace "Heartbeat" and Proactive Automation</h4>
+            <p>Use the Scheduler to have agents proactively monitor information sources and trigger tasks, achieving truly unmanned 24/7 operations. This is the critical step from "AI-assisted" to "AI-driven."</p>
+          </div>
+        </li>
+        <li class="tip-item">
+          <div class="tip-number">5</div>
+          <div class="tip-content">
+            <h4>Continuous Feedback, Human-AI Collaborative Optimization</h4>
+            <p>Regularly review agent outputs and provide feedback and fine-tuning instructions. AI doesn't replace you — it amplifies your judgment. Your 30 minutes of daily input determines the quality of the entire system's output.</p>
+          </div>
+        </li>
+      </ul>
+    </section>
+  </div>
+
+  <!-- ===== CTA ===== -->
+  <section class="cta-section fade-in">
+    <h2>Start Your "Passive Income" Journey</h2>
+    <p>
+      Zhang Hua's story is a microcosm of the "super individual" rise in the AI era. Powered by OpenClaw, a single person can achieve the volume and professional quality of work that once required an entire team.
+    </p>
+    <div class="cta-buttons">
+      <a href="https://openclaw.ai" class="btn-primary">Start Using OpenClaw →</a>
+      <a href="https://discord.gg/clawd" class="btn-secondary">Join the Community</a>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <p>
+      © 2026 OpenClaw · <a href="https://openclaw.ai">openclaw.ai</a> · <a
+        href="https://discord.gg/clawd">Discord</a>
+    </p>
+    <p style="margin-top:0.5rem; font-size:0.8rem;">
+      Source: <a href="https://www.molili.com.cn/blog/27">molili.com.cn/blog/27</a> · Compiled: 2026-03-01
+    </p>
+  </footer>
+
+  <!-- ===== SCROLL ANIMATION ===== -->
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+
+</body>
+
+</html>
