@@ -120,7 +120,7 @@ export default async function AboutPage({ params }: Props) {
             <ArrowRight className="h-4 w-4" />
           </Link>
           <a
-            href="https://github.com/aiinaction"
+            href="https://github.com/AIInactionTop"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-lg border border-border px-6 py-3 text-sm font-medium transition-colors hover:bg-muted"
