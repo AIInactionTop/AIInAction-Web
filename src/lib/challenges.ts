@@ -72,6 +72,16 @@ export async function getChallenges(filters: ChallengeFilters = {}, locale?: str
     where.OR = [
       { title: { contains: search, mode: "insensitive" } },
       { description: { contains: search, mode: "insensitive" } },
+      {
+        translations: {
+          some: {
+            OR: [
+              { title: { contains: search, mode: "insensitive" } },
+              { description: { contains: search, mode: "insensitive" } },
+            ],
+          },
+        },
+      },
     ];
   }
 

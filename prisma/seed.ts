@@ -7,6 +7,13 @@ import {
   officialCategories,
 } from "../src/data/challenges";
 import { ACHIEVEMENT_DEFINITIONS } from "../src/lib/achievements";
+import { readFileSync } from "fs";
+import { join } from "path";
+
+// Load Chinese content translations
+const zhContent = JSON.parse(
+  readFileSync(join(__dirname, "../messages/zh-content.json"), "utf-8")
+).challengeContent as Record<string, { title: string; description: string; objectives: string[]; hints: string[] }>;
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL!,
@@ -150,6 +157,30 @@ async function main() {
         hints: challenge.hints,
       },
     });
+
+    // Upsert Chinese translation from zh-content.json
+    const zh = zhContent[challenge.slug];
+    if (zh) {
+      await prisma.challengeTranslation.upsert({
+        where: {
+          challengeId_locale: { challengeId: upserted.id, locale: "zh" },
+        },
+        update: {
+          title: zh.title,
+          description: zh.description,
+          objectives: zh.objectives,
+          hints: zh.hints,
+        },
+        create: {
+          challengeId: upserted.id,
+          locale: "zh",
+          title: zh.title,
+          description: zh.description,
+          objectives: zh.objectives,
+          hints: zh.hints,
+        },
+      });
+    }
   }
 
   console.log(`  Seeded ${challenges.length} challenges.`);
