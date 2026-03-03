@@ -375,6 +375,7 @@
     "challenges": "挑战",
     "learningPaths": "学习路径",
     "showcase": "展示",
+    "about": "关于我们",
     "github": "GitHub",
     "projects": "项目",
     "privacy": "隐私政策",
@@ -393,7 +394,9 @@
     "leaderboardDescription": "查看经验值和连续天数排行",
     "createTitle": "创建挑战",
     "createDescription": "创建新的社区挑战。",
-    "editTitle": "编辑挑战"
+    "editTitle": "编辑挑战",
+    "aboutTitle": "关于我们",
+    "aboutDescription": "了解 AI In Action — 一个以实战为核心的 AI 技术社区，通过做项目来学习 AI。"
   },
   "categories": {
     "web-development": { "name": "Web 开发", "description": "从响应式作品集到全栈平台，构建现代 Web 应用。" },
@@ -406,6 +409,29 @@
     "ai-data": { "name": "AI 数据分析", "description": "构建智能数据分析、可视化和洞察生成工具。" },
     "ai-audio": { "name": "AI 音频与语音", "description": "创建语音识别、文字转语音、音乐生成和音频处理应用。" },
     "ai-coding": { "name": "AI 辅助编程", "description": "构建 AI 驱动的代码生成、审查、调试和开发工具。" }
+  },
+  "about": {
+    "title": "关于 AI In Action",
+    "heroSubtitle": "一个以「学 AI，用 AI，做项目」为核心理念的实战型 AI 技术社区。",
+    "heroDescription": "我们相信，学习 AI 最好的方式不是看教程，而是动手做项目。社区通过线上平台（aiinaction.top）与线下活动相结合的方式，帮助从初学者到专家级开发者掌握 AI 实战技能。",
+    "featuresTitle": "核心功能",
+    "featuresSubtitle": "通过实战掌握 AI 所需的一切。",
+    "featureChallenges": "AI 实战挑战",
+    "featureChallengesDesc": "覆盖 10 大类别、251+ 个实战项目，涵盖 Web 开发、AI Agent、图像生成、数据分析等方向。",
+    "featurePaths": "学习路径",
+    "featurePathsDesc": "从入门到专家的体系化学习路线，一步步引导你完成 AI 学习之旅。",
+    "featureShowcase": "作品展示",
+    "featureShowcaseDesc": "社区成员实战成果展示与交流。获取灵感，向世界展示你构建的作品。",
+    "featureLeaderboard": "排行榜",
+    "featureLeaderboardDesc": "游戏化排名系统，激励社区成员持续学习与输出。",
+    "visionTitle": "愿景",
+    "visionContent": "成为最具实战价值的 AI 技术社区，让每个人都能用 AI 解决真实问题。",
+    "missionTitle": "使命",
+    "missionContent": "通过「线上学习 + 线下实践」的双轮驱动模式，构建一个开放、共创、共享的 AI 实战生态，助力个人能力升级与产业创新。",
+    "ctaTitle": "准备好加入了吗？",
+    "ctaSubtitle": "今天就开始你的 AI 之旅。选一个挑战，构建真实项目，与社区共同成长。",
+    "browseChallenges": "浏览挑战",
+    "joinGithub": "在 GitHub 上 Star"
   },
   "pathContent": {
     "web-development": { "title": "Web 开发", "description": "从响应式作品集到全栈平台，构建现代 Web 应用。掌握 HTML、CSS、JavaScript、React、Next.js、数据库和部署。" },

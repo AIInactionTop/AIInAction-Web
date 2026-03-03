@@ -375,6 +375,7 @@
     "challenges": "Challenges",
     "learningPaths": "Learning Paths",
     "showcase": "Showcase",
+    "about": "About",
     "github": "GitHub",
     "projects": "Projects",
     "privacy": "Privacy",
@@ -393,7 +394,9 @@
     "leaderboardDescription": "See who's leading in XP and streaks",
     "createTitle": "Create Challenge",
     "createDescription": "Create a new community challenge.",
-    "editTitle": "Edit Challenge"
+    "editTitle": "Edit Challenge",
+    "aboutTitle": "About",
+    "aboutDescription": "Learn about AI In Action — a hands-on AI tech community where you learn by building real projects."
   },
   "categories": {
     "web-development": { "name": "Web Development", "description": "Build modern web applications from responsive portfolios to full-stack platforms." },
@@ -406,6 +409,29 @@
     "ai-data": { "name": "AI Data Analysis", "description": "Build intelligent data analysis, visualization, and insight generation tools." },
     "ai-audio": { "name": "AI Audio & Speech", "description": "Create speech recognition, text-to-speech, music generation, and audio processing apps." },
     "ai-coding": { "name": "AI-Assisted Coding", "description": "Build AI-powered code generation, review, debugging, and developer tools." }
+  },
+  "about": {
+    "title": "About AI In Action",
+    "heroSubtitle": "A hands-on AI tech community built on the philosophy of \"Learn AI, Use AI, Build Projects.\"",
+    "heroDescription": "We believe the best way to learn AI is not by watching tutorials — it's by building real projects. Through our online platform (aiinaction.top) and offline events, we help everyone from beginners to expert developers master practical AI skills.",
+    "featuresTitle": "Core Features",
+    "featuresSubtitle": "Everything you need to master AI through hands-on practice.",
+    "featureChallenges": "AI Challenges",
+    "featureChallengesDesc": "251+ hands-on projects across 10 categories including Web Development, AI Agents, Image Generation, Data Analysis, and more.",
+    "featurePaths": "Learning Paths",
+    "featurePathsDesc": "Structured learning tracks from beginner to expert, guiding you step by step through your AI journey.",
+    "featureShowcase": "Showcase",
+    "featureShowcaseDesc": "Share and explore real projects built by community members. Get inspired and show the world what you've built.",
+    "featureLeaderboard": "Leaderboard",
+    "featureLeaderboardDesc": "Gamified ranking system to motivate continuous learning and encourage community members to keep shipping.",
+    "visionTitle": "Our Vision",
+    "visionContent": "To become the most practical AI tech community, empowering everyone to solve real-world problems with AI.",
+    "missionTitle": "Our Mission",
+    "missionContent": "Through a dual-engine model of \"online learning + offline practice,\" we are building an open, co-creative, and shared AI ecosystem — accelerating individual growth and driving industry innovation.",
+    "ctaTitle": "Ready to Join Us?",
+    "ctaSubtitle": "Start your AI journey today. Pick a challenge, build something real, and grow with the community.",
+    "browseChallenges": "Browse Challenges",
+    "joinGithub": "Star on GitHub"
   },
   "pathContent": {
     "web-development": { "title": "Web Development", "description": "Build modern web applications from responsive portfolios to full-stack platforms. Master HTML, CSS, JavaScript, React, Next.js, databases, and deployment." },
