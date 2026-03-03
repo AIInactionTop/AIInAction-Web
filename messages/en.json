@@ -194,6 +194,8 @@
     "tags": "Tags",
     "tagsHint": "(comma-separated)",
     "tagsPlaceholder": "react, nextjs, ai",
+    "projectImage": "Cover Image",
+    "projectImageHint": "(optional)",
     "sharing": "Sharing...",
     "submitButton": "Share Project",
     "backToShowcase": "Back to Showcase",

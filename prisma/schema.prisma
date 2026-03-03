@@ -60,6 +60,7 @@ model User {
   stats              UserStats?
   achievements       UserAchievement[]
   apiKeys            ApiKey[]
+  projectLikes       SharedProjectLike[]
 
   @@map("users")
 }
@@ -199,16 +200,29 @@ model SharedProject {
   githubUrl   String    @map("github_url")
   demoUrl     String?   @map("demo_url")
   thumbnail   String?
+  imageUrl    String?   @map("image_url")
   tags        String[]
   likes       Int       @default(0)
 
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  challenge Challenge? @relation(fields: [challengeId], references: [id])
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challenge    Challenge?          @relation(fields: [challengeId], references: [id])
+  projectLikes SharedProjectLike[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("shared_projects")
+}
+
+model SharedProjectLike {
+  userId    String        @map("user_id")
+  projectId String        @map("project_id")
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project   SharedProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now()) @map("created_at")
+
+  @@id([userId, projectId])
+  @@map("shared_project_likes")
 }
 
 model ChallengeLike {

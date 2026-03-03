@@ -194,6 +194,8 @@
     "tags": "标签",
     "tagsHint": "（逗号分隔）",
     "tagsPlaceholder": "react, nextjs, ai",
+    "projectImage": "封面图片",
+    "projectImageHint": "（可选）",
     "sharing": "分享中...",
     "submitButton": "分享项目",
     "backToShowcase": "返回展示",

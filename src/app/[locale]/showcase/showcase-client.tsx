@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { useRouter } from "@/i18n/navigation";
 import { motion } from "framer-motion";
 import {
   Plus,
@@ -22,7 +23,10 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSession, signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { SubmitProjectForm } from "./submit-form";
+import { toggleProjectLike } from "@/actions/projects";
+import Image from "next/image";
 
 type SerializedProject = {
   id: string;
@@ -30,6 +34,7 @@ type SerializedProject = {
   description: string;
   githubUrl: string;
   demoUrl: string | null;
+  imageUrl: string | null;
   tags: string[];
   likes: number;
   createdAt: string;
@@ -54,13 +59,20 @@ const fadeUp = {
 export function ShowcaseClient({
   projects,
   total,
+  likedProjectIds = [],
 }: {
   projects: SerializedProject[];
   total: number;
+  likedProjectIds?: string[];
 }) {
   const { data: session } = useSession();
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [likedSet, setLikedSet] = useState<Set<string>>(new Set(likedProjectIds));
+  const [likesMap, setLikesMap] = useState<Record<string, number>>(
+    Object.fromEntries(projects.map((p) => [p.id, p.likes]))
+  );
   const t = useTranslations("showcase");
 
   const filtered = search.trim()
@@ -70,6 +82,46 @@ export function ShowcaseClient({
           p.tags.some((tag) => tag.includes(search.toLowerCase()))
       )
     : projects;
+
+  const handleLike = useCallback(
+    async (e: React.MouseEvent, projectId: string) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (!session) {
+        signIn("github");
+        return;
+      }
+
+      const wasLiked = likedSet.has(projectId);
+      setLikedSet((prev) => {
+        const next = new Set(prev);
+        if (wasLiked) next.delete(projectId);
+        else next.add(projectId);
+        return next;
+      });
+      setLikesMap((prev) => ({
+        ...prev,
+        [projectId]: (prev[projectId] || 0) + (wasLiked ? -1 : 1),
+      }));
+
+      try {
+        await toggleProjectLike(projectId);
+      } catch {
+        setLikedSet((prev) => {
+          const next = new Set(prev);
+          if (wasLiked) next.add(projectId);
+          else next.delete(projectId);
+          return next;
+        });
+        setLikesMap((prev) => ({
+          ...prev,
+          [projectId]: (prev[projectId] || 0) + (wasLiked ? 1 : -1),
+        }));
+      }
+    },
+    [session, likedSet]
+  );
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-16 lg:px-8">
@@ -90,7 +142,7 @@ export function ShowcaseClient({
                 {t("shareProject")}
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-lg">
+            <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{t("shareTitle")}</DialogTitle>
               </DialogHeader>
@@ -105,7 +157,6 @@ export function ShowcaseClient({
         )}
       </div>
 
-      {/* Search */}
       <div className="mt-8">
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -118,82 +169,125 @@ export function ShowcaseClient({
         </div>
       </div>
 
-      {/* Projects grid */}
       <motion.div
         initial="hidden"
         animate="visible"
         variants={stagger}
         className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
       >
-        {filtered.map((project) => (
-          <motion.div key={project.id} variants={fadeUp}>
-            <div className="group h-full rounded-xl border border-border/60 bg-card/50 p-5 transition-all hover:border-border hover:bg-card hover:shadow-lg">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-2.5">
-                  <Avatar className="h-7 w-7">
-                    <AvatarImage src={project.user.image || ""} />
-                    <AvatarFallback className="text-xs">
-                      {project.user.name?.charAt(0) || "?"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-sm font-medium">
-                    {project.user.name}
-                  </span>
+        {filtered.map((project) => {
+          const isLiked = likedSet.has(project.id);
+          const currentLikes = likesMap[project.id] ?? project.likes;
+
+          return (
+            <motion.div key={project.id} variants={fadeUp}>
+              <div
+                role="link"
+                tabIndex={0}
+                onClick={() => router.push(`/showcase/${project.id}`)}
+                onKeyDown={(e) => { if (e.key === "Enter") router.push(`/showcase/${project.id}`); }}
+                className="block cursor-pointer"
+              >
+                <div className="group h-full rounded-xl border border-border/60 bg-card/50 transition-all hover:border-border hover:bg-card hover:shadow-lg overflow-hidden">
+                  {project.imageUrl && (
+                    <div className="relative h-40 w-full overflow-hidden border-b border-border/40">
+                      <Image
+                        src={project.imageUrl}
+                        alt={project.title}
+                        fill
+                        className="object-cover transition-transform group-hover:scale-105"
+                      />
+                    </div>
+                  )}
+                  <div className="p-5">
+                    <div className="flex items-start justify-between">
+                      <Link
+                        href={`/profile/${project.user.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex items-center gap-2.5 transition-opacity hover:opacity-80"
+                      >
+                        <Avatar className="h-7 w-7">
+                          <AvatarImage src={project.user.image || ""} />
+                          <AvatarFallback className="text-xs">
+                            {project.user.name?.charAt(0) || "?"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm font-medium">
+                          {project.user.name}
+                        </span>
+                      </Link>
+                      <button
+                        onClick={(e) => handleLike(e, project.id)}
+                        className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-xs transition-colors ${
+                          isLiked
+                            ? "bg-red-50 text-red-500 dark:bg-red-950/30"
+                            : "text-muted-foreground hover:text-red-500"
+                        }`}
+                      >
+                        <Heart
+                          className={`h-3.5 w-3.5 ${isLiked ? "fill-current" : ""}`}
+                        />
+                        {currentLikes}
+                      </button>
+                    </div>
+
+                    <h3 className="mt-4 font-semibold group-hover:text-primary transition-colors">
+                      {project.title}
+                    </h3>
+                    <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground leading-relaxed">
+                      {project.description.replace(/<[^>]*>/g, "")}
+                    </p>
+
+                    {project.challenge && (
+                      <Badge variant="secondary" className="mt-3 text-[10px]">
+                        {project.challenge.title}
+                      </Badge>
+                    )}
+
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {project.tags.map((tag) => (
+                        <Badge
+                          key={tag}
+                          variant="outline"
+                          className="text-[10px]"
+                        >
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+
+                    <div className="mt-4 flex gap-2">
+                      {project.githubUrl && (
+                        <a
+                          href={project.githubUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+                        >
+                          <Github className="h-3.5 w-3.5" />
+                          {t("source")}
+                        </a>
+                      )}
+                      {project.demoUrl && (
+                        <a
+                          href={project.demoUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          {t("demo")}
+                        </a>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Heart className="h-3.5 w-3.5" />
-                  {project.likes}
-                </div>
               </div>
-
-              <h3 className="mt-4 font-semibold">{project.title}</h3>
-              <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground leading-relaxed">
-                {project.description}
-              </p>
-
-              {project.challenge && (
-                <Badge variant="secondary" className="mt-3 text-[10px]">
-                  {project.challenge.title}
-                </Badge>
-              )}
-
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {project.tags.map((tag) => (
-                  <Badge
-                    key={tag}
-                    variant="outline"
-                    className="text-[10px]"
-                  >
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-
-              <div className="mt-4 flex gap-2">
-                <a
-                  href={project.githubUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  <Github className="h-3.5 w-3.5" />
-                  {t("source")}
-                </a>
-                {project.demoUrl && (
-                  <a
-                    href={project.demoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    <ExternalLink className="h-3.5 w-3.5" />
-                    {t("demo")}
-                  </a>
-                )}
-              </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          );
+        })}
       </motion.div>
 
       {filtered.length === 0 && (
