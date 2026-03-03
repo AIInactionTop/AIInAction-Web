@@ -198,7 +198,8 @@
     "submitButton": "分享项目",
     "backToShowcase": "返回展示",
     "sharePageTitle": "分享你的项目",
-    "sharePageSubtitle": "链接你的 GitHub 仓库，与社区分享你的作品。"
+    "sharePageSubtitle": "链接你的 GitHub 仓库，与社区分享你的作品。",
+    "linkedToChallenge": "关联挑战："
   },
   "login": {
     "title": "欢迎回来",
@@ -238,6 +239,11 @@
     "title": "完成心得",
     "noReflections": "暂无心得。完成此挑战并分享你的经验！",
     "completedOn": "完成于 {date}"
+  },
+  "challengeShowcase": {
+    "title": "社区解决方案",
+    "source": "源码",
+    "demo": "演示"
   },
   "achievements": {
     "first-step": {

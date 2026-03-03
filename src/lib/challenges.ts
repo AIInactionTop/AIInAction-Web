@@ -244,6 +244,17 @@ export async function getProjects(filters: { search?: string; page?: number; pag
   return { projects, total, page, pageSize };
 }
 
+export async function getProjectsByChallenge(challengeId: string) {
+  return prisma.sharedProject.findMany({
+    where: { challengeId },
+    include: {
+      user: { select: { id: true, name: true, image: true } },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 10,
+  });
+}
+
 export async function getPublicReflections(challengeId: string) {
   return prisma.challengeCompletion.findMany({
     where: {

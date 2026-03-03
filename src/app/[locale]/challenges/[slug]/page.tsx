@@ -27,11 +27,13 @@ import {
   hasUserCompleted,
   hasUserRegistered,
   getPublicReflections,
+  getProjectsByChallenge,
 } from "@/lib/challenges";
 import { auth } from "@/lib/auth";
 import { ChallengeActions } from "./challenge-actions";
 import { CommentSection } from "./comment-section";
 import { ReflectionsSection } from "./reflections-section";
+import { ShowcaseSection } from "./showcase-section";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 type Props = {
@@ -77,7 +79,7 @@ export default async function ChallengeDetailPage({ params }: Props) {
     ? tCat(`${challenge.category.slug}.name`) : challenge.category?.name;
   const diffLabel = td.has(challenge.difficulty) ? td(challenge.difficulty) : diff.label;
 
-  const [pathChallenges, { comments, total: commentTotal }, liked, completed, registered, reflections] =
+  const [pathChallenges, { comments, total: commentTotal }, liked, completed, registered, reflections, projects] =
     await Promise.all([
       challenge.path ? getChallengesByPath(challenge.path.slug, locale) : Promise.resolve([]),
       getChallengeComments(challenge.id),
@@ -85,6 +87,7 @@ export default async function ChallengeDetailPage({ params }: Props) {
       userId ? hasUserCompleted(userId, challenge.id) : Promise.resolve(false),
       userId ? hasUserRegistered(userId, challenge.id) : Promise.resolve(false),
       getPublicReflections(challenge.id),
+      getProjectsByChallenge(challenge.id),
     ]);
 
   const currentIndex = pathChallenges.findIndex((c) => c.slug === slug);
@@ -285,6 +288,16 @@ export default async function ChallengeDetailPage({ params }: Props) {
           <Separator className="my-8" />
           <ReflectionsSection
             reflections={JSON.parse(JSON.stringify(reflections))}
+          />
+        </>
+      )}
+
+      {/* Showcase Projects */}
+      {projects.length > 0 && (
+        <>
+          <Separator className="my-8" />
+          <ShowcaseSection
+            projects={JSON.parse(JSON.stringify(projects))}
           />
         </>
       )}

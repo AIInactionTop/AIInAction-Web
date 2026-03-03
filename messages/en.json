@@ -198,7 +198,8 @@
     "submitButton": "Share Project",
     "backToShowcase": "Back to Showcase",
     "sharePageTitle": "Share Your Project",
-    "sharePageSubtitle": "Link your GitHub repository and share your work with the community."
+    "sharePageSubtitle": "Link your GitHub repository and share your work with the community.",
+    "linkedToChallenge": "Linked to challenge:"
   },
   "login": {
     "title": "Welcome back",
@@ -238,6 +239,11 @@
     "title": "Reflections",
     "noReflections": "No reflections yet. Complete this challenge and share your experience!",
     "completedOn": "Completed on {date}"
+  },
+  "challengeShowcase": {
+    "title": "Community Solutions",
+    "source": "Source",
+    "demo": "Demo"
   },
   "achievements": {
     "first-step": {

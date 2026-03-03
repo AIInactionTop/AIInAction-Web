@@ -8,7 +8,13 @@ import { useTranslations } from "next-intl";
 import { createProject } from "@/actions/projects";
 import { useRouter } from "next/navigation";
 
-export function SubmitProjectForm({ onSuccess }: { onSuccess: () => void }) {
+type Props = {
+  onSuccess?: () => void;
+  challengeSlug?: string;
+  challengeName?: string;
+};
+
+export function SubmitProjectForm({ onSuccess, challengeSlug, challengeName }: Props) {
   const [loading, setLoading] = useState(false);
   const t = useTranslations("showcase");
   const router = useRouter();
@@ -20,7 +26,11 @@ export function SubmitProjectForm({ onSuccess }: { onSuccess: () => void }) {
       const formData = new FormData(e.currentTarget);
       await createProject(formData);
       router.refresh();
-      onSuccess();
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.push("/showcase");
+      }
     } catch {
       setLoading(false);
     }
@@ -28,6 +38,13 @@ export function SubmitProjectForm({ onSuccess }: { onSuccess: () => void }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {challengeSlug && <input type="hidden" name="challengeSlug" value={challengeSlug} />}
+      {challengeName && (
+        <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm">
+          {t("linkedToChallenge")}{" "}
+          <span className="font-medium">{challengeName}</span>
+        </div>
+      )}
       <div>
         <label className="text-sm font-medium">{t("projectTitle")}</label>
         <Input

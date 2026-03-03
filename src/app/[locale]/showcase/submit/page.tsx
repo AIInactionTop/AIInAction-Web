@@ -1,13 +1,30 @@
-"use client";
-
 import { ArrowLeft } from "lucide-react";
-import { Link, useRouter } from "@/i18n/navigation";
-import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getChallengeBySlug } from "@/lib/challenges";
 import { SubmitProjectForm } from "../submit-form";
 
-export default function SubmitProjectPage() {
-  const router = useRouter();
-  const t = useTranslations("showcase");
+type Props = {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ challenge?: string }>;
+};
+
+export default async function SubmitProjectPage({ params, searchParams }: Props) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const sp = await searchParams;
+  const t = await getTranslations("showcase");
+
+  let challengeSlug: string | undefined;
+  let challengeName: string | undefined;
+
+  if (sp.challenge) {
+    const challenge = await getChallengeBySlug(sp.challenge, locale);
+    if (challenge) {
+      challengeSlug = challenge.slug;
+      challengeName = challenge.title;
+    }
+  }
 
   return (
     <div className="mx-auto max-w-lg px-4 py-10 sm:px-6 sm:py-16 lg:px-8">
@@ -23,7 +40,7 @@ export default function SubmitProjectPage() {
         {t("sharePageSubtitle")}
       </p>
       <div className="mt-8">
-        <SubmitProjectForm onSuccess={() => router.push("/showcase")} />
+        <SubmitProjectForm challengeSlug={challengeSlug} challengeName={challengeName} />
       </div>
     </div>
   );
