@@ -153,6 +153,42 @@ const caseConfigs = [
     htmlUrl: "/usercase/content-creator-passive-income.html",
     htmlUrlEn: "/usercase/content-creator-passive-income-en.html",
   },
+  {
+    id: "amazon-seller",
+    name: "Marcus Liu",
+    icon: ShoppingBag,
+    color: "from-orange-600 to-amber-700",
+    colorBg: "bg-orange-600/10",
+    colorText: "text-orange-400",
+    colorBorder: "border-orange-600/30",
+    glowColor: "#ea580c",
+    htmlUrl: "/usercase/amazon-seller-ai-agents.html",
+    htmlUrlEn: "/usercase/amazon-seller-ai-agents-en.html",
+  },
+  {
+    id: "investor-intelligence",
+    name: "Kevin Luo",
+    icon: TrendingUp,
+    color: "from-sky-500 to-blue-600",
+    colorBg: "bg-sky-500/10",
+    colorText: "text-sky-400",
+    colorBorder: "border-sky-500/30",
+    glowColor: "#0ea5e9",
+    htmlUrl: "/usercase/investor-intelligence-engine.html",
+    htmlUrlEn: "/usercase/investor-intelligence-engine-en.html",
+  },
+  {
+    id: "pm-brain-trust",
+    name: "Aria Zhang",
+    icon: Target,
+    color: "from-rose-500 to-red-600",
+    colorBg: "bg-rose-500/10",
+    colorText: "text-rose-400",
+    colorBorder: "border-rose-500/30",
+    glowColor: "#e63946",
+    htmlUrl: "/usercase/pm-ai-brain-trust.html",
+    htmlUrlEn: "/usercase/pm-ai-brain-trust-en.html",
+  },
 ];
 
 const stepIcons = [Target, Bot, Rocket, Users];
@@ -490,7 +526,7 @@ export default function ActivitiesPage() {
             className="mx-auto mt-16 grid max-w-lg grid-cols-3 gap-8"
           >
             {[
-              { value: "8", labelKey: "statCases" as const },
+              { value: "11", labelKey: "statCases" as const },
               { value: "30+", labelKey: "statAgents" as const },
               { value: "60%+", labelKey: "statEfficiency" as const },
             ].map((stat) => (
@@ -624,7 +660,10 @@ export default function ActivitiesPage() {
                 | "dev-assistant"
                 | "cybersecurity"
                 | "supermom"
-                | "content-creator";
+                | "content-creator"
+                | "amazon-seller"
+                | "investor-intelligence"
+                | "pm-brain-trust";
               const resolvedUrl =
                 locale === "en" ? config.htmlUrlEn : config.htmlUrl;
               return (
