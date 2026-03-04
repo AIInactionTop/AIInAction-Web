@@ -30,7 +30,6 @@ export default getRequestConfig(async ({ requestLocale }) => {
 
   const base = (await import(`../../messages/${locale}.json`)).default as Record<string, unknown>;
   const pathname = await getPathname();
-
   const messages = { ...base };
 
   if (needsNamespace(pathname, 'privacy')) {
@@ -41,10 +40,9 @@ export default getRequestConfig(async ({ requestLocale }) => {
     const m = (await import(`../../messages/${locale}-terms.json`)).default as Record<string, unknown>;
     Object.assign(messages, m);
   }
-  if (needsNamespace(pathname, 'activities')) {
-    const m = (await import(`../../messages/${locale}-activities.json`)).default as Record<string, unknown>;
-    Object.assign(messages, m);
-  }
+  // Always load activities: pathname-based loading fails during client-side navigation
+  const activities = (await import(`../../messages/${locale}-activities.json`)).default as Record<string, unknown>;
+  Object.assign(messages, activities);
 
   return {
     locale,
