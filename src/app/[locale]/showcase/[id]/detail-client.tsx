@@ -1,14 +1,34 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Github, ExternalLink, Heart, Calendar } from "lucide-react";
+import {
+  ArrowLeft,
+  Github,
+  ExternalLink,
+  Heart,
+  Calendar,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Link } from "@/i18n/navigation";
 import { useSession, signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import { toggleProjectLike } from "@/actions/projects";
+import { toggleProjectLike, deleteProject } from "@/actions/projects";
+import { useRouter } from "@/i18n/navigation";
 import Image from "next/image";
 
 type Project = {
@@ -21,7 +41,12 @@ type Project = {
   tags: string[];
   likes: number;
   createdAt: string;
-  user: { id: string; name: string | null; image: string | null; githubUrl: string | null };
+  user: {
+    id: string;
+    name: string | null;
+    image: string | null;
+    githubUrl: string | null;
+  };
   challenge: { id: string; slug: string; title: string } | null;
 };
 
@@ -36,7 +61,11 @@ export function ShowcaseDetailClient({
   const [liked, setLiked] = useState(initialLiked);
   const [likesCount, setLikesCount] = useState(project.likes);
   const [liking, setLiking] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const t = useTranslations("showcase");
+  const router = useRouter();
+
+  const isOwner = session?.user?.id === project.user.id;
 
   const handleLike = async () => {
     if (!session) {
@@ -54,6 +83,16 @@ export function ShowcaseDetailClient({
       setLikesCount((c) => (wasLiked ? c + 1 : c - 1));
     } finally {
       setLiking(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await deleteProject(project.id);
+      router.push("/showcase");
+    } catch {
+      setDeleting(false);
     }
   };
 
@@ -85,16 +124,59 @@ export function ShowcaseDetailClient({
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
           {project.title}
         </h1>
-        <Button
-          variant={liked ? "default" : "outline"}
-          size="sm"
-          onClick={handleLike}
-          disabled={liking}
-          className="shrink-0 gap-1.5"
-        >
-          <Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} />
-          {likesCount}
-        </Button>
+        <div className="flex shrink-0 items-center gap-2">
+          {isOwner && (
+            <>
+              <Link href={`/showcase/${project.id}/edit`}>
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <Pencil className="h-3.5 w-3.5" />
+                  {t("editPageTitle")}
+                </Button>
+              </Link>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5 text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      {t("deleteConfirmTitle")}
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t("deleteConfirmDescription")}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>{t("cancelButton")}</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDelete}
+                      disabled={deleting}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {deleting ? t("deleting") : t("deleteConfirmButton")}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </>
+          )}
+          <Button
+            variant={liked ? "default" : "outline"}
+            size="sm"
+            onClick={handleLike}
+            disabled={liking}
+            className="gap-1.5"
+          >
+            <Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} />
+            {likesCount}
+          </Button>
+        </div>
       </div>
 
       <div className="mt-4 flex items-center gap-3">
@@ -127,7 +209,10 @@ export function ShowcaseDetailClient({
       {project.challenge && (
         <div className="mt-4">
           <Link href={`/challenges/${project.challenge.slug}`}>
-            <Badge variant="secondary" className="transition-colors hover:bg-secondary/80">
+            <Badge
+              variant="secondary"
+              className="transition-colors hover:bg-secondary/80"
+            >
               {t("linkedToChallenge")} {project.challenge.title}
             </Badge>
           </Link>

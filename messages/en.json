@@ -201,7 +201,17 @@
     "backToShowcase": "Back to Showcase",
     "sharePageTitle": "Share Your Project",
     "sharePageSubtitle": "Link your GitHub repository and share your work with the community.",
-    "linkedToChallenge": "Linked to challenge:"
+    "linkedToChallenge": "Linked to challenge:",
+    "editPageTitle": "Edit Project",
+    "editPageSubtitle": "Update your project details.",
+    "updating": "Updating...",
+    "updateButton": "Update Project",
+    "deleteProject": "Delete Project",
+    "deleteConfirmTitle": "Delete Project",
+    "deleteConfirmDescription": "Are you sure you want to delete this project? This action cannot be undone.",
+    "deleteConfirmButton": "Delete",
+    "cancelButton": "Cancel",
+    "deleting": "Deleting..."
   },
   "login": {
     "title": "Welcome back",

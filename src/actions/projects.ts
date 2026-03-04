@@ -97,6 +97,66 @@ export async function hasUserLikedProject(projectId: string): Promise<boolean> {
   return !!like;
 }
 
+export async function updateProject(projectId: string, formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
+  const existing = await prisma.sharedProject.findUnique({
+    where: { id: projectId },
+  });
+  if (!existing || existing.userId !== session.user.id) {
+    throw new Error("Forbidden");
+  }
+
+  const title = formData.get("title") as string;
+  const description = formData.get("description") as string;
+  const githubUrl = formData.get("githubUrl") as string;
+  const demoUrl = (formData.get("demoUrl") as string) || null;
+  const imageUrl = (formData.get("imageUrl") as string) || null;
+  const tagsRaw = formData.get("tags") as string;
+
+  if (!title?.trim() || !description?.trim()) {
+    throw new Error("Title, description are required");
+  }
+
+  const tags = tagsRaw
+    ? tagsRaw.split(",").map((t) => t.trim()).filter(Boolean)
+    : [];
+
+  await prisma.sharedProject.update({
+    where: { id: projectId },
+    data: {
+      title: title.trim(),
+      description: description.trim(),
+      githubUrl: githubUrl.trim(),
+      demoUrl: demoUrl?.trim() || null,
+      imageUrl: imageUrl?.trim() || null,
+      tags,
+    },
+  });
+
+  revalidatePath("/showcase");
+  revalidatePath(`/showcase/${projectId}`);
+}
+
+export async function deleteProject(projectId: string) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
+  const existing = await prisma.sharedProject.findUnique({
+    where: { id: projectId },
+  });
+  if (!existing || existing.userId !== session.user.id) {
+    throw new Error("Forbidden");
+  }
+
+  await prisma.sharedProject.delete({
+    where: { id: projectId },
+  });
+
+  revalidatePath("/showcase");
+}
+
 export async function getProjectById(projectId: string) {
   return prisma.sharedProject.findUnique({
     where: { id: projectId },

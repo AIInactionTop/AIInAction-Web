@@ -7,21 +7,37 @@ import { Button } from "@/components/ui/button";
 import { RichEditor } from "@/components/ui/rich-editor";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { useTranslations } from "next-intl";
-import { createProject } from "@/actions/projects";
+import { createProject, updateProject } from "@/actions/projects";
 import { useRouter } from "next/navigation";
 
 type Props = {
   onSuccess?: () => void;
   challengeSlug?: string;
   challengeName?: string;
+  projectId?: string;
+  defaultValues?: {
+    title: string;
+    description: string;
+    githubUrl: string;
+    demoUrl: string | null;
+    imageUrl: string | null;
+    tags: string[];
+  };
 };
 
-export function SubmitProjectForm({ onSuccess, challengeSlug, challengeName }: Props) {
+export function SubmitProjectForm({
+  onSuccess,
+  challengeSlug,
+  challengeName,
+  projectId,
+  defaultValues,
+}: Props) {
   const [loading, setLoading] = useState(false);
-  const [description, setDescription] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [description, setDescription] = useState(defaultValues?.description || "");
+  const [imageUrl, setImageUrl] = useState(defaultValues?.imageUrl || "");
   const t = useTranslations("showcase");
   const router = useRouter();
+  const isEdit = !!projectId;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -32,12 +48,17 @@ export function SubmitProjectForm({ onSuccess, challengeSlug, challengeName }: P
       if (imageUrl) {
         formData.set("imageUrl", imageUrl);
       }
-      await createProject(formData);
-      router.refresh();
-      if (onSuccess) {
-        onSuccess();
+      if (isEdit) {
+        await updateProject(projectId, formData);
+        router.push(`/showcase/${projectId}`);
       } else {
-        router.push("/showcase");
+        await createProject(formData);
+        router.refresh();
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          router.push("/showcase");
+        }
       }
     } catch {
       setLoading(false);
@@ -59,6 +80,7 @@ export function SubmitProjectForm({ onSuccess, challengeSlug, challengeName }: P
           name="title"
           placeholder={t("projectTitlePlaceholder")}
           required
+          defaultValue={defaultValues?.title}
           className="mt-1.5"
         />
       </div>
@@ -68,6 +90,7 @@ export function SubmitProjectForm({ onSuccess, challengeSlug, challengeName }: P
           <RichEditor
             onChange={setDescription}
             placeholder={t("descriptionPlaceholder")}
+            content={defaultValues?.description}
           />
         </div>
       </div>
@@ -87,6 +110,7 @@ export function SubmitProjectForm({ onSuccess, challengeSlug, challengeName }: P
           <Input
             name="githubUrl"
             placeholder={t("githubUrlPlaceholder")}
+            defaultValue={defaultValues?.githubUrl}
             className="pl-9"
           />
         </div>
@@ -99,6 +123,7 @@ export function SubmitProjectForm({ onSuccess, challengeSlug, challengeName }: P
         <Input
           name="demoUrl"
           placeholder={t("demoUrlPlaceholder")}
+          defaultValue={defaultValues?.demoUrl || ""}
           className="mt-1.5"
         />
       </div>
@@ -113,11 +138,15 @@ export function SubmitProjectForm({ onSuccess, challengeSlug, challengeName }: P
         <Input
           name="tags"
           placeholder={t("tagsPlaceholder")}
+          defaultValue={defaultValues?.tags.join(", ")}
           className="mt-1.5"
         />
       </div>
       <Button type="submit" className="w-full" disabled={loading || !description.trim()}>
-        {loading ? t("sharing") : t("submitButton")}
+        {loading
+          ? isEdit ? t("updating") : t("sharing")
+          : isEdit ? t("updateButton") : t("submitButton")
+        }
       </Button>
     </form>
   );

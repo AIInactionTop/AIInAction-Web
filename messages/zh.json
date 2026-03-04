@@ -201,7 +201,17 @@
     "backToShowcase": "返回展示",
     "sharePageTitle": "分享你的项目",
     "sharePageSubtitle": "链接你的 GitHub 仓库，与社区分享你的作品。",
-    "linkedToChallenge": "关联挑战："
+    "linkedToChallenge": "关联挑战：",
+    "editPageTitle": "编辑项目",
+    "editPageSubtitle": "更新你的项目信息。",
+    "updating": "更新中...",
+    "updateButton": "更新项目",
+    "deleteProject": "删除项目",
+    "deleteConfirmTitle": "删除项目",
+    "deleteConfirmDescription": "确定要删除此项目吗？此操作不可撤销。",
+    "deleteConfirmButton": "删除",
+    "cancelButton": "取消",
+    "deleting": "删除中..."
   },
   "login": {
     "title": "欢迎回来",
