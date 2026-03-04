@@ -3,7 +3,7 @@
     "heroBadge": "OpenClaw 实践挑战",
     "heroTitle1": "用 AI Agent 重新定义",
     "heroTitle2": "你的工作方式",
-    "heroSubtitle": "8 个真实用户案例，8 种 AI Agent 配置方案。\n选择你的角色，跟随配置指南，亲手搭建属于自己的 OpenClaw 自动化工作流。",
+    "heroSubtitle": "11 个真实用户案例，11 种 AI Agent 配置方案。\n选择你的角色，跟随配置指南，亲手搭建属于自己的 OpenClaw 自动化工作流。",
     "browseCases": "浏览案例",
     "learnOpenClaw": "了解 OpenClaw",
     "joinChallenge": "参与挑战",
@@ -15,7 +15,7 @@
     "howTitle": "如何参与挑战",
     "howSubtitle": "四步完成你的 OpenClaw 实践之旅",
     "step1Title": "选择你的角色",
-    "step1Desc": "浏览下方8个真实用户案例，找到与你最匹配的角色和场景",
+    "step1Desc": "浏览下方 11 个真实用户案例，找到与你最匹配的角色和场景",
     "step2Title": "阅读配置指南",
     "step2Desc": "深入了解该角色的 Agent 配置方案、技能组合和工作流设计",
     "step3Title": "动手配置OpenClaw",
@@ -120,6 +120,39 @@
           { "value": "5x", "label": "账号翻倍" }
         ],
         "highlights": ["研究智能体", "内容创作智能体", "数据分析优化"]
+      },
+      "amazon-seller": {
+        "title": "亚马逊卖家的 AI 运营帝国",
+        "subtitle": "1 卖家 5 Agent 3 站点，从选品到客服全自动化",
+        "persona": "跨境电商卖家",
+        "personaTag": "电商自动化",
+        "stats": [
+          { "value": "80%", "label": "调研时间节省" },
+          { "value": "5", "label": "AI Agent" }
+        ],
+        "highlights": ["采购自动化", "竞品监控", "7×24 客服"]
+      },
+      "investor-intelligence": {
+        "title": "投资者的 AI 情报引擎",
+        "subtitle": "20 倍信号覆盖，$12/月替代全职研究员",
+        "persona": "天使投资人",
+        "personaTag": "投资智能",
+        "stats": [
+          { "value": "20x", "label": "信号覆盖" },
+          { "value": "$12", "label": "月成本" }
+        ],
+        "highlights": ["市场情报", "Deal Flow", "Thesis 压力测试"]
+      },
+      "pm-brain-trust": {
+        "title": "PM 的 AI 智囊团",
+        "subtitle": "从需求混乱到产品上线，一人完成团队工作",
+        "persona": "高级产品经理",
+        "personaTag": "产品管理",
+        "stats": [
+          { "value": "5x", "label": "文档提速" },
+          { "value": "4", "label": "AI Agent" }
+        ],
+        "highlights": ["竞品情报", "PRD 生成", "会议洞察"]
       }
     }
   }

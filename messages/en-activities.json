@@ -3,7 +3,7 @@
     "heroBadge": "OpenClaw Practice Challenge",
     "heroTitle1": "Redefine Your Work",
     "heroTitle2": "with AI Agents",
-    "heroSubtitle": "8 real user cases, 8 AI Agent configurations.\nPick your role, follow the guide, and build your own OpenClaw automation workflow.",
+    "heroSubtitle": "11 real user cases, 11 AI Agent configurations.\nPick your role, follow the guide, and build your own OpenClaw automation workflow.",
     "browseCases": "Browse Cases",
     "learnOpenClaw": "Learn OpenClaw",
     "joinChallenge": "Join Challenge",
@@ -15,7 +15,7 @@
     "howTitle": "How to Participate",
     "howSubtitle": "Four steps to complete your OpenClaw practice journey",
     "step1Title": "Choose Your Role",
-    "step1Desc": "Browse the 8 real user cases below and find the role and scenario that best matches you",
+    "step1Desc": "Browse the 11 real user cases below and find the role and scenario that best matches you",
     "step2Title": "Read the Config Guide",
     "step2Desc": "Dive deep into the Agent configuration, skill combinations, and workflow design for that role",
     "step3Title": "Configure OpenClaw",
@@ -120,6 +120,39 @@
           { "value": "5x", "label": "Account Growth" }
         ],
         "highlights": ["Research Agent", "Content Creation Agent", "Data Analytics Optimization"]
+      },
+      "amazon-seller": {
+        "title": "The Amazon Seller's AI Operations Empire",
+        "subtitle": "1 seller, 5 agents, 3 marketplaces — from research to support, fully automated",
+        "persona": "Cross-Border E-Commerce Seller",
+        "personaTag": "E-Commerce Automation",
+        "stats": [
+          { "value": "80%", "label": "Research Time Saved" },
+          { "value": "5", "label": "AI Agents" }
+        ],
+        "highlights": ["Procurement Automation", "Competitor Monitoring", "24/7 Support"]
+      },
+      "investor-intelligence": {
+        "title": "The Investor's AI Intelligence Engine",
+        "subtitle": "20x signal coverage, $12/month replaces full-time analyst",
+        "persona": "Angel Investor",
+        "personaTag": "Investment Intelligence",
+        "stats": [
+          { "value": "20x", "label": "Signal Coverage" },
+          { "value": "$12", "label": "Monthly Cost" }
+        ],
+        "highlights": ["Market Intel", "Deal Flow", "Thesis Stress-Test"]
+      },
+      "pm-brain-trust": {
+        "title": "The PM's AI Brain Trust",
+        "subtitle": "From requirements chaos to shipped product — one PM, team-level output",
+        "persona": "Senior Product Manager",
+        "personaTag": "Product Management",
+        "stats": [
+          { "value": "5x", "label": "Docs Speed" },
+          { "value": "4", "label": "AI Agents" }
+        ],
+        "highlights": ["Competitive Intel", "PRD Generation", "Meeting Insights"]
       }
     }
   }

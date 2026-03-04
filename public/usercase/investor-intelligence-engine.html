@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>投资者的AI情报引擎 | OpenClaw 用户案例</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Bebas+Neue&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #050810;
+      --bg2: #080d1a;
+      --bg3: #0d1424;
+      --border: rgba(100,160,255,0.1);
+      --accent: #4f9eff;
+      --accent2: #7ec8ff;
+      --accent-dim: rgba(79,158,255,0.1);
+      --gold: #f4c542;
+      --gold-dim: rgba(244,197,66,0.1);
+      --green: #00d4aa;
+      --red: #ff4d6d;
+      --text: #d8e8ff;
+      --text-muted: #6b85b0;
+      --text-dim: #2d3f60;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans SC', 'Space Grotesk', sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 18px 52px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(5,8,16,0.9);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.05em; color: var(--text); text-decoration: none; }
+    .nav-logo span { color: var(--accent); }
+    .nav-links { display: flex; gap: 36px; }
+    .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-btn {
+      padding: 8px 22px; border-radius: 6px;
+      border: 1px solid var(--accent);
+      color: var(--accent); background: var(--accent-dim);
+      text-decoration: none; font-size: 13px; font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+      transition: background 0.2s;
+    }
+    .nav-btn:hover { background: rgba(79,158,255,0.2); }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      padding: 130px 52px 80px;
+      display: grid; grid-template-columns: 5fr 4fr;
+      gap: 60px; align-items: center;
+      position: relative; overflow: hidden;
+    }
+    .hero-glow {
+      position: absolute;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(79,158,255,0.06) 0%, transparent 70%);
+      top: 50%; left: 60%; transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    .hero-glow2 {
+      position: absolute;
+      width: 400px; height: 400px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(244,197,66,0.04) 0%, transparent 70%);
+      top: 20%; left: 10%;
+      pointer-events: none;
+    }
+
+    .hero-left { position: relative; z-index: 1; }
+
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 5px 12px; border-radius: 4px;
+      background: var(--accent-dim); border: 1px solid rgba(79,158,255,0.2);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; color: var(--accent); letter-spacing: 0.1em;
+      text-transform: uppercase; margin-bottom: 28px;
+    }
+    .tag-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 1.5s ease-in-out infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+    h1 {
+      font-family: 'Bebas Neue', 'Noto Sans SC', sans-serif;
+      font-size: clamp(52px, 7vw, 96px);
+      line-height: 0.95; letter-spacing: 0.02em;
+      margin-bottom: 20px;
+    }
+    h1 .blue { color: var(--accent); }
+    h1 .gold { color: var(--gold); }
+
+    .hero-sub {
+      font-size: 17px; color: var(--text-muted);
+      line-height: 1.7; max-width: 520px; margin-bottom: 40px;
+    }
+
+    .persona-chip {
+      display: inline-flex; align-items: center; gap: 12px;
+      padding: 10px 18px; border-radius: 8px;
+      background: var(--bg2); border: 1px solid var(--border);
+      margin-bottom: 48px;
+    }
+    .persona-avatar { font-size: 24px; }
+    .persona-name { font-weight: 700; font-size: 14px; }
+    .persona-title { font-size: 12px; color: var(--text-muted); }
+
+    .hero-metrics { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+    .hm-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 18px;
+    }
+    .hm-val { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--accent); line-height: 1; }
+    .hm-val.gold { color: var(--gold); }
+    .hm-val.green { color: var(--green); }
+    .hm-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+
+    /* Terminal Mockup */
+    .terminal {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+      position: relative; z-index: 1;
+      box-shadow: 0 0 60px rgba(79,158,255,0.06);
+    }
+    .term-bar {
+      background: var(--bg3); padding: 12px 16px;
+      display: flex; align-items: center; gap: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .term-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .term-title { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); margin-left: 8px; }
+    .term-body { padding: 20px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 2; }
+    .t-prompt { color: var(--accent); }
+    .t-cmd { color: var(--text); }
+    .t-out { color: var(--text-muted); padding-left: 0; }
+    .t-green { color: var(--green); }
+    .t-gold { color: var(--gold); }
+    .t-red { color: var(--red); }
+    .t-blue { color: var(--accent2); }
+    .t-blank { height: 6px; }
+    .t-cursor { display: inline-block; width: 8px; height: 14px; background: var(--accent); animation: cursor 1s step-end infinite; vertical-align: middle; }
+    @keyframes cursor { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* SECTION */
+    section { padding: 80px 52px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .s-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; font-weight: 600; letter-spacing: 0.2em;
+      color: var(--accent); text-transform: uppercase; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .s-label::before { content: '//'; color: var(--text-dim); }
+    h2 { font-family: 'Bebas Neue', 'Noto Sans SC', sans-serif; font-size: clamp(36px, 4vw, 56px); line-height: 1; letter-spacing: 0.02em; margin-bottom: 16px; }
+    h2 .hl { color: var(--accent); }
+    h2 .gd { color: var(--gold); }
+    .s-desc { color: var(--text-muted); max-width: 580px; font-size: 16px; line-height: 1.7; }
+
+    /* PAIN */
+    .pain-section { background: var(--bg2); }
+    .pain-table { margin-top: 48px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .pain-row { display: grid; grid-template-columns: 40px 1fr 2fr; border-bottom: 1px solid var(--border); }
+    .pain-row:last-child { border-bottom: none; }
+    .pain-row.header { background: var(--bg3); }
+    .pain-cell { padding: 16px 20px; font-size: 13px; }
+    .pain-cell.num { font-family: 'JetBrains Mono', monospace; color: var(--text-dim); font-size: 11px; display: flex; align-items: center; justify-content: center; border-right: 1px solid var(--border); }
+    .pain-cell.title-cell { font-weight: 700; color: var(--text); border-right: 1px solid var(--border); display: flex; align-items: center; }
+    .pain-cell.desc-cell { color: var(--text-muted); display: flex; align-items: center; }
+    .header .pain-cell { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); font-weight: 600; }
+
+    /* AGENTS */
+    .agents-section {}
+    .agents-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 48px; }
+    .agent-block {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .agent-block:hover { border-color: rgba(79,158,255,0.3); }
+    .ab-head {
+      padding: 20px 24px;
+      display: flex; align-items: center; gap: 14px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg3);
+    }
+    .ab-icon { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .icon-b { background: rgba(79,158,255,0.12); }
+    .icon-g { background: rgba(0,212,170,0.1); }
+    .icon-y { background: rgba(244,197,66,0.1); }
+    .icon-r { background: rgba(255,77,109,0.1); }
+    .ab-name { font-family: 'Bebas Neue', 'Noto Sans SC', sans-serif; font-size: 22px; letter-spacing: 0.05em; }
+    .ab-role { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; }
+    .ab-body { padding: 20px 24px; }
+    .ab-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 16px; }
+    .ab-skills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+    .ab-skill { padding: 3px 9px; border-radius: 4px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+    .ab-metric { padding-top: 14px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .abm-label { font-size: 11px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
+    .abm-val { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--accent); letter-spacing: 0.05em; }
+    .abm-val.green { color: var(--green); }
+    .abm-val.gold { color: var(--gold); }
+
+    .agent-block-full { grid-column: 1 / -1; }
+
+    /* WORKFLOW */
+    .workflow-section { background: var(--bg2); }
+    .wf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 48px; }
+    .wf-schedule { }
+    .wf-title-sm { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px; }
+    .wf-event { display: flex; gap: 16px; margin-bottom: 4px; }
+    .wf-time-col { width: 64px; text-align: right; flex-shrink: 0; }
+    .wf-time-val { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); }
+    .wf-time-day { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); }
+    .wf-line-col { width: 24px; display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+    .wf-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--accent); background: var(--bg); flex-shrink: 0; margin-top: 2px; }
+    .wf-dotline { flex: 1; width: 1px; background: var(--border); margin: 4px 0; }
+    .wf-content-col { padding-bottom: 20px; }
+    .wf-agent-name { font-weight: 700; font-size: 13px; color: var(--text); margin-bottom: 3px; }
+    .wf-event-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+    .wf-output-tag { display: inline-block; margin-top: 6px; padding: 2px 8px; border-radius: 4px; background: var(--accent-dim); border: 1px solid rgba(79,158,255,0.2); font-size: 10px; font-family: 'JetBrains Mono', monospace; color: var(--accent); }
+
+    .wf-impact { display: flex; flex-direction: column; gap: 16px; }
+    .impact-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+    .impact-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; }
+    .impact-content { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+    .impact-highlight { color: var(--accent); font-weight: 700; }
+    .impact-gold { color: var(--gold); font-weight: 700; }
+    .impact-green { color: var(--green); font-weight: 700; }
+
+    /* CONFIG */
+    .config-section {}
+    .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 48px; }
+    .cfg-block { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .cfg-bar { padding: 11px 16px; background: var(--bg3); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 7px; }
+    .cfg-d { width: 9px; height: 9px; border-radius: 50%; }
+    .cfg-fn { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); margin-left: 6px; }
+    .cfg-code { padding: 18px 20px; }
+    pre { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; line-height: 1.9; white-space: pre-wrap; }
+    .ck { color: #ff79c6; }
+    .cv { color: #f1fa8c; }
+    .cs { color: #50fa7b; }
+    .cc { color: #44475a; }
+    .cn { color: #8be9fd; }
+    .cr { color: #ff5555; }
+
+    /* RESULTS */
+    .results-section { background: var(--bg2); }
+    .results-layout { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-top: 48px; }
+    .result-block {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 12px; padding: 28px;
+      position: relative; overflow: hidden;
+    }
+    .result-block::after {
+      content: ''; position: absolute;
+      bottom: 0; left: 0; right: 0; height: 2px;
+    }
+    .result-block.b::after { background: var(--accent); }
+    .result-block.g::after { background: var(--green); }
+    .result-block.y::after { background: var(--gold); }
+    .result-num { font-family: 'Bebas Neue', sans-serif; font-size: 56px; line-height: 1; margin-bottom: 8px; }
+    .result-num.b { color: var(--accent); }
+    .result-num.g { color: var(--green); }
+    .result-num.y { color: var(--gold); }
+    .result-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+    .results-quote { grid-column: 1 / -1; background: var(--bg3); border: 1px solid rgba(79,158,255,0.15); border-radius: 12px; padding: 32px; }
+    .rq-text { font-size: 18px; font-weight: 300; color: var(--text); line-height: 1.6; margin-bottom: 16px; }
+    .rq-author { font-size: 13px; font-weight: 700; }
+    .rq-role { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+
+    /* CTA */
+    .cta-section { text-align: center; padding: 80px 52px; position: relative; overflow: hidden; }
+    .cta-glow { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 500px; height: 200px; background: radial-gradient(ellipse, rgba(79,158,255,0.06), transparent 70%); pointer-events: none; }
+    .cta-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 14px; }
+    .cta-title { font-family: 'Bebas Neue', 'Noto Sans SC', sans-serif; font-size: 52px; line-height: 1; margin-bottom: 16px; }
+    .cta-title .hl { color: var(--accent); }
+    .cta-desc { color: var(--text-muted); max-width: 440px; margin: 0 auto 40px; font-size: 15px; }
+    .cta-btns { display: flex; gap: 14px; justify-content: center; }
+    .btn-p { padding: 13px 30px; border-radius: 6px; background: var(--accent); color: var(--bg); text-decoration: none; font-weight: 700; font-size: 14px; font-family: 'JetBrains Mono', monospace; }
+    .btn-s { padding: 13px 30px; border-radius: 6px; border: 1px solid var(--border); color: var(--text); text-decoration: none; font-weight: 600; font-size: 14px; font-family: 'JetBrains Mono', monospace; }
+
+    footer { padding: 28px 52px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    footer a { color: var(--text-muted); text-decoration: none; font-size: 13px; font-family: 'JetBrains Mono', monospace; }
+    .ft-logo { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.05em; }
+    .ft-logo span { color: var(--accent); }
+
+    .divider { height: 1px; background: var(--border); }
+
+    @media (max-width: 900px) {
+      nav { padding: 16px 24px; }
+      .nav-links { display: none; }
+      .hero { grid-template-columns: 1fr; padding: 100px 24px 60px; }
+      .hero-metrics { grid-template-columns: 1fr 1fr; }
+      section { padding: 60px 24px; }
+      .pain-row { grid-template-columns: 1fr; }
+      .pain-cell.num { display: none; }
+      .agents-grid, .config-grid, .wf-grid, .results-layout { grid-template-columns: 1fr; }
+      .agent-block-full { grid-column: 1; }
+      footer { flex-direction: column; gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/zh" class="nav-logo">AI <span>IN ACTION</span></a>
+  <div class="nav-links">
+    <a href="/zh/challenges">挑战</a>
+    <a href="/zh/activities">活动</a>
+    <a href="/zh/paths">学习路径</a>
+    <a href="/zh/showcase">作品展示</a>
+  </div>
+  <a href="/zh/challenges/openclaw" class="nav-btn">// 参与挑战</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+  <div class="hero-left">
+    <div class="hero-tag">
+      <span class="tag-dot"></span>
+      投资 · OpenClaw 用户案例
+    </div>
+    <h1>
+      投资者的<br />
+      <span class="blue">情报</span><br />
+      <span class="gold">引擎</span>
+    </h1>
+    <p class="hero-sub">20 倍市场信号覆盖。每日节省 2 小时。一个 AI Agent 网络替代全职研究员——每月仅 $12。</p>
+
+    <div class="persona-chip">
+      <span class="persona-avatar">📈</span>
+      <div>
+        <div class="persona-name">Kevin Luo · 天使投资人 & 公募交易员</div>
+        <div class="persona-title">$200万+ 组合 · 美股 + 早期科技 · 兼职</div>
+      </div>
+    </div>
+
+    <div class="hero-metrics">
+      <div class="hm-card">
+        <div class="hm-val">20x</div>
+        <div class="hm-label">信号覆盖</div>
+      </div>
+      <div class="hm-card">
+        <div class="hm-val green">2h</div>
+        <div class="hm-label">每日节省</div>
+      </div>
+      <div class="hm-card">
+        <div class="hm-val gold">$12</div>
+        <div class="hm-label">月 Agent 成本</div>
+      </div>
+      <div class="hm-card">
+        <div class="hm-val">4</div>
+        <div class="hm-label">AI Agent</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="terminal">
+    <div class="term-bar">
+      <div class="term-dot" style="background:#ff5f56"></div>
+      <div class="term-dot" style="background:#ffbd2e"></div>
+      <div class="term-dot" style="background:#27c93f"></div>
+      <span class="term-title">openclaw — investor-agents — live</span>
+    </div>
+    <div class="term-body">
+      <div><span class="t-prompt">▶</span> <span class="t-cmd">market_scout.run()</span></div>
+      <div class="t-out">扫描 847 个来源...</div>
+      <div class="t-out"><span class="t-green">✓</span> <span class="t-blue">NVDA</span> — 内幕买入：CFO $210万</div>
+      <div class="t-out"><span class="t-gold">★</span> <span class="t-blue">TSLA</span> — 交付超预期 +8%</div>
+      <div class="t-out"><span class="t-red">!</span> <span class="t-blue">SMCI</span> — SEC 传票已提交</div>
+      <div class="t-blank"></div>
+      <div><span class="t-prompt">▶</span> <span class="t-cmd">deal_scout.scan(stage="seed,series-a")</span></div>
+      <div class="t-out">分析 234 家公司...</div>
+      <div class="t-out"><span class="t-green">✓</span> 匹配：AI 基础设施 · YC W25 · $300万 ARR</div>
+      <div class="t-out"><span class="t-green">✓</span> 匹配：气候科技 · 3 条可介绍路径</div>
+      <div class="t-blank"></div>
+      <div><span class="t-prompt">▶</span> <span class="t-cmd">portfolio_pulse.report()</span></div>
+      <div class="t-out">持仓：12 只股票 · 3 私募</div>
+      <div class="t-out"><span class="t-green">↑</span> AAPL 财报 3 天后 — 关注 IV 收缩</div>
+      <div class="t-out"><span class="t-gold">→</span> 科技超配 68% — 再平衡？</div>
+      <div class="t-blank"></div>
+      <span class="t-cursor"></span>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PAIN POINTS -->
+<section class="pain-section">
+  <div class="container">
+    <div class="s-label">痛点</div>
+    <h2>信息<span class="hl">过载</span>，<br />洞察<span class="gd">饥荒</span></h2>
+    <p class="s-desc">现代投资者拥有更多数据，但缺乏过滤的数据只会带来分析瘫痪，而非超额收益。</p>
+
+    <div class="pain-table">
+      <div class="pain-row header">
+        <div class="pain-cell num">#</div>
+        <div class="pain-cell title-cell">痛点</div>
+        <div class="pain-cell desc-cell">代价</div>
+      </div>
+      <div class="pain-row">
+        <div class="pain-cell num">01</div>
+        <div class="pain-cell title-cell">RSS 与新闻过载</div>
+        <div class="pain-cell desc-cell">订阅 30+  newsletters、15 个 RSS 源和 3 个金融数据服务。全部读完要 3 小时。错过关键信号是家常便饭。</div>
+      </div>
+      <div class="pain-row">
+        <div class="pain-cell num">02</div>
+        <div class="pain-cell title-cell">手动财报追踪</div>
+        <div class="pain-cell desc-cell">财报季意味着 3 周内 兼顾 40 家公司。你无法追踪每场电话会、每次指引更新、每次分析师评级。一次错过，持仓可能错一个月。</div>
+      </div>
+      <div class="pain-row">
+        <div class="pain-cell num">03</div>
+        <div class="pain-cell title-cell">Deal Flow 盲区</div>
+        <div class="pain-cell desc-cell">优质早期项目在收件箱里死掉，或根本到不了你手里。在 YC 批次、AngelList 和创始人网络中找符合你投资 thesis 的初创公司，本身就是一份兼职。</div>
+      </div>
+      <div class="pain-row">
+        <div class="pain-cell num">04</div>
+        <div class="pain-cell title-cell">组合漂移</div>
+        <div class="pain-cell desc-cell">科技板块大涨时，你的配置从 40% 漂到 68% 而你浑然不觉。手动组合复盘最多每月一次——但市场每天都在动。</div>
+      </div>
+      <div class="pain-row">
+        <div class="pain-cell num">05</div>
+        <div class="pain-cell title-cell">研报堆积</div>
+        <div class="pain-cell desc-cell">分析师报告、10-K、S-1、竞品拆解堆积如山。一份 S-1 就 200 页。要么读太少，要么全读然后决策慢。</div>
+      </div>
+      <div class="pain-row">
+        <div class="pain-cell num">06</div>
+        <div class="pain-cell title-cell">缺乏系统性第二意见</div>
+        <div class="pain-cell desc-cell">你只能在事后发现自己的盲点。没有一致的框架来压力测试你的 thesis——只有直觉和今早读到的内容。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- AGENTS -->
+<section class="agents-section">
+  <div class="container">
+    <div class="s-label">解决方案</div>
+    <h2>你的<span class="hl">4-Agent</span><br />情报<span class="gd">网络</span></h2>
+    <p class="s-desc">四个专业 Agent 覆盖投资流程的每一层——7×24 运行，你只处理真正重要的事。</p>
+
+    <div class="agents-grid">
+      <div class="agent-block">
+        <div class="ab-head">
+          <div class="ab-icon icon-b">📡</div>
+          <div>
+            <div class="ab-name">MarketScout</div>
+            <div class="ab-role">市场情报 Agent</div>
+          </div>
+        </div>
+        <div class="ab-body">
+          <div class="ab-desc">每天早上扫描 800+ 来源——财经新闻、SEC 文件、内幕交易报告、分析师评级、社交情绪。只过滤与你的自选股和 thesis 相关的信号。按置信度排序推送晨间简报。</div>
+          <div class="ab-skills">
+            <span class="ab-skill">web_search</span>
+            <span class="ab-skill">sec_filings</span>
+            <span class="ab-skill">sentiment_parse</span>
+            <span class="ab-skill">relevance_score</span>
+            <span class="ab-skill">email_brief</span>
+          </div>
+          <div class="ab-metric">
+            <span class="abm-label">每日新闻阅读时间</span>
+            <span class="abm-val">3h → 15min</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-block">
+        <div class="ab-head">
+          <div class="ab-icon icon-y">🔭</div>
+          <div>
+            <div class="ab-name">DealScout</div>
+            <div class="ab-role">私募 Deal Flow Agent</div>
+          </div>
+        </div>
+        <div class="ab-body">
+          <div class="ab-desc">持续扫描 YC 批次、AngelList、Product Hunt 首发、GitHub 热门 repo 和招聘信号，寻找符合你投资 thesis 的初创公司。按 traction、团队、市场规模和你的标准打分。标记通过你人脉的 warm intro 路径。</div>
+          <div class="ab-skills">
+            <span class="ab-skill">web_scrape</span>
+            <span class="ab-skill">thesis_match</span>
+            <span class="ab-skill">network_scan</span>
+            <span class="ab-skill">score_rank</span>
+            <span class="ab-skill">crunchbase_api</span>
+          </div>
+          <div class="ab-metric">
+            <span class="abm-label">Deal 来源覆盖</span>
+            <span class="abm-val green">20x 更广</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-block">
+        <div class="ab-head">
+          <div class="ab-icon icon-g">📊</div>
+          <div>
+            <div class="ab-name">PortfolioPulse</div>
+            <div class="ab-role">组合监控 Agent</div>
+          </div>
+        </div>
+        <div class="ab-body">
+          <div class="ab-desc">每日追踪公募持仓，季度追踪私募。监控配置漂移、财报日期、期权到期、每只持仓的新闻。在问题出现前提醒再平衡机会。生成月度组合健康报告。</div>
+          <div class="ab-skills">
+            <span class="ab-skill">portfolio_track</span>
+            <span class="ab-skill">drift_calc</span>
+            <span class="ab-skill">earnings_cal</span>
+            <span class="ab-skill">alert_send</span>
+            <span class="ab-skill">monthly_report</span>
+          </div>
+          <div class="ab-metric">
+            <span class="abm-label">组合复盘频率</span>
+            <span class="abm-val gold">每日 → 自动</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-block">
+        <div class="ab-head">
+          <div class="ab-icon icon-r">🧪</div>
+          <div>
+            <div class="ab-name">ThesisDebater</div>
+            <div class="ab-role">投资 Thesis 压力测试 Agent</div>
+          </div>
+        </div>
+        <div class="ab-body">
+          <div class="ab-desc">当你考虑新仓位或投资时，ThesisDebater 扮演魔鬼代言人。研究反方论点、识别你未言明的风险、找出可比失败案例、压力测试你的假设。在投入资金前提供严谨的第二意见。</div>
+          <div class="ab-skills">
+            <span class="ab-skill">counterarg_gen</span>
+            <span class="ab-skill">comparable_research</span>
+            <span class="ab-skill">risk_identify</span>
+            <span class="ab-skill">scenario_model</span>
+          </div>
+          <div class="ab-metric">
+            <span class="abm-label">投资前发现的 thesis 盲点</span>
+            <span class="abm-val">3→0 平均/季</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-block agent-block-full" style="background:var(--bg3);">
+        <div class="ab-head" style="background:rgba(255,255,255,0.02);">
+          <div class="ab-icon" style="background:rgba(244,197,66,0.1);font-size:18px;">📑</div>
+          <div>
+            <div class="ab-name">ResearchDigest</div>
+            <div class="ab-role">文档摘要 Agent · 按需</div>
+          </div>
+        </div>
+        <div class="ab-body" style="display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;">
+          <div>
+            <div class="ab-desc">丢入任意文档——S-1、10-K、财报电话会纪要、研报或 pitch deck——ResearchDigest 在 3 分钟内提取 10 条最相关的投资洞察。高亮红牌、关键指标、管理层指引变化和竞争格局变化。</div>
+            <div class="ab-skills">
+              <span class="ab-skill">pdf_parse</span>
+              <span class="ab-skill">10k_extract</span>
+              <span class="ab-skill">s1_analyze</span>
+              <span class="ab-skill">flag_detect</span>
+              <span class="ab-skill">summary_gen</span>
+            </div>
+          </div>
+          <div style="background:var(--bg2);border-radius:10px;padding:20px;border:1px solid var(--border);">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:14px;">S-1 摘要输出示例</div>
+            <div style="font-size:12px;color:var(--text-muted);line-height:1.8;">
+              <div style="margin-bottom:8px;"><span style="color:var(--accent);font-weight:700;">收入：</span>$1.27亿 ARR，82% 同比增速——较上年 114% 放缓</div>
+              <div style="margin-bottom:8px;"><span style="color:var(--gold);font-weight:700;">⚠ 风险：</span>前三大客户 = 41% 收入——集中度风险</div>
+              <div style="margin-bottom:8px;"><span style="color:var(--green);font-weight:700;">✓ 优势：</span>净收入留存率 128%——产品粘性强</div>
+              <div style="margin-bottom:8px;"><span style="color:var(--text-muted);font-weight:700;">烧钱：</span>$820万/月，收盘时 14 个月 runway——紧张</div>
+              <div><span style="color:var(--accent);font-weight:700;">估值：</span>中位数定价 18x NTM——较同业 22x 压缩</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- WORKFLOW -->
+<section class="workflow-section">
+  <div class="container">
+    <div class="s-label">每日工作流</div>
+    <h2>Kevin 的<span class="hl">自动化</span><br />投资<span class="gd">周</span></h2>
+    <p class="s-desc">Agent 持续运行。Kevin 只与精选、高信号输出互动——而非原始噪音。</p>
+
+    <div class="wf-grid">
+      <div class="wf-schedule">
+        <div class="wf-title-sm">// Agent 活动时间线</div>
+
+        <div class="wf-event">
+          <div class="wf-time-col">
+            <div class="wf-time-val">06:00</div>
+            <div class="wf-time-day">每日</div>
+          </div>
+          <div class="wf-line-col"><div class="wf-dot"></div><div class="wf-dotline"></div></div>
+          <div class="wf-content-col">
+            <div class="wf-agent-name">MarketScout → 晨间简报</div>
+            <div class="wf-event-desc">扫描隔夜 SEC 文件、亚洲收盘、自选股盘前表现。将排序信号摘要推送到邮箱和 Telegram。</div>
+            <span class="wf-output-tag">output: ranked_signals.pdf</span>
+          </div>
+        </div>
+
+        <div class="wf-event">
+          <div class="wf-time-col">
+            <div class="wf-time-val">08:00</div>
+            <div class="wf-time-day">每日</div>
+          </div>
+          <div class="wf-line-col"><div class="wf-dot" style="border-color:var(--gold)"></div><div class="wf-dotline"></div></div>
+          <div class="wf-content-col">
+            <div class="wf-agent-name">PortfolioPulse → 每日检查</div>
+            <div class="wf-event-desc">检查配置漂移与目标。标记未来 72 小时内有财报的持仓。任一持仓盘前波动 >5% 时提醒。</div>
+            <span class="wf-output-tag" style="border-color:rgba(244,197,66,0.3);background:var(--gold-dim);color:var(--gold);">output: portfolio_status</span>
+          </div>
+        </div>
+
+        <div class="wf-event">
+          <div class="wf-time-col">
+            <div class="wf-time-val">10:00</div>
+            <div class="wf-time-day">周一/三</div>
+          </div>
+          <div class="wf-line-col"><div class="wf-dot" style="border-color:var(--green)"></div><div class="wf-dotline"></div></div>
+          <div class="wf-content-col">
+            <div class="wf-agent-name">DealScout → 新匹配</div>
+            <div class="wf-event-desc">报告符合 thesis 的新初创公司。本周：YC W25 批次 3 家 AI 基础设施公司，2 家气候科技公司，已识别 warm intro 路径。</div>
+            <span class="wf-output-tag" style="border-color:rgba(0,212,170,0.3);background:rgba(0,212,170,0.06);color:var(--green);">output: deal_shortlist</span>
+          </div>
+        </div>
+
+        <div class="wf-event">
+          <div class="wf-time-col">
+            <div class="wf-time-val">按需</div>
+            <div class="wf-time-day">随时</div>
+          </div>
+          <div class="wf-line-col"><div class="wf-dot" style="border-color:var(--red)"></div><div class="wf-dotline"></div></div>
+          <div class="wf-content-col">
+            <div class="wf-agent-name">ThesisDebater → 投资前审核</div>
+            <div class="wf-event-desc">打款前，Kevin 将投资备忘录发给 ThesisDebater。收到严谨的 bear case、3 个可比失败案例和标记的盲点。</div>
+            <span class="wf-output-tag" style="border-color:rgba(255,77,109,0.3);background:rgba(255,77,109,0.06);color:var(--red);">output: bear_case_analysis</span>
+          </div>
+        </div>
+
+        <div class="wf-event">
+          <div class="wf-time-col">
+            <div class="wf-time-val">周日</div>
+            <div class="wf-time-day">每周</div>
+          </div>
+          <div class="wf-line-col"><div class="wf-dot"></div></div>
+          <div class="wf-content-col">
+            <div class="wf-agent-name">All Agents → 周汇总</div>
+            <div class="wf-event-desc">合并周报：Top 5 市场动态、组合 vs 基准表现、3 个值得电话的 deal、下周关键日期和财报。</div>
+            <span class="wf-output-tag">output: weekly_briefing</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="wf-impact">
+        <div class="impact-card">
+          <div class="impact-label">// 每周回收时间</div>
+          <div class="impact-content">Kevin 过去每天花 <span class="impact-highlight">2-3 小时</span> 读新闻、看持仓、研究 deal。现在每天花 <span class="impact-green">20 分钟</span> 审查 Agent 输出并处理高信号项。每周 <span class="impact-gold">14+ 小时</span> 回收。</div>
+        </div>
+        <div class="impact-card">
+          <div class="impact-label">// Deal Flow 变化</div>
+          <div class="impact-content">之前：每月仅通过直接介绍审核 4-6 个 deal。之后：每月 <span class="impact-green">40+ 家公司</span> 浮现，且 <span class="impact-highlight">thesis 匹配已完成</span>。Kevin 只与已通过第一筛选的公司互动。</div>
+        </div>
+        <div class="impact-card">
+          <div class="impact-label">// ThesisDebater 效应</div>
+          <div class="impact-content">Q1 时 ThesisDebater 指出 Kevin 看好的一个 fintech 存在关键人依赖风险，他当时在自我合理化。他放弃了。60 天后该公司遭遇监管问题。 <span class="impact-gold">一次规避 = 网络成本的 10 倍。</span></div>
+        </div>
+        <div class="impact-card">
+          <div class="impact-label">// 总月成本</div>
+          <div class="impact-content">在 OpenClaw 上运行全部 4 个 Agent 每月约 <span class="impact-highlight">$12</span> LLM token 成本。初级研究员每月 <span class="impact-gold">$6,000–8,000</span>。Agent 7×24 工作，永不休假。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CONFIG -->
+<section class="config-section">
+  <div class="container">
+    <div class="s-label">配置指南</div>
+    <h2>OpenClaw <span class="hl">配置</span><br />参考</h2>
+    <p class="s-desc">Kevin 投资者 Agent 网络的核心配置。根据你的 thesis 和自选股调整。</p>
+
+    <div class="config-grid">
+      <div class="cfg-block">
+        <div class="cfg-bar">
+          <div class="cfg-d" style="background:#ff5f56"></div>
+          <div class="cfg-d" style="background:#ffbd2e"></div>
+          <div class="cfg-d" style="background:#27c93f"></div>
+          <span class="cfg-fn">agents/market-scout.json</span>
+        </div>
+        <div class="cfg-code">
+<pre>{
+  <span class="ck">"id"</span>: <span class="cs">"market-scout"</span>,
+  <span class="ck">"schedule"</span>: <span class="cs">"0 6 * * 1-5"</span>,
+  <span class="cc">// 工作日 6am</span>
+  <span class="ck">"watchlist"</span>: [
+    <span class="cs">"NVDA"</span>, <span class="cs">"TSLA"</span>, <span class="cs">"AAPL"</span>
+    <span class="cc">// 添加你的自选股</span>
+  ],
+  <span class="ck">"sources"</span>: [
+    <span class="cs">"sec_edgar"</span>,
+    <span class="cs">"reuters"</span>,
+    <span class="cs">"bloomberg"</span>,
+    <span class="cs">"twitter_finance"</span>
+  ],
+  <span class="ck">"filters"</span>: {
+    <span class="ck">"min_relevance"</span>: <span class="cv">0.7</span>,
+    <span class="ck">"insider_trades"</span>: <span class="cv">true</span>,
+    <span class="ck">"analyst_changes"</span>: <span class="cv">true</span>
+  },
+  <span class="ck">"output"</span>: <span class="cs">"email + telegram"</span>
+}</pre>
+        </div>
+      </div>
+
+      <div class="cfg-block">
+        <div class="cfg-bar">
+          <div class="cfg-d" style="background:#ff5f56"></div>
+          <div class="cfg-d" style="background:#ffbd2e"></div>
+          <div class="cfg-d" style="background:#27c93f"></div>
+          <span class="cfg-fn">DealScout — Thesis 配置</span>
+        </div>
+        <div class="cfg-code">
+<pre><span class="cc"># DealScout 投资 Thesis 配置</span>
+
+<span class="cn">THESIS_SECTORS:</span>
+  - <span class="cs">AI 基础设施</span>
+  - <span class="cs">开发者工具</span>
+  - <span class="cs">气候科技硬件</span>
+
+<span class="cn">STAGE_FILTER:</span>
+  - <span class="cs">pre-seed</span>
+  - <span class="cs">seed</span>
+  - <span class="cs">series-a</span>
+
+<span class="cn">TRACTION_THRESHOLD:</span>
+  <span class="ck">arr_min</span>: <span class="cv">500000</span>  <span class="cc"># $50万 ARR 最低</span>
+  <span class="ck">growth_rate_min</span>: <span class="cv">100</span>  <span class="cc"># 100% 同比</span>
+
+<span class="cn">SOURCES:</span>
+  - <span class="cs">ycombinator.com</span>
+  - <span class="cs">angellist.com</span>
+  - <span class="cs">producthunt.com</span>
+  - <span class="cs">github trending</span>
+
+<span class="cn">SCORE_WEIGHTS:</span>
+  <span class="ck">traction</span>: <span class="cv">0.35</span>
+  <span class="ck">market_size</span>: <span class="cv">0.30</span>
+  <span class="ck">team_signal</span>: <span class="cv">0.20</span>
+  <span class="ck">thesis_fit</span>: <span class="cv">0.15</span></pre>
+        </div>
+      </div>
+
+      <div class="cfg-block">
+        <div class="cfg-bar">
+          <div class="cfg-d" style="background:#ff5f56"></div>
+          <div class="cfg-d" style="background:#ffbd2e"></div>
+          <div class="cfg-d" style="background:#27c93f"></div>
+          <span class="cfg-fn">ThesisDebater — 系统提示词</span>
+        </div>
+        <div class="cfg-code">
+<pre><span class="cc"># ThesisDebater 指令
+
+你是严谨、持怀疑态度的投资分析
+师。当收到投资 thesis 时，你的任务是
+挑战它，而非验证。
+
+</span><span class="cn">始终产出：</span>
+<span class="cv">1. Top 3 bear case 论点</span>
+<span class="cv">   （具体，非泛泛）
+
+</span><span class="cv">2. 2-3 可比失败案例
+   与相似 thesis/市场</span>
+<span class="cv">3. 投资者可能自我合理化的
+   关键假设</span>
+<span class="cv">4. 向创始人提问的问题</span>
+<span class="cv">5. Kill 条件——什么会让你
+   立即退出？</span>
+
+<span class="cr">不要：验证或鼓励。
+你的工作是找缺陷。</span>
+
+<span class="cc">语气：直接、分析、怀疑。
+不要软化语言。</span></pre>
+        </div>
+      </div>
+
+      <div class="cfg-block">
+        <div class="cfg-bar">
+          <div class="cfg-d" style="background:#ff5f56"></div>
+          <div class="cfg-d" style="background:#ffbd2e"></div>
+          <div class="cfg-d" style="background:#27c93f"></div>
+          <span class="cfg-fn">PortfolioPulse — 提醒规则</span>
+        </div>
+        <div class="cfg-code">
+<pre><span class="cc"># PortfolioPulse 提醒配置</span>
+
+<span class="cn">DRIFT_ALERTS:</span>
+  <span class="ck">sector_max</span>: <span class="cv">0.40</span>  <span class="cc"># 40% 上限</span>
+  <span class="ck">single_stock_max</span>: <span class="cv">0.12</span>
+  <span class="ck">check_frequency</span>: <span class="cs">"daily"</span>
+
+<span class="cn">PRICE_ALERTS:</span>
+  <span class="ck">premarket_move</span>: <span class="cv">0.05</span>  <span class="cc"># 5%+</span>
+  <span class="ck">intraday_move</span>: <span class="cv">0.08</span>  <span class="cc"># 8%+</span>
+  <span class="ck">channel</span>: <span class="cs">"telegram_instant"</span>
+
+<span class="cn">EARNINGS_WATCH:</span>
+  <span class="ck">advance_notice_days</span>: <span class="cv">3</span>
+  <span class="ck">include_iv_data</span>: <span class="cv">true</span>
+  <span class="ck">include_consensus</span>: <span class="cv">true</span>
+
+<span class="cn">REPORTING:</span>
+  <span class="ck">daily_summary</span>: <span class="cs">"8:00 AM"</span>
+  <span class="ck">weekly_report</span>: <span class="cs">"Sunday 7:00 AM"</span>
+  <span class="ck">format</span>: <span class="cs">"email + pdf"</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- RESULTS -->
+<section class="results-section">
+  <div class="container">
+    <div class="s-label">90 天后结果</div>
+    <h2>Kevin 的<span class="hl">数据</span></h2>
+    <p class="s-desc">运行完整投资者 Agent 网络三个月。变化如下。</p>
+
+    <div class="results-layout">
+      <div class="result-block b">
+        <div class="result-num b">20x</div>
+        <div class="result-desc">每日覆盖的市场信号更多——无需花更多时间</div>
+      </div>
+      <div class="result-block g">
+        <div class="result-num g">14h</div>
+        <div class="result-desc">每周从手动研究和新闻阅读中回收的小时数</div>
+      </div>
+      <div class="result-block y">
+        <div class="result-num y">$12</div>
+        <div class="result-desc">4 个 Agent 月成本——vs 人类分析师 $6K+</div>
+      </div>
+
+      <div class="results-quote">
+        <div class="rq-text">ThesisDebater Agent alone 的价值抵得上月成本的 100 倍。不是省时间——而是抓住我本会因错误理由做出的 deal。把严谨的怀疑者内置到流程里，让我成为了更好的投资者，而不只是更快的。</div>
+        <div class="rq-author">Kevin Luo</div>
+        <div class="rq-role">// 天使投资人 & 公募交易员 · $200万+ AUM</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-glow"></div>
+  <div class="cta-label">// 开始你的旅程</div>
+  <div class="cta-title">搭建你的<br /><span class="hl">情报引擎</span></div>
+  <p class="cta-desc">30 分钟内部署首个投资者 Agent。你的自选股、你的 thesis、你的标准。</p>
+  <div class="cta-btns">
+    <a href="https://openclaw.ai" class="btn-p">→ 从 openclaw 开始</a>
+    <a href="/zh/activities" class="btn-s">← 全部用户案例</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <a href="/zh" class="ft-logo">AI <span>IN ACTION</span></a>
+  <div style="display:flex;gap:24px;">
+    <a href="/zh/privacy">隐私</a>
+    <a href="/zh/terms">条款</a>
+    <a href="https://github.com/AIInactionTop">github</a>
+  </div>
+  <span style="color:var(--text-dim);font-size:11px;font-family:'JetBrains Mono',monospace;">© 2026 AI In Action</span>
+</footer>
+
+</body>
+</html>
