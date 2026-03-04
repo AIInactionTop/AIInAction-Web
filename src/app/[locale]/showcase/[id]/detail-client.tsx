@@ -235,22 +235,16 @@ export function ShowcaseDetailClient({
       )}
 
       <div className="mt-8 flex gap-3">
-        <a
-          href={project.githubUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Button variant="outline" className="gap-2">
-            <Github className="h-4 w-4" />
-            {t("source")}
-          </Button>
-        </a>
+        {project.githubUrl && (
+          <a href={project.githubUrl} target="_blank" rel="noopener noreferrer">
+            <Button variant="outline" className="gap-2">
+              <Github className="h-4 w-4" />
+              {t("source")}
+            </Button>
+          </a>
+        )}
         {project.demoUrl && (
-          <a
-            href={project.demoUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href={project.demoUrl} target="_blank" rel="noopener noreferrer">
             <Button variant="outline" className="gap-2">
               <ExternalLink className="h-4 w-4" />
               {t("demo")}
