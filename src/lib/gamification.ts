@@ -113,10 +113,25 @@ export async function getUserStats(
     };
   }
 
+  // Check if streak has expired (last activity was more than 1 day ago)
+  let currentStreak = stats.currentStreak;
+  if (stats.lastActiveDate) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const lastActive = new Date(stats.lastActiveDate);
+    lastActive.setHours(0, 0, 0, 0);
+    const diffDays = Math.floor(
+      (today.getTime() - lastActive.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    if (diffDays > 1) {
+      currentStreak = 0;
+    }
+  }
+
   return {
     xp: stats.xp,
     level: stats.level,
-    currentStreak: stats.currentStreak,
+    currentStreak,
     longestStreak: stats.longestStreak,
     lastActiveDate: stats.lastActiveDate,
     levelInfo: getLevelFromXP(stats.xp),

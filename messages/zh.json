@@ -27,7 +27,8 @@
     "activities": "活动",
     "paths": "学习路径",
     "showcase": "展示",
-    "leaderboard": "排行榜"
+    "leaderboard": "排行榜",
+    "aiStudio": "AI 工作室"
   },
   "home": {
     "badge": "AI 实践平台",
@@ -458,5 +459,29 @@
     "ai-data": { "title": "AI 数据分析", "description": "从 CSV 分析器到完整分析平台，构建智能数据工具。掌握 AI 驱动的可视化、预测建模、自然语言查询和实时分析。" },
     "ai-audio": { "title": "AI 音频与语音", "description": "从文字转语音朗读器到音乐制作套件，创建 AI 音频应用。掌握语音识别、语音合成、音频处理和实时翻译。" },
     "ai-coding": { "title": "AI 辅助编程", "description": "从代码解释器到结对编程 IDE，构建 AI 开发者工具。掌握代码生成、自动审查、智能调试和 AI 驱动的开发工作流。" }
+  },
+  "aiStudio": {
+    "title": "AI 工作室",
+    "subtitle": "描述你的学习目标，AI 将为你创建个性化的学习路径",
+    "inputPlaceholder": "例如：我想学习如何用 LangChain 构建 AI Agent...",
+    "send": "发送",
+    "generating": "生成中...",
+    "outlineTitle": "学习路径大纲",
+    "noOutline": "开始对话以生成你的学习路径",
+    "challenges": "挑战",
+    "generateDetails": "生成详情",
+    "generatingDetails": "正在生成挑战详情...",
+    "saveDraft": "保存草稿",
+    "publish": "发布",
+    "editTitle": "编辑标题",
+    "editDescription": "编辑描述",
+    "knowledge": "知识内容",
+    "resources": "资源",
+    "objectives": "目标",
+    "hints": "提示",
+    "step": "步骤",
+    "confirmOutline": "大纲看起来不错，请为所有挑战生成详细内容。",
+    "saved": "学习路径保存成功！",
+    "published": "学习路径发布成功！"
   }
 }

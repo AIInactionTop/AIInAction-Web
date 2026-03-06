@@ -3,6 +3,8 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { awardXP, updateStreak } from "@/lib/gamification";
+import { checkAndAwardAchievements } from "@/lib/achievements";
 
 export async function createComment(challengeId: string, content: string) {
   const session = await auth();
@@ -17,6 +19,11 @@ export async function createComment(challengeId: string, content: string) {
       challengeId,
     },
   });
+
+  // Award XP for commenting
+  await updateStreak(session.user.id);
+  await awardXP(session.user.id, 5);
+  await checkAndAwardAchievements(session.user.id, "comment_create");
 
   const challenge = await prisma.challenge.findUnique({
     where: { id: challengeId },

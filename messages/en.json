@@ -27,7 +27,8 @@
     "activities": "Activities",
     "paths": "Learning Paths",
     "showcase": "Showcase",
-    "leaderboard": "Leaderboard"
+    "leaderboard": "Leaderboard",
+    "aiStudio": "AI Studio"
   },
   "home": {
     "badge": "AI Practice Platform",
@@ -458,5 +459,29 @@
     "ai-data": { "title": "AI Data Analysis", "description": "Build intelligent data tools from CSV analyzers to full analytics platforms. Master AI-powered visualization, predictive modeling, NL querying, and real-time analytics." },
     "ai-audio": { "title": "AI Audio & Speech", "description": "Create AI audio applications from text-to-speech readers to music production suites. Master speech recognition, voice synthesis, audio processing, and real-time translation." },
     "ai-coding": { "title": "AI-Assisted Coding", "description": "Build AI developer tools from code explainers to pair-programming IDEs. Master code generation, automated review, intelligent debugging, and AI-powered development workflows." }
+  },
+  "aiStudio": {
+    "title": "AI Studio",
+    "subtitle": "Describe your learning goal and AI will create a personalized learning path",
+    "inputPlaceholder": "e.g., I want to learn how to build AI agents with LangChain...",
+    "send": "Send",
+    "generating": "Generating...",
+    "outlineTitle": "Learning Path Outline",
+    "noOutline": "Start a conversation to generate your learning path",
+    "challenges": "Challenges",
+    "generateDetails": "Generate Details",
+    "generatingDetails": "Generating challenge details...",
+    "saveDraft": "Save Draft",
+    "publish": "Publish",
+    "editTitle": "Edit Title",
+    "editDescription": "Edit Description",
+    "knowledge": "Knowledge",
+    "resources": "Resources",
+    "objectives": "Objectives",
+    "hints": "Hints",
+    "step": "Step",
+    "confirmOutline": "The outline looks good, please generate the details for all challenges.",
+    "saved": "Learning path saved successfully!",
+    "published": "Learning path published successfully!"
   }
 }

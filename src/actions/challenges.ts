@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { awardXP } from "@/lib/gamification";
+import { awardXP, updateStreak } from "@/lib/gamification";
 import { checkAndAwardAchievements } from "@/lib/achievements";
 import { translateChallenge, type ChallengeContent } from "@/lib/ai";
 
@@ -104,6 +104,7 @@ export async function createChallenge(formData: FormData) {
   }
 
   // Award XP for publishing a community challenge
+  await updateStreak(session.user.id);
   await awardXP(session.user.id, 20);
   await checkAndAwardAchievements(session.user.id, "challenge_publish");
 
@@ -241,6 +242,15 @@ export async function forkChallenge(originalSlug: string) {
         hints: t.hints,
       },
     });
+  }
+
+  // Award XP for forking a challenge
+  await updateStreak(session.user.id);
+  await awardXP(session.user.id, 10);
+
+  // Check fork-related achievements for original author
+  if (original.authorId) {
+    await checkAndAwardAchievements(original.authorId, "fork_received");
   }
 
   revalidatePath("/challenges");

@@ -5,7 +5,9 @@ export type AchievementTrigger =
   | "challenge_complete"
   | "challenge_publish"
   | "like_received"
-  | "fork_received";
+  | "fork_received"
+  | "project_share"
+  | "comment_create";
 
 export type AchievementDefinition = {
   slug: string;
@@ -133,6 +135,40 @@ export const ACHIEVEMENT_DEFINITIONS: AchievementDefinition[] = [
     xpReward: 50,
     rarity: "RARE",
   },
+  // Showcase achievements
+  {
+    slug: "showcase-star",
+    name: "展示之星",
+    description: "分享第 1 个项目到展示区",
+    icon: "🌟",
+    xpReward: 15,
+    rarity: "COMMON",
+  },
+  {
+    slug: "showcase-veteran",
+    name: "展示达人",
+    description: "分享 5 个项目到展示区",
+    icon: "💎",
+    xpReward: 50,
+    rarity: "RARE",
+  },
+  // Comment achievements
+  {
+    slug: "first-comment",
+    name: "畅所欲言",
+    description: "发表第 1 条评论",
+    icon: "💬",
+    xpReward: 5,
+    rarity: "COMMON",
+  },
+  {
+    slug: "commentator",
+    name: "评论达人",
+    description: "发表 20 条评论",
+    icon: "🗣️",
+    xpReward: 30,
+    rarity: "RARE",
+  },
   // Path achievements
   {
     slug: "path-pioneer",
@@ -231,6 +267,10 @@ function getChecksForTrigger(trigger: AchievementTrigger): AchievementCheck[] {
       return [popularCheck];
     case "fork_received":
       return [influencerCheck];
+    case "project_share":
+      return [showcaseStarCheck, showcaseVeteranCheck];
+    case "comment_create":
+      return [firstCommentCheck, commentatorCheck];
   }
 }
 
@@ -440,5 +480,39 @@ const influencerCheck: AchievementCheck = {
       where: { forkedFrom: { authorId: userId } },
     });
     return totalForks >= 5;
+  },
+};
+
+// --- Showcase checks ---
+const showcaseStarCheck: AchievementCheck = {
+  slug: "showcase-star",
+  condition: async (userId) => {
+    const count = await prisma.sharedProject.count({ where: { userId } });
+    return count >= 1;
+  },
+};
+
+const showcaseVeteranCheck: AchievementCheck = {
+  slug: "showcase-veteran",
+  condition: async (userId) => {
+    const count = await prisma.sharedProject.count({ where: { userId } });
+    return count >= 5;
+  },
+};
+
+// --- Comment checks ---
+const firstCommentCheck: AchievementCheck = {
+  slug: "first-comment",
+  condition: async (userId) => {
+    const count = await prisma.challengeComment.count({ where: { userId } });
+    return count >= 1;
+  },
+};
+
+const commentatorCheck: AchievementCheck = {
+  slug: "commentator",
+  condition: async (userId) => {
+    const count = await prisma.challengeComment.count({ where: { userId } });
+    return count >= 20;
   },
 };

@@ -61,6 +61,7 @@ model User {
   achievements       UserAchievement[]
   apiKeys            ApiKey[]
   projectLikes       SharedProjectLike[]
+  learningPaths      LearningPath[]
 
   @@map("users")
 }
@@ -117,6 +118,10 @@ model LearningPath {
   order       Int         @default(0)
   challenges  Challenge[]
   createdAt   DateTime    @default(now()) @map("created_at")
+  authorId    String?     @map("author_id")
+  author      User?       @relation(fields: [authorId], references: [id])
+  isOfficial  Boolean     @default(false) @map("is_official")
+  isPublished Boolean     @default(false) @map("is_published")
 
   @@map("learning_paths")
 }
@@ -131,6 +136,8 @@ model Challenge {
   hints         String[]
   resources     String[]
   estimatedTime String?    @map("estimated_time")
+  knowledgeContent String?  @db.Text @map("knowledge_content")
+  isDraft          Boolean  @default(false) @map("is_draft")
   order         Int        @default(0)
 
   isOfficial    Boolean    @default(false) @map("is_official")
@@ -169,6 +176,7 @@ model ChallengeTranslation {
   description String    @db.Text
   objectives  String[]
   hints       String[]
+  knowledgeContent String?  @db.Text @map("knowledge_content")
   challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
 
   @@unique([challengeId, locale])

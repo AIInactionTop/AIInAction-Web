@@ -3,6 +3,8 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { awardXP, updateStreak } from "@/lib/gamification";
+import { checkAndAwardAchievements } from "@/lib/achievements";
 
 export async function createProject(formData: FormData) {
   const session = await auth();
@@ -47,6 +49,11 @@ export async function createProject(formData: FormData) {
       ...(challengeId ? { challengeId } : {}),
     },
   });
+
+  // Award XP for sharing a project
+  await updateStreak(session.user.id);
+  await awardXP(session.user.id, 15);
+  await checkAndAwardAchievements(session.user.id, "project_share");
 
   revalidatePath("/showcase");
   if (challengeSlug) {
