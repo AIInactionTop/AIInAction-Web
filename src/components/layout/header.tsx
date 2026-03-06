@@ -34,6 +34,7 @@ export function Header() {
     { href: "/paths" as const, label: t("paths") },
     { href: "/showcase" as const, label: t("showcase") },
     { href: "/leaderboard" as const, label: t("leaderboard") },
+    { href: "/ai-studio" as const, label: t("aiStudio") },
   ];
 
   return (

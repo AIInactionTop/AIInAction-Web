@@ -322,6 +322,22 @@
     "path-master": {
       "name": "全路径大师",
       "description": "完成所有学习路径"
+    },
+    "showcase-star": {
+      "name": "展示之星",
+      "description": "分享第 1 个项目到展示区"
+    },
+    "showcase-veteran": {
+      "name": "展示达人",
+      "description": "分享 5 个项目到展示区"
+    },
+    "first-comment": {
+      "name": "畅所欲言",
+      "description": "发表第 1 条评论"
+    },
+    "commentator": {
+      "name": "评论达人",
+      "description": "发表 20 条评论"
     }
   },
   "levels": {

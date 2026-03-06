@@ -322,6 +322,22 @@
     "path-master": {
       "name": "Path Master",
       "description": "Complete all learning paths"
+    },
+    "showcase-star": {
+      "name": "Showcase Star",
+      "description": "Share your first project to the showcase"
+    },
+    "showcase-veteran": {
+      "name": "Showcase Veteran",
+      "description": "Share 5 projects to the showcase"
+    },
+    "first-comment": {
+      "name": "Speak Up",
+      "description": "Post your first comment"
+    },
+    "commentator": {
+      "name": "Commentator",
+      "description": "Post 20 comments"
     }
   },
   "levels": {
