@@ -6,7 +6,12 @@ import {
   challenges,
   officialCategories,
 } from "../src/data/challenges";
+import {
+  defaultAiModelPricing,
+  defaultCreditProducts,
+} from "../src/data/billing";
 import { ACHIEVEMENT_DEFINITIONS } from "../src/lib/achievements";
+import { creditsToMicrocredits } from "../src/lib/billing/units";
 import { readFileSync } from "fs";
 import { join } from "path";
 
@@ -207,6 +212,92 @@ async function main() {
     });
   }
   console.log(`  Seeded ${ACHIEVEMENT_DEFINITIONS.length} achievements.`);
+
+  // 5. Upsert default credit products
+  for (const product of defaultCreditProducts) {
+    await prisma.creditProduct.upsert({
+      where: { code: product.code },
+      update: {
+        name: product.name,
+        description: product.description,
+        type: product.type,
+        billingInterval: product.billingInterval,
+        currency: product.currency,
+        unitAmount: product.unitAmount,
+        creditsMicrocredits: creditsToMicrocredits(product.credits),
+        bonusMicrocredits: creditsToMicrocredits(product.bonusCredits),
+        active: true,
+        sortOrder: product.sortOrder,
+      },
+      create: {
+        code: product.code,
+        name: product.name,
+        description: product.description,
+        type: product.type,
+        billingInterval: product.billingInterval,
+        currency: product.currency,
+        unitAmount: product.unitAmount,
+        creditsMicrocredits: creditsToMicrocredits(product.credits),
+        bonusMicrocredits: creditsToMicrocredits(product.bonusCredits),
+        active: true,
+        sortOrder: product.sortOrder,
+      },
+    });
+  }
+  console.log(`  Seeded ${defaultCreditProducts.length} credit products.`);
+
+  // 6. Upsert default AI model pricing
+  for (const pricing of defaultAiModelPricing) {
+    await prisma.aiModelPricing.upsert({
+      where: {
+        provider_model: {
+          provider: pricing.provider,
+          model: pricing.model,
+        },
+      },
+      update: {
+        displayName: pricing.displayName,
+        active: true,
+        promptMicrocreditsPerMillion: creditsToMicrocredits(
+          pricing.promptCreditsPerMillion
+        ),
+        completionMicrocreditsPerMillion: creditsToMicrocredits(
+          pricing.completionCreditsPerMillion
+        ),
+        cacheWriteMicrocreditsPerMillion: creditsToMicrocredits(
+          pricing.cacheWriteCreditsPerMillion
+        ),
+        cacheReadMicrocreditsPerMillion: creditsToMicrocredits(
+          pricing.cacheReadCreditsPerMillion
+        ),
+        minimumChargeMicrocredits: creditsToMicrocredits(
+          pricing.minimumChargeCredits
+        ),
+      },
+      create: {
+        provider: pricing.provider,
+        model: pricing.model,
+        displayName: pricing.displayName,
+        active: true,
+        promptMicrocreditsPerMillion: creditsToMicrocredits(
+          pricing.promptCreditsPerMillion
+        ),
+        completionMicrocreditsPerMillion: creditsToMicrocredits(
+          pricing.completionCreditsPerMillion
+        ),
+        cacheWriteMicrocreditsPerMillion: creditsToMicrocredits(
+          pricing.cacheWriteCreditsPerMillion
+        ),
+        cacheReadMicrocreditsPerMillion: creditsToMicrocredits(
+          pricing.cacheReadCreditsPerMillion
+        ),
+        minimumChargeMicrocredits: creditsToMicrocredits(
+          pricing.minimumChargeCredits
+        ),
+      },
+    });
+  }
+  console.log(`  Seeded ${defaultAiModelPricing.length} AI pricing rules.`);
 
   console.log("Done.");
 }

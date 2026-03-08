@@ -1,9 +1,17 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResendClient() {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    throw new Error("Missing RESEND_API_KEY");
+  }
+
+  return new Resend(apiKey);
+}
 
 export async function sendWelcomeEmail(name: string, email: string) {
   const firstName = name?.split(" ")[0] || "there";
+  const resend = getResendClient();
 
   await resend.emails.send({
     from: "AI In Action <noreply@aiinaction.top>",

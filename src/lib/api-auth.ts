@@ -18,9 +18,14 @@ export type ApiUser = {
   image: string | null;
 };
 
-export async function authenticateApiKey(
+export type AuthenticatedApiKey = {
+  apiKeyId: string;
+  user: ApiUser;
+};
+
+export async function authenticateApiRequest(
   request: Request
-): Promise<ApiUser | null> {
+): Promise<AuthenticatedApiKey | null> {
   const authHeader = request.headers.get("authorization");
   if (!authHeader?.startsWith("Bearer ")) return null;
 
@@ -48,7 +53,17 @@ export async function authenticateApiKey(
     })
     .catch(() => {});
 
-  return apiKey.user;
+  return {
+    apiKeyId: apiKey.id,
+    user: apiKey.user,
+  };
+}
+
+export async function authenticateApiKey(
+  request: Request
+): Promise<ApiUser | null> {
+  const authenticated = await authenticateApiRequest(request);
+  return authenticated?.user ?? null;
 }
 
 export function jsonSuccess(data: unknown, status = 200) {
@@ -63,9 +78,26 @@ export function jsonError(code: string, message: string, status = 400) {
 }
 
 export async function requireAuth(request: Request) {
-  const user = await authenticateApiKey(request);
-  if (!user) {
+  const authenticated = await authenticateApiRequest(request);
+  if (!authenticated) {
     return { user: null, error: jsonError("UNAUTHORIZED", "Invalid or missing API key", 401) };
   }
-  return { user, error: null };
+  return { user: authenticated.user, error: null };
+}
+
+export async function requireApiKeySession(request: Request) {
+  const authenticated = await authenticateApiRequest(request);
+  if (!authenticated) {
+    return {
+      apiKeyId: null,
+      user: null,
+      error: jsonError("UNAUTHORIZED", "Invalid or missing API key", 401),
+    };
+  }
+
+  return {
+    apiKeyId: authenticated.apiKeyId,
+    user: authenticated.user,
+    error: null,
+  };
 }
