@@ -10,6 +10,7 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { routing } from "@/i18n/routing";
+import { Analytics } from "@vercel/analytics/next"
 
 const orbitron = Orbitron({
   variable: "--font-orbitron",
@@ -103,6 +104,7 @@ var _hmt = _hmt || [];
             </ThemeProvider>
           </SessionProvider>
         </NextIntlClientProvider>
+        <Analytics />
       </body>
     </html>
   );
