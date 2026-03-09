@@ -19,6 +19,8 @@ type Props = {
   locale: string;
 };
 
+const STORAGE_KEY_MESSAGES = "ai-studio-outline-messages";
+
 function getTextFromMessage(message: UIMessage): string {
   return message.parts
     .filter((p): p is { type: "text"; text: string } => p.type === "text")
@@ -54,6 +56,26 @@ function parseOutlineFromText(text: string): PathOutline | null {
   }
 }
 
+function parseChallengeDetailFromText(text: string) {
+  const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
+  if (!jsonMatch) return null;
+  try {
+    return JSON.parse(jsonMatch[1]);
+  } catch {
+    return null;
+  }
+}
+
+function loadMessages(): UIMessage[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY_MESSAGES);
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
+  }
+}
+
 function normalizeChatError(message: string) {
   try {
     const parsed = JSON.parse(message) as {
@@ -68,9 +90,12 @@ function normalizeChatError(message: string) {
 export function AIStudioClient({ categories, locale }: Props) {
   const { pathOutline, phase, setPathOutline, setPhase } = useAIStudioStore();
   const lastParsedRef = useRef<string>("");
+  const generatingChallengeRef = useRef<string | null>(null);
+  const isGeneratingAllRef = useRef(false);
+  const hasRestoredRef = useRef(false);
+  const [generatingChallengeId, setGeneratingChallengeId] = useState<string | null>(null);
   const [localErrorMessage, setLocalErrorMessage] = useState<string | null>(null);
   const { balance, refreshCredits } = useCredits();
-
   const availableCredits = balance?.balance.credits ?? null;
 
   const outlineChat = useChat({
@@ -83,19 +108,64 @@ export function AIStudioClient({ categories, locale }: Props) {
         setPathOutline(outline);
       }
     },
-    onError: (error) => {
-      setLocalErrorMessage(normalizeChatError(error.message));
-    },
+    onError: (error) => setLocalErrorMessage(normalizeChatError(error.message)),
   });
+
+  const triggerDetailGeneration = useCallback((challenge: OutlineChallenge) => {
+    generatingChallengeRef.current = challenge.id;
+    setGeneratingChallengeId(challenge.id);
+
+    const { pathOutline: currentOutline } = useAIStudioStore.getState();
+    const context = currentOutline
+      ? `Learning Path: "${currentOutline.title}"\nChallenge to expand: "${challenge.title}" - ${challenge.summary}\nDifficulty: ${challenge.difficulty}\n\nPlease generate the full challenge details.`
+      : "";
+
+    detailChat.setMessages([]);
+    setTimeout(() => {
+      detailChat.sendMessage({ text: context });
+    }, 0);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const detailChat = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat/generate-challenge" }),
-    onFinish: () => {
+    onFinish: ({ message }) => {
       void refreshCredits();
+      const text = getTextFromMessage(message);
+      const detail = parseChallengeDetailFromText(text);
+      const challengeId = generatingChallengeRef.current;
+
+      if (detail && challengeId) {
+        useAIStudioStore.getState().updateChallenge(challengeId, {
+          description: detail.description,
+          knowledgeContent: detail.knowledgeContent,
+          objectives: detail.objectives,
+          hints: detail.hints,
+          resources: detail.resources,
+          tags: detail.tags,
+          estimatedTime: detail.estimatedTime,
+          difficulty: detail.difficulty,
+          isDetailGenerated: true,
+        });
+      }
+
+      generatingChallengeRef.current = null;
+      setGeneratingChallengeId(null);
+
+      // Auto-progress if generating all details
+      if (isGeneratingAllRef.current) {
+        const state = useAIStudioStore.getState();
+        if (!state.pathOutline) return;
+        const ungenerated = state.pathOutline.challenges.filter((c) => !c.isDetailGenerated);
+        if (ungenerated.length > 0) {
+          setTimeout(() => triggerDetailGeneration(ungenerated[0]), 500);
+        } else {
+          state.setPhase("done");
+          isGeneratingAllRef.current = false;
+        }
+      }
     },
-    onError: (error) => {
-      setLocalErrorMessage(normalizeChatError(error.message));
-    },
+    onError: (error) => setLocalErrorMessage(normalizeChatError(error.message)),
   });
 
   const chatErrorMessage = normalizeChatError(
@@ -103,6 +173,24 @@ export function AIStudioClient({ categories, locale }: Props) {
   );
   const errorMessage = localErrorMessage || (chatErrorMessage || null);
 
+  useEffect(() => {
+    if (hasRestoredRef.current) return;
+    hasRestoredRef.current = true;
+    const saved = loadMessages();
+    if (saved.length > 0) {
+      outlineChat.setMessages(saved);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Save outline messages to localStorage
+  useEffect(() => {
+    if (outlineChat.messages.length > 0) {
+      localStorage.setItem(STORAGE_KEY_MESSAGES, JSON.stringify(outlineChat.messages));
+    }
+  }, [outlineChat.messages]);
+
+  // Parse outline from streaming response
   useEffect(() => {
     const lastAssistant = outlineChat.messages
       .filter((m) => m.role === "assistant")
@@ -120,6 +208,7 @@ export function AIStudioClient({ categories, locale }: Props) {
   }, [outlineChat.messages, setPathOutline]);
 
   const isOutlineLoading = outlineChat.status === "submitted" || outlineChat.status === "streaming";
+  const isDetailLoading = detailChat.status === "submitted" || detailChat.status === "streaming";
 
   const handleSendMessage = useCallback(
     (content: string) => {
@@ -145,13 +234,40 @@ export function AIStudioClient({ categories, locale }: Props) {
       }
 
       setLocalErrorMessage(null);
-      const context = pathOutline
-        ? `Learning Path: "${pathOutline.title}"\nChallenge to expand: "${challenge.title}" - ${challenge.summary}\nDifficulty: ${challenge.difficulty}\n\nPlease generate the full challenge details.`
-        : "";
-      detailChat.sendMessage({ text: context });
+      isGeneratingAllRef.current = false;
+      triggerDetailGeneration(challenge);
     },
-    [balance, pathOutline, detailChat]
+    [balance, triggerDetailGeneration]
   );
+
+  const handleGenerateAll = useCallback(() => {
+    if (!pathOutline) return;
+
+    if (balance && Number(balance.balance.credits) <= 0) {
+      setLocalErrorMessage("You do not have enough credits to generate challenge details.");
+      return;
+    }
+
+    setLocalErrorMessage(null);
+    setPhase("generating-details");
+    isGeneratingAllRef.current = true;
+    const ungenerated = pathOutline.challenges.filter((c) => !c.isDetailGenerated);
+    if (ungenerated.length > 0) {
+      triggerDetailGeneration(ungenerated[0]);
+    }
+  }, [balance, pathOutline, setPhase, triggerDetailGeneration]);
+
+  const handleNewSession = useCallback(() => {
+    useAIStudioStore.getState().reset();
+    outlineChat.setMessages([]);
+    detailChat.setMessages([]);
+    lastParsedRef.current = "";
+    generatingChallengeRef.current = null;
+    isGeneratingAllRef.current = false;
+    setGeneratingChallengeId(null);
+    setLocalErrorMessage(null);
+    localStorage.removeItem(STORAGE_KEY_MESSAGES);
+  }, [outlineChat, detailChat]);
 
   return (
     <div className="mx-auto flex h-[calc(100vh-4rem)] max-w-7xl">
@@ -162,14 +278,18 @@ export function AIStudioClient({ categories, locale }: Props) {
           errorMessage={errorMessage}
           balanceLabel={availableCredits ? `${availableCredits} credits` : null}
           onSend={handleSendMessage}
+          onNewSession={handleNewSession}
+          hasSession={outlineChat.messages.length > 0 || !!pathOutline}
         />
       </div>
       <div className="flex w-[60%] flex-col overflow-y-auto">
         <PreviewPanel
           categories={categories}
           locale={locale}
-          detailChat={detailChat}
+          isDetailLoading={isDetailLoading}
+          generatingChallengeId={generatingChallengeId}
           onGenerateDetails={handleGenerateDetails}
+          onGenerateAll={handleGenerateAll}
         />
       </div>
     </div>

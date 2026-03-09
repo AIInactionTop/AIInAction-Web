@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "@/i18n/navigation";
-import { Send, Bot, User, Loader2 } from "lucide-react";
+import { Send, Bot, User, Loader2, RotateCcw } from "lucide-react";
 import type { UIMessage } from "ai";
 import ReactMarkdown from "react-markdown";
 
@@ -15,6 +15,8 @@ type Props = {
   errorMessage?: string | null;
   balanceLabel?: string | null;
   onSend: (content: string) => void;
+  onNewSession: () => void;
+  hasSession: boolean;
 };
 
 function getTextFromMessage(message: UIMessage): string {
@@ -24,12 +26,18 @@ function getTextFromMessage(message: UIMessage): string {
     .join("");
 }
 
+function stripJsonBlocks(text: string) {
+  return text.replace(/```json\s*[\s\S]*?\s*```/g, "").trim();
+}
+
 export function ChatPanel({
   messages,
   isLoading,
   errorMessage,
   balanceLabel,
   onSend,
+  onNewSession,
+  hasSession,
 }: Props) {
   const t = useTranslations("aiStudio");
   const [input, setInput] = useState("");
@@ -50,14 +58,27 @@ export function ChatPanel({
 
   return (
     <div className="flex h-full flex-col">
-      <div className="border-b border-border p-4">
-        <h2 className="text-lg font-semibold">{t("title")}</h2>
-        <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
-        {balanceLabel ? (
-          <p className="mt-2 text-xs text-muted-foreground">
-            Available balance: <span className="font-medium text-foreground">{balanceLabel}</span>
-          </p>
-        ) : null}
+      <div className="flex items-center justify-between border-b border-border p-4">
+        <div>
+          <h2 className="text-lg font-semibold">{t("title")}</h2>
+          <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
+          {balanceLabel ? (
+            <p className="mt-2 text-xs text-muted-foreground">
+              Available balance:{" "}
+              <span className="font-medium text-foreground">{balanceLabel}</span>
+            </p>
+          ) : null}
+        </div>
+        {hasSession && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onNewSession}
+            title={t("newSession")}
+          >
+            <RotateCcw className="h-4 w-4" />
+          </Button>
+        )}
       </div>
 
       {errorMessage ? (
@@ -72,20 +93,26 @@ export function ChatPanel({
       ) : null}
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message) => (
-          <div key={message.id} className="flex gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted">
-              {message.role === "assistant" ? (
-                <Bot className="h-4 w-4" />
-              ) : (
-                <User className="h-4 w-4" />
-              )}
+        {messages.map((message) => {
+          const rawText = getTextFromMessage(message);
+          const displayText = message.role === "assistant" ? stripJsonBlocks(rawText) : rawText;
+          if (!displayText) return null;
+
+          return (
+            <div key={message.id} className="flex gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted">
+                {message.role === "assistant" ? (
+                  <Bot className="h-4 w-4" />
+                ) : (
+                  <User className="h-4 w-4" />
+                )}
+              </div>
+              <div className="prose prose-sm dark:prose-invert max-w-none flex-1 overflow-hidden">
+                <ReactMarkdown>{displayText}</ReactMarkdown>
+              </div>
             </div>
-            <div className="prose prose-sm dark:prose-invert max-w-none flex-1 overflow-hidden">
-              <ReactMarkdown>{getTextFromMessage(message)}</ReactMarkdown>
-            </div>
-          </div>
-        ))}
+          );
+        })}
         {isLoading && messages.at(-1)?.role !== "assistant" && (
           <div className="flex gap-3">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted">

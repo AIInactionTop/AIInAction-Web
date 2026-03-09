@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,8 +9,6 @@ import { BookOpen, ChevronDown, ChevronRight, Loader2, Save, Globe, Sparkles } f
 import { useAIStudioStore, type OutlineChallenge } from "@/stores/ai-studio-store";
 import { saveAILearningPath } from "@/actions/ai-studio";
 import { ChallengeEditor } from "./challenge-editor";
-import type { useChat } from "@ai-sdk/react";
-import type { UIMessage } from "ai";
 
 type Category = {
   id: string;
@@ -21,55 +19,17 @@ type Category = {
 type Props = {
   categories: Category[];
   locale: string;
-  detailChat: ReturnType<typeof useChat>;
+  isDetailLoading: boolean;
+  generatingChallengeId: string | null;
   onGenerateDetails: (challenge: OutlineChallenge) => void;
+  onGenerateAll: () => void;
 };
 
-function getTextFromMessage(message: UIMessage): string {
-  return message.parts
-    .filter((p): p is { type: "text"; text: string } => p.type === "text")
-    .map((p) => p.text)
-    .join("");
-}
-
-function parseChallengeDetailFromText(text: string) {
-  const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
-  if (!jsonMatch) return null;
-  try {
-    return JSON.parse(jsonMatch[1]);
-  } catch {
-    return null;
-  }
-}
-
-export function PreviewPanel({ categories, locale, detailChat, onGenerateDetails }: Props) {
+export function PreviewPanel({ categories, locale, isDetailLoading, generatingChallengeId, onGenerateDetails, onGenerateAll }: Props) {
   const t = useTranslations("aiStudio");
-  const { pathOutline, phase, updatePathField, updateChallenge, setPhase } = useAIStudioStore();
+  const { pathOutline, phase, updatePathField, updateChallenge } = useAIStudioStore();
   const [expandedChallenges, setExpandedChallenges] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
-  const generatingChallengeRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    const lastAssistant = detailChat.messages
-      .filter((m) => m.role === "assistant")
-      .at(-1);
-    if (!lastAssistant || !generatingChallengeRef.current) return;
-
-    const detail = parseChallengeDetailFromText(getTextFromMessage(lastAssistant));
-    if (detail) {
-      updateChallenge(generatingChallengeRef.current, {
-        description: detail.description,
-        knowledgeContent: detail.knowledgeContent,
-        objectives: detail.objectives,
-        hints: detail.hints,
-        resources: detail.resources,
-        tags: detail.tags,
-        estimatedTime: detail.estimatedTime,
-        difficulty: detail.difficulty,
-        isDetailGenerated: true,
-      });
-    }
-  }, [detailChat.messages, updateChallenge]);
 
   const toggleExpand = (id: string) => {
     setExpandedChallenges((prev) => {
@@ -80,35 +40,10 @@ export function PreviewPanel({ categories, locale, detailChat, onGenerateDetails
     });
   };
 
-  const handleGenerateDetail = useCallback(
-    (challenge: OutlineChallenge) => {
-      generatingChallengeRef.current = challenge.id;
-      setExpandedChallenges((prev) => new Set(prev).add(challenge.id));
-      onGenerateDetails(challenge);
-    },
-    [onGenerateDetails]
-  );
-
-  const handleGenerateAll = useCallback(() => {
-    if (!pathOutline) return;
-    setPhase("generating-details");
-    const ungenerated = pathOutline.challenges.filter((c) => !c.isDetailGenerated);
-    if (ungenerated.length > 0) {
-      handleGenerateDetail(ungenerated[0]);
-    }
-  }, [pathOutline, setPhase, handleGenerateDetail]);
-
-  useEffect(() => {
-    if (phase !== "generating-details" || (detailChat.status === "submitted" || detailChat.status === "streaming") || !pathOutline) return;
-
-    const ungenerated = pathOutline.challenges.filter((c) => !c.isDetailGenerated);
-    if (ungenerated.length > 0) {
-      const timer = setTimeout(() => handleGenerateDetail(ungenerated[0]), 500);
-      return () => clearTimeout(timer);
-    } else {
-      setPhase("done");
-    }
-  }, [phase, detailChat.status, pathOutline, handleGenerateDetail, setPhase]);
+  const handleGenerateDetail = (challenge: OutlineChallenge) => {
+    setExpandedChallenges((prev) => new Set(prev).add(challenge.id));
+    onGenerateDetails(challenge);
+  };
 
   const handleSave = async (publish: boolean) => {
     if (!pathOutline) return;
@@ -221,24 +156,22 @@ export function PreviewPanel({ categories, locale, detailChat, onGenerateDetails
                 ) : (
                   <div className="space-y-2">
                     <p className="text-sm text-muted-foreground">{challenge.summary}</p>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleGenerateDetail(challenge)}
-                      disabled={(detailChat.status === "submitted" || detailChat.status === "streaming")}
-                    >
-                      {(detailChat.status === "submitted" || detailChat.status === "streaming") && generatingChallengeRef.current === challenge.id ? (
-                        <>
-                          <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                          {t("generatingDetails")}
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="mr-2 h-3 w-3" />
-                          {t("generateDetails")}
-                        </>
-                      )}
-                    </Button>
+                    {isDetailLoading && generatingChallengeId === challenge.id ? (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        {t("generatingDetails")}
+                      </div>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleGenerateDetail(challenge)}
+                        disabled={isDetailLoading}
+                      >
+                        <Sparkles className="mr-2 h-3 w-3" />
+                        {t("generateDetails")}
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>
@@ -249,10 +182,16 @@ export function PreviewPanel({ categories, locale, detailChat, onGenerateDetails
 
       <div className="border-t border-border p-4 flex gap-3">
         {phase === "outline-done" && (
-          <Button onClick={handleGenerateAll} className="flex-1">
+          <Button onClick={onGenerateAll} className="flex-1">
             <Sparkles className="mr-2 h-4 w-4" />
             {t("generateDetails")}
           </Button>
+        )}
+        {phase === "generating-details" && (
+          <div className="flex flex-1 items-center justify-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            {t("generatingDetails")}
+          </div>
         )}
         {(phase === "done" || pathOutline.challenges.some((c) => c.isDetailGenerated)) && (
           <>
