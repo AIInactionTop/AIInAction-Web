@@ -615,6 +615,31 @@ export async function listRecentLedgerEntries(userId: string, limit = 20) {
   }));
 }
 
+export async function listRecentAiUsageRecords(userId: string, limit = 20) {
+  const usageRecords = await prisma.aiUsageRecord.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+  });
+
+  return usageRecords.map((record) => ({
+    id: record.id,
+    externalId: record.externalId,
+    provider: record.provider,
+    model: record.model,
+    status: record.status,
+    inputTokens: record.inputTokens.toString(),
+    outputTokens: record.outputTokens.toString(),
+    cacheWriteTokens: record.cacheWriteTokens.toString(),
+    cacheReadTokens: record.cacheReadTokens.toString(),
+    totalTokens: record.totalTokens.toString(),
+    charged: serializeCredits(record.chargedMicrocredits),
+    pricingSnapshot: record.pricingSnapshot,
+    metadata: record.metadata,
+    createdAt: record.createdAt.toISOString(),
+  }));
+}
+
 export async function listCreditProducts(options?: {
   activeOnly?: boolean;
   type?: BillingProductType;
