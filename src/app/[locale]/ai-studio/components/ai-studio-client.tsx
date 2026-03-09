@@ -2,9 +2,9 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
-import { useCallback, useEffect, useRef } from "react";
-import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAIStudioStore, type OutlineChallenge, type PathOutline } from "@/stores/ai-studio-store";
+import { useCredits } from "@/components/billing/credits-provider";
 import { ChatPanel } from "./chat-panel";
 import { PreviewPanel } from "./preview-panel";
 
@@ -54,25 +54,54 @@ function parseOutlineFromText(text: string): PathOutline | null {
   }
 }
 
+function normalizeChatError(message: string) {
+  try {
+    const parsed = JSON.parse(message) as {
+      error?: { message?: string };
+    };
+    return parsed.error?.message || message;
+  } catch {
+    return message;
+  }
+}
+
 export function AIStudioClient({ categories, locale }: Props) {
-  const t = useTranslations("aiStudio");
   const { pathOutline, phase, setPathOutline, setPhase } = useAIStudioStore();
   const lastParsedRef = useRef<string>("");
+  const [localErrorMessage, setLocalErrorMessage] = useState<string | null>(null);
+  const { balance, refreshCredits } = useCredits();
+
+  const availableCredits = balance?.balance.credits ?? null;
 
   const outlineChat = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat/generate-outline" }),
     onFinish: ({ message }) => {
+      void refreshCredits();
       const text = getTextFromMessage(message);
       const outline = parseOutlineFromText(text);
       if (outline) {
         setPathOutline(outline);
       }
     },
+    onError: (error) => {
+      setLocalErrorMessage(normalizeChatError(error.message));
+    },
   });
 
   const detailChat = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat/generate-challenge" }),
+    onFinish: () => {
+      void refreshCredits();
+    },
+    onError: (error) => {
+      setLocalErrorMessage(normalizeChatError(error.message));
+    },
   });
+
+  const chatErrorMessage = normalizeChatError(
+    outlineChat.error?.message || detailChat.error?.message || ""
+  );
+  const errorMessage = localErrorMessage || (chatErrorMessage || null);
 
   useEffect(() => {
     const lastAssistant = outlineChat.messages
@@ -94,22 +123,34 @@ export function AIStudioClient({ categories, locale }: Props) {
 
   const handleSendMessage = useCallback(
     (content: string) => {
+      if (balance && Number(balance.balance.credits) <= 0) {
+        setLocalErrorMessage("You do not have enough credits to start a new AI request.");
+        return;
+      }
+
+      setLocalErrorMessage(null);
       if (phase === "idle" || phase === "outline-done" || phase === "outlining") {
         setPhase("outlining");
         outlineChat.sendMessage({ text: content });
       }
     },
-    [phase, setPhase, outlineChat]
+    [balance, phase, setPhase, outlineChat]
   );
 
   const handleGenerateDetails = useCallback(
     (challenge: OutlineChallenge) => {
+      if (balance && Number(balance.balance.credits) <= 0) {
+        setLocalErrorMessage("You do not have enough credits to generate challenge details.");
+        return;
+      }
+
+      setLocalErrorMessage(null);
       const context = pathOutline
         ? `Learning Path: "${pathOutline.title}"\nChallenge to expand: "${challenge.title}" - ${challenge.summary}\nDifficulty: ${challenge.difficulty}\n\nPlease generate the full challenge details.`
         : "";
       detailChat.sendMessage({ text: context });
     },
-    [pathOutline, detailChat]
+    [balance, pathOutline, detailChat]
   );
 
   return (
@@ -118,6 +159,8 @@ export function AIStudioClient({ categories, locale }: Props) {
         <ChatPanel
           messages={outlineChat.messages}
           isLoading={isOutlineLoading}
+          errorMessage={errorMessage}
+          balanceLabel={availableCredits ? `${availableCredits} credits` : null}
           onSend={handleSendMessage}
         />
       </div>

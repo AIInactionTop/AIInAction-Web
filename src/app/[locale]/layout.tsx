@@ -6,6 +6,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SessionProvider } from "@/components/session-provider";
+import { CreditsProvider } from "@/components/billing/credits-provider";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -93,15 +94,17 @@ var _hmt = _hmt || [];
       >
         <NextIntlClientProvider messages={messages}>
           <SessionProvider>
-            <ThemeProvider>
-              <TooltipProvider>
-                <div className="flex min-h-svh flex-col">
-                  <Header />
-                  <main className="flex-1">{children}</main>
-                  <Footer />
-                </div>
-              </TooltipProvider>
-            </ThemeProvider>
+            <CreditsProvider>
+              <ThemeProvider>
+                <TooltipProvider>
+                  <div className="flex min-h-svh flex-col">
+                    <Header />
+                    <main className="flex-1">{children}</main>
+                    <Footer />
+                  </div>
+                </TooltipProvider>
+              </ThemeProvider>
+            </CreditsProvider>
           </SessionProvider>
         </NextIntlClientProvider>
         <Analytics />

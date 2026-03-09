@@ -4,6 +4,7 @@ import { useRef, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Link } from "@/i18n/navigation";
 import { Send, Bot, User, Loader2 } from "lucide-react";
 import type { UIMessage } from "ai";
 import ReactMarkdown from "react-markdown";
@@ -11,6 +12,8 @@ import ReactMarkdown from "react-markdown";
 type Props = {
   messages: UIMessage[];
   isLoading: boolean;
+  errorMessage?: string | null;
+  balanceLabel?: string | null;
   onSend: (content: string) => void;
 };
 
@@ -21,7 +24,13 @@ function getTextFromMessage(message: UIMessage): string {
     .join("");
 }
 
-export function ChatPanel({ messages, isLoading, onSend }: Props) {
+export function ChatPanel({
+  messages,
+  isLoading,
+  errorMessage,
+  balanceLabel,
+  onSend,
+}: Props) {
   const t = useTranslations("aiStudio");
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -44,7 +53,23 @@ export function ChatPanel({ messages, isLoading, onSend }: Props) {
       <div className="border-b border-border p-4">
         <h2 className="text-lg font-semibold">{t("title")}</h2>
         <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
+        {balanceLabel ? (
+          <p className="mt-2 text-xs text-muted-foreground">
+            Available balance: <span className="font-medium text-foreground">{balanceLabel}</span>
+          </p>
+        ) : null}
       </div>
+
+      {errorMessage ? (
+        <div className="border-b border-border bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <span>{errorMessage}</span>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/credits">Get credits</Link>
+            </Button>
+          </div>
+        </div>
+      ) : null}
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message) => (

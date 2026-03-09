@@ -541,6 +541,26 @@ export async function getCreditBalanceSummary(userId: string) {
   return serializeBillingAccount(account);
 }
 
+export async function getCreditBalanceMicrocredits(userId: string) {
+  const account = await ensureBillingAccount(userId);
+  return account.balanceMicrocredits;
+}
+
+export async function requireCreditBalanceAtLeast(
+  userId: string,
+  amountMicrocredits: bigint
+) {
+  const account = await ensureBillingAccount(userId);
+
+  if (account.balanceMicrocredits < amountMicrocredits) {
+    throw new InsufficientCreditsError(
+      `Insufficient credits. Required ${microcreditsToCreditsString(amountMicrocredits)}, available ${microcreditsToCreditsString(account.balanceMicrocredits)}.`
+    );
+  }
+
+  return serializeBillingAccount(account);
+}
+
 export async function listRecentLedgerEntries(userId: string, limit = 20) {
   const entries = await prisma.creditLedgerEntry.findMany({
     where: { userId },
@@ -656,6 +676,42 @@ export async function listAiModelPricing(activeOnly = false) {
   });
 
   return pricing.map(serializeAiModelPricing);
+}
+
+export async function estimateAiUsageCharge(input: {
+  provider: string;
+  model: string;
+  usage: AiUsageInput;
+}) {
+  const pricing = await prisma.aiModelPricing.findFirst({
+    where: {
+      provider: input.provider,
+      model: input.model,
+      active: true,
+    },
+  });
+
+  if (!pricing) {
+    throw new MissingModelPricingError(
+      `No active pricing rule for ${input.provider}/${input.model}`
+    );
+  }
+
+  const normalizedUsage = normalizeUsage(input.usage);
+  const usageCost = calculateUsageCost(pricing, normalizedUsage);
+
+  return {
+    pricing: serializeAiModelPricing(pricing),
+    usage: {
+      inputTokens: normalizedUsage.inputTokens.toString(),
+      outputTokens: normalizedUsage.outputTokens.toString(),
+      cacheWriteTokens: normalizedUsage.cacheWriteTokens.toString(),
+      cacheReadTokens: normalizedUsage.cacheReadTokens.toString(),
+      totalTokens: normalizedUsage.totalTokens.toString(),
+    },
+    charge: serializeUsageCostBreakdown(usageCost),
+    totalMicrocredits: usageCost.totalMicrocredits,
+  };
 }
 
 export async function upsertAiModelPricing(input: UpsertAiModelPricingInput) {
