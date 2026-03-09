@@ -19,6 +19,7 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "pnpm tsx prisma/seed.ts",
+    "db:seed:pricing": "pnpm tsx prisma/seed-ai-model-pricing.ts",
     "db:studio": "prisma studio",
     "db:migrate-translations": "pnpm tsx scripts/migrate-translations.ts",
     "challenge:generate": "pnpm tsx scripts/generate-challenge.ts"

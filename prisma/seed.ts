@@ -1,4 +1,4 @@
-import "dotenv/config";
+import { config as loadEnv } from "dotenv";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import {
@@ -6,14 +6,15 @@ import {
   challenges,
   officialCategories,
 } from "../src/data/challenges";
-import {
-  defaultAiModelPricing,
-  defaultCreditProducts,
-} from "../src/data/billing";
+import { defaultCreditProducts } from "../src/data/billing";
 import { ACHIEVEMENT_DEFINITIONS } from "../src/lib/achievements";
 import { creditsToMicrocredits } from "../src/lib/billing/units";
 import { readFileSync } from "fs";
 import { join } from "path";
+import { seedAiModelPricing } from "./seed-ai-model-pricing";
+
+loadEnv({ path: ".env.local", quiet: true });
+loadEnv({ path: ".env", quiet: true });
 
 // Load Chinese content translations
 const zhContent = JSON.parse(
@@ -247,57 +248,8 @@ async function main() {
   console.log(`  Seeded ${defaultCreditProducts.length} credit products.`);
 
   // 6. Upsert default AI model pricing
-  for (const pricing of defaultAiModelPricing) {
-    await prisma.aiModelPricing.upsert({
-      where: {
-        provider_model: {
-          provider: pricing.provider,
-          model: pricing.model,
-        },
-      },
-      update: {
-        displayName: pricing.displayName,
-        active: true,
-        promptMicrocreditsPerMillion: creditsToMicrocredits(
-          pricing.promptCreditsPerMillion
-        ),
-        completionMicrocreditsPerMillion: creditsToMicrocredits(
-          pricing.completionCreditsPerMillion
-        ),
-        cacheWriteMicrocreditsPerMillion: creditsToMicrocredits(
-          pricing.cacheWriteCreditsPerMillion
-        ),
-        cacheReadMicrocreditsPerMillion: creditsToMicrocredits(
-          pricing.cacheReadCreditsPerMillion
-        ),
-        minimumChargeMicrocredits: creditsToMicrocredits(
-          pricing.minimumChargeCredits
-        ),
-      },
-      create: {
-        provider: pricing.provider,
-        model: pricing.model,
-        displayName: pricing.displayName,
-        active: true,
-        promptMicrocreditsPerMillion: creditsToMicrocredits(
-          pricing.promptCreditsPerMillion
-        ),
-        completionMicrocreditsPerMillion: creditsToMicrocredits(
-          pricing.completionCreditsPerMillion
-        ),
-        cacheWriteMicrocreditsPerMillion: creditsToMicrocredits(
-          pricing.cacheWriteCreditsPerMillion
-        ),
-        cacheReadMicrocreditsPerMillion: creditsToMicrocredits(
-          pricing.cacheReadCreditsPerMillion
-        ),
-        minimumChargeMicrocredits: creditsToMicrocredits(
-          pricing.minimumChargeCredits
-        ),
-      },
-    });
-  }
-  console.log(`  Seeded ${defaultAiModelPricing.length} AI pricing rules.`);
+  const seededPricingCount = await seedAiModelPricing(prisma);
+  console.log(`  Seeded ${seededPricingCount} AI pricing rules.`);
 
   console.log("Done.");
 }

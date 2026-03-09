@@ -48,16 +48,3 @@ export const defaultCreditProducts = [
     sortOrder: 100,
   },
 ] as const;
-
-export const defaultAiModelPricing = [
-  {
-    provider: "anthropic",
-    model: "claude-sonnet-4-6",
-    displayName: "Claude Sonnet 4.6",
-    promptCreditsPerMillion: "3",
-    completionCreditsPerMillion: "15",
-    cacheWriteCreditsPerMillion: "3.75",
-    cacheReadCreditsPerMillion: "0.3",
-    minimumChargeCredits: "0",
-  },
-] as const;
