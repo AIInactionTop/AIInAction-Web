@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 export type OutlineChallenge = {
   id: string;
@@ -48,53 +49,69 @@ const initialState = {
   activeChallenge: null as string | null,
 };
 
-export const useAIStudioStore = create<AIStudioState>((set) => ({
-  ...initialState,
+export const useAIStudioStore = create<AIStudioState>()(
+  persist(
+    (set) => ({
+      ...initialState,
 
-  setPhase: (phase) => set({ phase }),
+      setPhase: (phase) => set({ phase }),
 
-  setPathOutline: (outline) => set({ pathOutline: outline, phase: "outline-done" }),
+      setPathOutline: (outline) => set({ pathOutline: outline, phase: "outline-done" }),
 
-  updatePathField: (field, value) =>
-    set((state) => ({
-      pathOutline: state.pathOutline ? { ...state.pathOutline, [field]: value } : null,
-    })),
+      updatePathField: (field, value) =>
+        set((state) => ({
+          pathOutline: state.pathOutline ? { ...state.pathOutline, [field]: value } : null,
+        })),
 
-  updateChallenge: (id, updates) =>
-    set((state) => ({
-      pathOutline: state.pathOutline
-        ? {
-            ...state.pathOutline,
-            challenges: state.pathOutline.challenges.map((c) =>
-              c.id === id ? { ...c, ...updates } : c
-            ),
-          }
-        : null,
-    })),
+      updateChallenge: (id, updates) =>
+        set((state) => ({
+          pathOutline: state.pathOutline
+            ? {
+                ...state.pathOutline,
+                challenges: state.pathOutline.challenges.map((c) =>
+                  c.id === id ? { ...c, ...updates } : c
+                ),
+              }
+            : null,
+        })),
 
-  addChallenge: (challenge) =>
-    set((state) => ({
-      pathOutline: state.pathOutline
-        ? { ...state.pathOutline, challenges: [...state.pathOutline.challenges, challenge] }
-        : null,
-    })),
+      addChallenge: (challenge) =>
+        set((state) => ({
+          pathOutline: state.pathOutline
+            ? { ...state.pathOutline, challenges: [...state.pathOutline.challenges, challenge] }
+            : null,
+        })),
 
-  removeChallenge: (id) =>
-    set((state) => ({
-      pathOutline: state.pathOutline
-        ? {
-            ...state.pathOutline,
-            challenges: state.pathOutline.challenges.filter((c) => c.id !== id),
-          }
-        : null,
-    })),
+      removeChallenge: (id) =>
+        set((state) => ({
+          pathOutline: state.pathOutline
+            ? {
+                ...state.pathOutline,
+                challenges: state.pathOutline.challenges.filter((c) => c.id !== id),
+              }
+            : null,
+        })),
 
-  reorderChallenges: (challenges) =>
-    set((state) => ({
-      pathOutline: state.pathOutline ? { ...state.pathOutline, challenges } : null,
-    })),
+      reorderChallenges: (challenges) =>
+        set((state) => ({
+          pathOutline: state.pathOutline ? { ...state.pathOutline, challenges } : null,
+        })),
 
-  setActiveChallenge: (id) => set({ activeChallenge: id }),
+      setActiveChallenge: (id) => set({ activeChallenge: id }),
 
-  reset: () => set(initialState),
-}));
+      reset: () => {
+        set(initialState);
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("ai-studio-outline-messages");
+        }
+      },
+    }),
+    {
+      name: "ai-studio-storage",
+      partialize: (state) => ({
+        phase: state.phase,
+        pathOutline: state.pathOutline,
+      }),
+    }
+  )
+);
