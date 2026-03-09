@@ -35,6 +35,23 @@ type Product = {
   metadata: unknown;
 };
 
+type PricingRule = {
+  id: string;
+  provider: string;
+  model: string;
+  displayName: string | null;
+  active: boolean;
+  rates: {
+    prompt: CreditAmount;
+    completion: CreditAmount;
+    cacheWrite: CreditAmount;
+    cacheRead: CreditAmount;
+    minimumCharge: CreditAmount;
+    unit: string;
+  };
+  metadata: unknown;
+};
+
 function formatPrice(unitAmount: number, currency: string) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -174,7 +191,85 @@ function LedgerList() {
   );
 }
 
-export function CreditsPageClient({ products }: { products: Product[] }) {
+function PricingExplanation({ pricing }: { pricing: PricingRule[] }) {
+  return (
+    <Card className="border-border/60 bg-card/50">
+      <CardHeader>
+        <CardTitle>Current model pricing</CardTitle>
+        <CardDescription>
+          Credits are charged using the active pricing rule for each provider and model. All rates below are shown per 1M tokens.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {pricing.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            No active pricing rules are currently published.
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {pricing.map((rule) => (
+              <div
+                key={rule.id}
+                className="rounded-lg border border-border/50 bg-background/60 p-4"
+              >
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="font-medium">
+                      {rule.displayName || `${rule.provider} / ${rule.model}`}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {rule.provider} / {rule.model}
+                    </p>
+                  </div>
+                  <Badge variant="secondary">Per 1M tokens</Badge>
+                </div>
+
+                <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2 xl:grid-cols-5">
+                  <div className="rounded-md border border-border/40 bg-card/30 p-3">
+                    <p className="text-xs text-muted-foreground">Input</p>
+                    <p className="mt-1 font-medium">{rule.rates.prompt.credits}</p>
+                  </div>
+                  <div className="rounded-md border border-border/40 bg-card/30 p-3">
+                    <p className="text-xs text-muted-foreground">Output</p>
+                    <p className="mt-1 font-medium">
+                      {rule.rates.completion.credits}
+                    </p>
+                  </div>
+                  <div className="rounded-md border border-border/40 bg-card/30 p-3">
+                    <p className="text-xs text-muted-foreground">Cache write</p>
+                    <p className="mt-1 font-medium">
+                      {rule.rates.cacheWrite.credits}
+                    </p>
+                  </div>
+                  <div className="rounded-md border border-border/40 bg-card/30 p-3">
+                    <p className="text-xs text-muted-foreground">Cache read</p>
+                    <p className="mt-1 font-medium">
+                      {rule.rates.cacheRead.credits}
+                    </p>
+                  </div>
+                  <div className="rounded-md border border-border/40 bg-card/30 p-3">
+                    <p className="text-xs text-muted-foreground">Minimum charge</p>
+                    <p className="mt-1 font-medium">
+                      {rule.rates.minimumCharge.credits}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+export function CreditsPageClient({
+  products,
+  pricing,
+}: {
+  products: Product[];
+  pricing: PricingRule[];
+}) {
   const searchParams = useSearchParams();
   const { refreshCredits, error, isLoading } = useCredits();
 
@@ -242,12 +337,20 @@ export function CreditsPageClient({ products }: { products: Product[] }) {
         ))}
       </div>
 
+      <PricingExplanation pricing={pricing} />
+
       <LedgerList />
     </div>
   );
 }
 
-export function MembershipPageClient({ products }: { products: Product[] }) {
+export function MembershipPageClient({
+  products,
+  pricing,
+}: {
+  products: Product[];
+  pricing: PricingRule[];
+}) {
   const searchParams = useSearchParams();
   const { refreshCredits, error, isLoading } = useCredits();
 
@@ -308,6 +411,8 @@ export function MembershipPageClient({ products }: { products: Product[] }) {
           />
         ))}
       </div>
+
+      <PricingExplanation pricing={pricing} />
 
       <Card className="border-border/60 bg-card/50">
         <CardHeader>

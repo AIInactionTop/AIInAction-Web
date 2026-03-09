@@ -1,5 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
-import { listCreditProducts } from "@/lib/billing/service";
+import { listAiModelPricing, listCreditProducts } from "@/lib/billing/service";
 import { CreditsPageClient } from "@/components/billing/billing-page-client";
 
 type Props = {
@@ -10,10 +10,13 @@ export default async function CreditsPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const products = await listCreditProducts({
-    activeOnly: true,
-    type: "TOP_UP",
-  });
+  const [products, pricing] = await Promise.all([
+    listCreditProducts({
+      activeOnly: true,
+      type: "TOP_UP",
+    }),
+    listAiModelPricing(true),
+  ]);
 
-  return <CreditsPageClient products={products} />;
+  return <CreditsPageClient products={products} pricing={pricing} />;
 }

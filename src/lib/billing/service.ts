@@ -640,6 +640,41 @@ export async function listRecentAiUsageRecords(userId: string, limit = 20) {
   }));
 }
 
+export async function listAiUsageAggregation(userId: string) {
+  const groups = await prisma.aiUsageRecord.groupBy({
+    by: ["provider", "model"],
+    where: { userId },
+    _count: {
+      _all: true,
+    },
+    _sum: {
+      inputTokens: true,
+      outputTokens: true,
+      cacheWriteTokens: true,
+      cacheReadTokens: true,
+      totalTokens: true,
+      chargedMicrocredits: true,
+    },
+    orderBy: {
+      _sum: {
+        chargedMicrocredits: "desc",
+      },
+    },
+  });
+
+  return groups.map((group) => ({
+    provider: group.provider,
+    model: group.model,
+    requestCount: group._count._all,
+    inputTokens: (group._sum.inputTokens || BigInt(0)).toString(),
+    outputTokens: (group._sum.outputTokens || BigInt(0)).toString(),
+    cacheWriteTokens: (group._sum.cacheWriteTokens || BigInt(0)).toString(),
+    cacheReadTokens: (group._sum.cacheReadTokens || BigInt(0)).toString(),
+    totalTokens: (group._sum.totalTokens || BigInt(0)).toString(),
+    charged: serializeCredits(group._sum.chargedMicrocredits || BigInt(0)),
+  }));
+}
+
 export async function listCreditProducts(options?: {
   activeOnly?: boolean;
   type?: BillingProductType;

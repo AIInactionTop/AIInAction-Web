@@ -126,6 +126,21 @@ type UsageItem = {
   createdAt: string;
 };
 
+type UsageAggregationItem = {
+  provider: string;
+  model: string;
+  requestCount: number;
+  inputTokens: string;
+  outputTokens: string;
+  cacheWriteTokens: string;
+  cacheReadTokens: string;
+  totalTokens: string;
+  charged: {
+    microcredits: string;
+    credits: string;
+  };
+};
+
 export function ProfileContent({
   user,
   publishedChallenges,
@@ -449,6 +464,7 @@ export function ProfileContent({
 function BillingPanel() {
   const { balance, ledger, isLoading, error, refreshCredits } = useCredits();
   const [usage, setUsage] = useState<UsageItem[]>([]);
+  const [aggregation, setAggregation] = useState<UsageAggregationItem[]>([]);
   const [usageLoading, setUsageLoading] = useState(true);
   const [usageError, setUsageError] = useState<string | null>(null);
 
@@ -465,7 +481,10 @@ function BillingPanel() {
 
       const payload = (await response.json().catch(() => null)) as
         | {
-            data?: { usage?: UsageItem[] };
+            data?: {
+              usage?: UsageItem[];
+              aggregation?: UsageAggregationItem[];
+            };
             error?: { message?: string };
           }
         | null;
@@ -475,6 +494,7 @@ function BillingPanel() {
       }
 
       setUsage(payload?.data?.usage || []);
+      setAggregation(payload?.data?.aggregation || []);
     } catch (fetchError) {
       setUsageError(
         fetchError instanceof Error
@@ -569,6 +589,59 @@ function BillingPanel() {
           </CardContent>
         </Card>
       </div>
+
+      <Card className="border-border/60 bg-card/50">
+        <CardHeader>
+          <CardTitle>Usage by provider and model</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {usageLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : aggregation.length === 0 ? (
+            <div className="rounded-lg border border-border/40 bg-card/30 p-6 text-sm text-muted-foreground">
+              No usage aggregation yet. Your model spend summary will appear here after you use AI Studio.
+            </div>
+          ) : (
+            <div className="grid gap-3 lg:grid-cols-2">
+              {aggregation.map((item) => (
+                <div
+                  key={`${item.provider}-${item.model}`}
+                  className="rounded-lg border border-border/40 bg-card/30 p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <Bot className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">
+                          {item.provider} / {item.model}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {item.requestCount} metered request
+                        {item.requestCount === 1 ? "" : "s"}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold">{item.charged.credits}</p>
+                      <p className="text-xs text-muted-foreground">credits spent</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
+                    <div>Total tokens: {item.totalTokens}</div>
+                    <div>Input tokens: {item.inputTokens}</div>
+                    <div>Output tokens: {item.outputTokens}</div>
+                    <div>Cache write: {item.cacheWriteTokens}</div>
+                    <div>Cache read: {item.cacheReadTokens}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <Card className="border-border/60 bg-card/50">
