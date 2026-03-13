@@ -314,7 +314,7 @@ export function HomeClient({
                 return (
                   <motion.div key={cat.slug} variants={fadeUp}>
                     <Link
-                      href={`/challenges?category=${cat.slug}`}
+                      href={`/challenges?categories=${cat.slug}`}
                       className="group block"
                     >
                       <div className="h-full rounded-xl border border-border bg-card/50 p-5 backdrop-blur-sm transition-all duration-300 hover:border-primary/30 hover:bg-card/80 hover:shadow-[0_0_30px_oklch(0.78_0.145_195/0.08)]">
