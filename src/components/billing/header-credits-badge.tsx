@@ -19,17 +19,6 @@ export function HeaderCreditsBadge() {
         <Coins className="h-3.5 w-3.5" />
         <span>{balance.balance.credits} credits</span>
       </Link>
-      <Button
-        variant="outline"
-        size="sm"
-        className="border-amber-500/30 bg-transparent hover:border-amber-500/50 hover:bg-amber-500/10"
-        asChild
-      >
-        <Link href="/credits">
-          <Plus className="h-3.5 w-3.5" />
-          Top up
-        </Link>
-      </Button>
     </div>
   );
 }

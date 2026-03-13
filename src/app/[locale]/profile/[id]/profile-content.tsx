@@ -439,7 +439,7 @@ export function ProfileContent({
             </p>
             {user._count.projects === 0 && (
               <Button variant="outline" size="sm" className="mt-4" asChild>
-                <Link href="/showcase">{t("visitShowcase")}</Link>
+                <Link href="/community?tab=showcase">{t("visitShowcase")}</Link>
               </Button>
             )}
           </div>

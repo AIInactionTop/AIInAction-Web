@@ -57,7 +57,7 @@ export function SubmitProjectForm({
         if (onSuccess) {
           onSuccess();
         } else {
-          router.push("/showcase");
+          router.push("/community?tab=showcase");
         }
       }
     } catch {

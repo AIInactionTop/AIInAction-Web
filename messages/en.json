@@ -28,6 +28,7 @@
     "paths": "Learning Paths",
     "showcase": "Showcase",
     "leaderboard": "Leaderboard",
+    "community": "Community",
     "aiStudio": "AI Studio"
   },
   "home": {
@@ -213,6 +214,20 @@
     "deleteConfirmButton": "Delete",
     "cancelButton": "Cancel",
     "deleting": "Deleting..."
+  },
+  "community": {
+    "title": "Community",
+    "subtitle": "Connect with fellow AI builders. Explore projects, rankings, and members.",
+    "showcaseTab": "Showcase",
+    "leaderboardTab": "Leaderboard",
+    "membersTab": "Members",
+    "sortByXP": "Sort by XP",
+    "sortByNewest": "Sort by Newest",
+    "searchMembers": "Search members...",
+    "noMembers": "No members found.",
+    "challengesCompleted": "Challenges",
+    "projectsShared": "Projects",
+    "joinedOn": "Joined {date}"
   },
   "login": {
     "title": "Welcome back",
@@ -419,6 +434,8 @@
     "pathsDescription": "Structured learning paths from beginner to expert. Web, Game, Mobile, and AI Agent development.",
     "leaderboardTitle": "Leaderboard",
     "leaderboardDescription": "See who's leading in XP and streaks",
+    "communityTitle": "Community",
+    "communityDescription": "Connect with fellow AI builders",
     "createTitle": "Create Challenge",
     "createDescription": "Create a new community challenge.",
     "editTitle": "Edit Challenge",

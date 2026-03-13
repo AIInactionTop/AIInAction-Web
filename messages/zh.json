@@ -28,6 +28,7 @@
     "paths": "学习路径",
     "showcase": "展示",
     "leaderboard": "排行榜",
+    "community": "社区",
     "aiStudio": "AI 工作室"
   },
   "home": {
@@ -213,6 +214,20 @@
     "deleteConfirmButton": "删除",
     "cancelButton": "取消",
     "deleting": "删除中..."
+  },
+  "community": {
+    "title": "社区",
+    "subtitle": "与 AI 开发者们交流。探索项目、排名和成员。",
+    "showcaseTab": "项目展示",
+    "leaderboardTab": "排行榜",
+    "membersTab": "成员",
+    "sortByXP": "按经验排序",
+    "sortByNewest": "按最新排序",
+    "searchMembers": "搜索成员...",
+    "noMembers": "未找到成员。",
+    "challengesCompleted": "挑战",
+    "projectsShared": "项目",
+    "joinedOn": "加入于 {date}"
   },
   "login": {
     "title": "欢迎回来",
@@ -419,6 +434,8 @@
     "pathsDescription": "从入门到专家的结构化学习路径。Web、游戏、移动端和 AI 智能体开发。",
     "leaderboardTitle": "排行榜",
     "leaderboardDescription": "查看经验值和连续天数排行",
+    "communityTitle": "社区",
+    "communityDescription": "与 AI 开发者们交流",
     "createTitle": "创建挑战",
     "createDescription": "创建新的社区挑战。",
     "editTitle": "编辑挑战",
