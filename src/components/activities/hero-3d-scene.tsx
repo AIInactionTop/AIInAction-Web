@@ -1,105 +1,8 @@
 "use client";
 
-import { useRef, useMemo, useState } from "react";
+import { useRef, useMemo } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Float, MeshDistortMaterial } from "@react-three/drei";
 import * as THREE from "three";
-
-/* ── Role configurations ── */
-const roles = [
-  { color: "#f59e0b", emissive: "#f59e0b", geometry: "icosahedron" as const, scale: 0.6 },
-  { color: "#f97316", emissive: "#f97316", geometry: "dodecahedron" as const, scale: 0.55 },
-  { color: "#3b82f6", emissive: "#3b82f6", geometry: "octahedron" as const, scale: 0.6 },
-  { color: "#a855f7", emissive: "#a855f7", geometry: "icosahedron" as const, scale: 0.55 },
-  { color: "#14b8a6", emissive: "#14b8a6", geometry: "dodecahedron" as const, scale: 0.6 },
-  { color: "#ef4444", emissive: "#ef4444", geometry: "octahedron" as const, scale: 0.55 },
-  { color: "#ec4899", emissive: "#ec4899", geometry: "icosahedron" as const, scale: 0.5 },
-  { color: "#f59e0b", emissive: "#d97706", geometry: "dodecahedron" as const, scale: 0.55 },
-];
-
-/* ── Floating geometry with simple physics ── */
-function FloatingGeometry({
-  color,
-  emissive,
-  geometry,
-  scale,
-  initialPosition,
-  initialVelocity,
-}: {
-  color: string;
-  emissive: string;
-  geometry: "icosahedron" | "dodecahedron" | "octahedron";
-  scale: number;
-  initialPosition: [number, number, number];
-  initialVelocity: [number, number, number];
-}) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const velocity = useRef(new THREE.Vector3(...initialVelocity));
-  const [hovered, setHovered] = useState(false);
-
-  useFrame((state, delta) => {
-    if (!meshRef.current) return;
-
-    const pos = meshRef.current.position;
-    const vel = velocity.current;
-
-    // Apply velocity
-    pos.x += vel.x * delta;
-    pos.y += vel.y * delta;
-    pos.z += vel.z * delta;
-
-    // Bounce off boundaries
-    const bound = 4;
-    const boundY = 3;
-    if (Math.abs(pos.x) > bound) { vel.x *= -1; pos.x = Math.sign(pos.x) * bound; }
-    if (Math.abs(pos.y) > boundY) { vel.y *= -1; pos.y = Math.sign(pos.y) * boundY; }
-    if (Math.abs(pos.z) > 2) { vel.z *= -1; pos.z = Math.sign(pos.z) * 2; }
-
-    // Gentle rotation
-    meshRef.current.rotation.x += delta * 0.3;
-    meshRef.current.rotation.y += delta * 0.4;
-
-    // Mouse influence
-    const mouseX = state.pointer.x * 0.3;
-    const mouseY = state.pointer.y * 0.3;
-    vel.x += (mouseX - pos.x) * 0.002;
-    vel.y += (mouseY - pos.y) * 0.002;
-
-    // Damping
-    vel.multiplyScalar(0.999);
-  });
-
-  const GeometryComponent = {
-    icosahedron: <icosahedronGeometry args={[1, 1]} />,
-    dodecahedron: <dodecahedronGeometry args={[1, 0]} />,
-    octahedron: <octahedronGeometry args={[1, 0]} />,
-  };
-
-  return (
-    <Float speed={1.5} rotationIntensity={0.5} floatIntensity={0.5}>
-      <mesh
-        ref={meshRef}
-        position={initialPosition}
-        scale={hovered ? scale * 1.3 : scale}
-        onPointerOver={() => setHovered(true)}
-        onPointerOut={() => setHovered(false)}
-      >
-        {GeometryComponent[geometry]}
-        <MeshDistortMaterial
-          color={color}
-          emissive={emissive}
-          emissiveIntensity={hovered ? 1.5 : 0.6}
-          roughness={0.2}
-          metalness={0.8}
-          distort={0.25}
-          speed={2}
-          transparent
-          opacity={0.85}
-        />
-      </mesh>
-    </Float>
-  );
-}
 
 /* ── Particle field ── */
 function ParticleField({ count = 300 }: { count?: number }) {
@@ -211,34 +114,6 @@ function MouseLight() {
 
 /* ── Main 3D Scene ── */
 function Scene() {
-  const initialPositions: [number, number, number][] = useMemo(
-    () => [
-      [-3, 2, 0],
-      [3, 2, 1],
-      [-2, -1, -1],
-      [2, -1, 0.5],
-      [-3.5, 0, 1],
-      [3.5, 0, -0.5],
-      [0, 2.5, -1],
-      [0, -2, 0.5],
-    ],
-    []
-  );
-
-  const initialVelocities: [number, number, number][] = useMemo(
-    () => [
-      [0.4, -0.3, 0.2],
-      [-0.3, 0.4, -0.1],
-      [0.5, 0.2, -0.3],
-      [-0.4, -0.3, 0.2],
-      [0.3, 0.5, -0.2],
-      [-0.5, -0.2, 0.3],
-      [0.2, -0.4, 0.1],
-      [-0.3, 0.3, -0.2],
-    ],
-    []
-  );
-
   return (
     <>
       <ambientLight intensity={0.15} />
@@ -248,15 +123,6 @@ function Scene() {
 
       <ParticleField count={300} />
       <CollisionSparks />
-
-      {roles.map((role, i) => (
-        <FloatingGeometry
-          key={i}
-          {...role}
-          initialPosition={initialPositions[i]}
-          initialVelocity={initialVelocities[i]}
-        />
-      ))}
     </>
   );
 }
