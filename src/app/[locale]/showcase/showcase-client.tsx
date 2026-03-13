@@ -60,10 +60,12 @@ export function ShowcaseClient({
   projects,
   total,
   likedProjectIds = [],
+  embedded = false,
 }: {
   projects: SerializedProject[];
   total: number;
   likedProjectIds?: string[];
+  embedded?: boolean;
 }) {
   const { data: session } = useSession();
   const router = useRouter();
@@ -124,8 +126,9 @@ export function ShowcaseClient({
   );
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-16 lg:px-8">
+    <div className={embedded ? "" : "mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-16 lg:px-8"}>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        {!embedded && (
         <div>
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
             {t("title")}
@@ -134,6 +137,7 @@ export function ShowcaseClient({
             {t("subtitle")}
           </p>
         </div>
+        )}
         {session ? (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>

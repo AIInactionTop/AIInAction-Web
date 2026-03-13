@@ -19,6 +19,7 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "pnpm tsx prisma/seed.ts",
+    "db:seed:pricing": "pnpm tsx prisma/seed-ai-model-pricing.ts",
     "db:studio": "prisma studio",
     "db:migrate-translations": "pnpm tsx scripts/migrate-translations.ts",
     "challenge:generate": "pnpm tsx scripts/generate-challenge.ts"
@@ -58,6 +59,7 @@
     "react-dom": "19.2.3",
     "react-markdown": "^10.1.0",
     "resend": "^6.9.3",
+    "stripe": "^20.4.1",
     "tailwind-merge": "^3.5.0",
     "three": "^0.183.2",
     "zustand": "^5.0.11"

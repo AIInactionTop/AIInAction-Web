@@ -1,8 +1,11 @@
 import { anthropic } from "@ai-sdk/anthropic";
-import { streamText, convertToModelMessages } from "ai";
 import { auth } from "@/lib/auth";
+import { createMeteredChatResponse } from "@/lib/billing/ai-metering";
 
 export const maxDuration = 60;
+const MODEL_PROVIDER = "anthropic";
+const MODEL_ID = "claude-sonnet-4-6";
+const MAX_OUTPUT_TOKENS = 2048;
 
 const systemPrompt = `You are an expert learning path designer for "AI In Action", a platform for learning AI through hands-on challenge projects.
 
@@ -42,12 +45,14 @@ export async function POST(req: Request) {
   }
 
   const { messages } = await req.json();
-
-  const result = streamText({
-    model: anthropic("claude-sonnet-4-6"),
-    system: systemPrompt,
-    messages: await convertToModelMessages(messages),
+  return createMeteredChatResponse({
+    userId: session.user.id,
+    routeName: "ai-studio-outline",
+    provider: MODEL_PROVIDER,
+    modelId: MODEL_ID,
+    systemPrompt,
+    messages,
+    model: anthropic(MODEL_ID),
+    maxOutputTokens: MAX_OUTPUT_TOKENS,
   });
-
-  return result.toUIMessageStreamResponse();
 }

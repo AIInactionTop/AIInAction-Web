@@ -17,6 +17,8 @@ import {
   Plus,
   AlertTriangle,
   Loader2,
+  Coins,
+  Bot,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -24,6 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { difficultyConfig } from "@/lib/constants";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
@@ -33,6 +36,7 @@ import { StreakDisplay } from "@/components/gamification/streak-display";
 import { AchievementCard } from "@/components/gamification/achievement-card";
 import { ContributionHeatmap } from "@/components/gamification/contribution-heatmap";
 import { createApiKey, listApiKeys, deleteApiKey } from "@/actions/api-keys";
+import { useCredits } from "@/components/billing/credits-provider";
 import type { AchievementRarity } from "@prisma/client";
 import type { Level } from "@/lib/xp";
 
@@ -99,6 +103,41 @@ type CompletionData = {
     title: string;
     difficulty: keyof typeof difficultyConfig;
     category: { name: string } | null;
+  };
+};
+
+type UsageItem = {
+  id: string;
+  externalId: string | null;
+  provider: string;
+  model: string;
+  status: string;
+  inputTokens: string;
+  outputTokens: string;
+  cacheWriteTokens: string;
+  cacheReadTokens: string;
+  totalTokens: string;
+  charged: {
+    microcredits: string;
+    credits: string;
+  };
+  pricingSnapshot: unknown;
+  metadata: unknown;
+  createdAt: string;
+};
+
+type UsageAggregationItem = {
+  provider: string;
+  model: string;
+  requestCount: number;
+  inputTokens: string;
+  outputTokens: string;
+  cacheWriteTokens: string;
+  cacheReadTokens: string;
+  totalTokens: string;
+  charged: {
+    microcredits: string;
+    credits: string;
   };
 };
 
@@ -228,6 +267,12 @@ export function ProfileContent({
           <TabsTrigger value="completed">{t("completedTab")}</TabsTrigger>
           <TabsTrigger value="published">{t("publishedTab")}</TabsTrigger>
           <TabsTrigger value="projects">{t("projectsTab")}</TabsTrigger>
+          {isOwnProfile && (
+            <TabsTrigger value="billing">
+              <Coins className="mr-1.5 h-3.5 w-3.5" />
+              Credits
+            </TabsTrigger>
+          )}
           {isOwnProfile && (
             <TabsTrigger value="api-keys">
               <Key className="mr-1.5 h-3.5 w-3.5" />
@@ -394,11 +439,17 @@ export function ProfileContent({
             </p>
             {user._count.projects === 0 && (
               <Button variant="outline" size="sm" className="mt-4" asChild>
-                <Link href="/showcase">{t("visitShowcase")}</Link>
+                <Link href="/community?tab=showcase">{t("visitShowcase")}</Link>
               </Button>
             )}
           </div>
         </TabsContent>
+
+        {isOwnProfile && (
+          <TabsContent value="billing" className="mt-6">
+            <BillingPanel />
+          </TabsContent>
+        )}
 
         {isOwnProfile && (
           <TabsContent value="api-keys" className="mt-6">
@@ -406,6 +457,322 @@ export function ProfileContent({
           </TabsContent>
         )}
       </Tabs>
+    </div>
+  );
+}
+
+function BillingPanel() {
+  const { balance, ledger, isLoading, error, refreshCredits } = useCredits();
+  const [usage, setUsage] = useState<UsageItem[]>([]);
+  const [aggregation, setAggregation] = useState<UsageAggregationItem[]>([]);
+  const [usageLoading, setUsageLoading] = useState(true);
+  const [usageError, setUsageError] = useState<string | null>(null);
+
+  const fetchUsage = useCallback(async () => {
+    setUsageLoading(true);
+    setUsageError(null);
+
+    try {
+      const response = await fetch("/api/billing/usage", {
+        method: "GET",
+        cache: "no-store",
+        credentials: "include",
+      });
+
+      const payload = (await response.json().catch(() => null)) as
+        | {
+            data?: {
+              usage?: UsageItem[];
+              aggregation?: UsageAggregationItem[];
+            };
+            error?: { message?: string };
+          }
+        | null;
+
+      if (!response.ok) {
+        throw new Error(payload?.error?.message || "Failed to load usage history");
+      }
+
+      setUsage(payload?.data?.usage || []);
+      setAggregation(payload?.data?.aggregation || []);
+    } catch (fetchError) {
+      setUsageError(
+        fetchError instanceof Error
+          ? fetchError.message
+          : "Failed to load usage history"
+      );
+    } finally {
+      setUsageLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchUsage();
+  }, [fetchUsage]);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 className="text-base font-semibold">Credits and AI usage</h3>
+          <p className="text-sm text-muted-foreground">
+            Review your prepaid balance, immutable ledger, and recent model usage charges.
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            void refreshCredits();
+            void fetchUsage();
+          }}
+          disabled={isLoading || usageLoading}
+        >
+          <Loader2
+            className={`h-3.5 w-3.5 ${
+              isLoading || usageLoading ? "animate-spin" : ""
+            }`}
+          />
+          Refresh
+        </Button>
+      </div>
+
+      {error && (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {error}
+        </div>
+      )}
+
+      {usageError && (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {usageError}
+        </div>
+      )}
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="border-border/60 bg-card/50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Current balance
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-semibold">
+              {balance ? `${balance.balance.credits} credits` : "--"}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/60 bg-card/50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Lifetime credited
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-semibold">
+              {balance ? `${balance.lifetimeCredited.credits} credits` : "--"}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/60 bg-card/50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Lifetime debited
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-semibold">
+              {balance ? `${balance.lifetimeDebited.credits} credits` : "--"}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="border-border/60 bg-card/50">
+        <CardHeader>
+          <CardTitle>Usage by provider and model</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {usageLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : aggregation.length === 0 ? (
+            <div className="rounded-lg border border-border/40 bg-card/30 p-6 text-sm text-muted-foreground">
+              No usage aggregation yet. Your model spend summary will appear here after you use AI Studio.
+            </div>
+          ) : (
+            <div className="grid gap-3 lg:grid-cols-2">
+              {aggregation.map((item) => (
+                <div
+                  key={`${item.provider}-${item.model}`}
+                  className="rounded-lg border border-border/40 bg-card/30 p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <Bot className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">
+                          {item.provider} / {item.model}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {item.requestCount} metered request
+                        {item.requestCount === 1 ? "" : "s"}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold">{item.charged.credits}</p>
+                      <p className="text-xs text-muted-foreground">credits spent</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
+                    <div>Total tokens: {item.totalTokens}</div>
+                    <div>Input tokens: {item.inputTokens}</div>
+                    <div>Output tokens: {item.outputTokens}</div>
+                    <div>Cache write: {item.cacheWriteTokens}</div>
+                    <div>Cache read: {item.cacheReadTokens}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        <Card className="border-border/60 bg-card/50">
+          <CardHeader>
+            <CardTitle>Recent AI usage</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {usageLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : usage.length === 0 ? (
+              <div className="rounded-lg border border-border/40 bg-card/30 p-6 text-sm text-muted-foreground">
+                No AI usage yet. Use AI Studio to create your first metered generation.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {usage.map((item) => {
+                  const routeName =
+                    typeof item.metadata === "object" &&
+                    item.metadata &&
+                    "routeName" in item.metadata
+                      ? String(
+                          (item.metadata as { routeName?: unknown }).routeName || ""
+                        )
+                      : null;
+
+                  return (
+                    <div
+                      key={item.id}
+                      className="rounded-lg border border-border/40 bg-card/30 p-4"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <Bot className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">
+                              {item.provider} / {item.model}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {new Date(item.createdAt).toLocaleString()}
+                            {routeName ? ` · ${routeName}` : ""}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold">-{item.charged.credits}</p>
+                          <p className="text-xs text-muted-foreground">credits</p>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
+                        <div>Input tokens: {item.inputTokens}</div>
+                        <div>Output tokens: {item.outputTokens}</div>
+                        <div>Cache write: {item.cacheWriteTokens}</div>
+                        <div>Cache read: {item.cacheReadTokens}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/60 bg-card/50">
+          <CardHeader>
+            <CardTitle>Recent credit ledger</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoading && !balance ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : !ledger.length ? (
+              <div className="rounded-lg border border-border/40 bg-card/30 p-6 text-sm text-muted-foreground">
+                No credit activity yet. Top up your balance or start a membership plan.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {ledger.map((entry) => {
+                  const isPositive =
+                    entry.type === "CREDIT" ||
+                    entry.type === "REFUND" ||
+                    entry.type === "ADJUSTMENT";
+
+                  return (
+                    <div
+                      key={entry.id}
+                      className="rounded-lg border border-border/40 bg-card/30 p-4"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="font-medium">
+                            {entry.description || entry.source.replaceAll("_", " ")}
+                          </p>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {new Date(entry.createdAt).toLocaleString()}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p
+                            className={`font-semibold ${
+                              isPositive ? "text-emerald-600" : "text-foreground"
+                            }`}
+                          >
+                            {isPositive ? "+" : "-"}
+                            {entry.amount.credits}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Balance {entry.balanceAfter.credits}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            <div className="mt-4 flex gap-3">
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/credits">Top up credits</Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/membership">Membership</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

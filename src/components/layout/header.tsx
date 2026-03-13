@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { HeaderXPBadge } from "@/components/gamification/header-xp-badge";
+import { HeaderCreditsBadge } from "@/components/billing/header-credits-badge";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
@@ -32,8 +33,7 @@ export function Header() {
     { href: "/challenges" as const, label: t("challenges") },
     { href: "/activities" as const, label: t("activities") },
     { href: "/paths" as const, label: t("paths") },
-    { href: "/showcase" as const, label: t("showcase") },
-    { href: "/leaderboard" as const, label: t("leaderboard") },
+    { href: "/community" as const, label: t("community") },
     { href: "/ai-studio" as const, label: t("aiStudio") },
   ];
 
@@ -101,6 +101,10 @@ export function Header() {
             <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           </Button>
 
+          {/* {session?.user?.id && (
+            <HeaderCreditsBadge />
+          )} */}
+
           {session?.user?.id && (
             <HeaderXPBadge userId={session.user.id} />
           )}
@@ -124,6 +128,13 @@ export function Header() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link href="/credits">Credits</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/membership">Membership</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href={`/profile/${session.user.id}` as never}>Profile</Link>
                 </DropdownMenuItem>
@@ -184,6 +195,24 @@ export function Header() {
                   {link.label}
                 </Link>
               ))}
+              {session?.user && (
+                <>
+                  <Link
+                    href="/credits"
+                    onClick={() => setMobileOpen(false)}
+                    className="rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    Credits
+                  </Link>
+                  <Link
+                    href="/membership"
+                    onClick={() => setMobileOpen(false)}
+                    className="rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    Membership
+                  </Link>
+                </>
+              )}
             </nav>
           </motion.div>
         )}

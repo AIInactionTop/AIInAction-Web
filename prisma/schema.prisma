@@ -46,6 +46,7 @@ model User {
   githubId      String?   @unique @map("github_id")
   githubUrl     String?   @map("github_url")
   bio           String?
+  stripeCustomerId String? @unique @map("stripe_customer_id")
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
@@ -62,6 +63,11 @@ model User {
   apiKeys            ApiKey[]
   projectLikes       SharedProjectLike[]
   learningPaths      LearningPath[]
+  billingAccount     BillingAccount?
+  billingCheckouts   BillingCheckoutSession[]
+  billingSubscriptions BillingSubscription[]
+  creditLedgerEntries CreditLedgerEntry[]
+  aiUsageRecords     AiUsageRecord[]
 
   @@map("users")
 }
@@ -316,8 +322,199 @@ model ApiKey {
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   lastUsedAt DateTime? @map("last_used_at")
   createdAt  DateTime  @default(now()) @map("created_at")
+  usageRecords AiUsageRecord[]
 
   @@map("api_keys")
+}
+
+model BillingAccount {
+  id                          String              @id @default(cuid())
+  userId                      String              @unique @map("user_id")
+  balanceMicrocredits         BigInt              @default(0) @map("balance_microcredits")
+  lifetimeCreditedMicrocredits BigInt             @default(0) @map("lifetime_credited_microcredits")
+  lifetimeDebitedMicrocredits BigInt              @default(0) @map("lifetime_debited_microcredits")
+  createdAt                   DateTime            @default(now()) @map("created_at")
+  updatedAt                   DateTime            @updatedAt @map("updated_at")
+
+  user          User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ledgerEntries CreditLedgerEntry[]
+  checkouts     BillingCheckoutSession[]
+  subscriptions BillingSubscription[]
+  usageRecords  AiUsageRecord[]
+
+  @@map("billing_accounts")
+}
+
+model CreditProduct {
+  id                  String             @id @default(cuid())
+  code                String             @unique
+  name                String
+  description         String?            @db.Text
+  type                BillingProductType
+  billingInterval     BillingInterval    @default(ONE_TIME) @map("billing_interval")
+  currency            String             @default("usd")
+  unitAmount          Int                @map("unit_amount")
+  creditsMicrocredits BigInt             @map("credits_microcredits")
+  bonusMicrocredits   BigInt             @default(0) @map("bonus_microcredits")
+  stripeProductId     String?            @map("stripe_product_id")
+  stripePriceId       String?            @unique @map("stripe_price_id")
+  active              Boolean            @default(true)
+  sortOrder           Int                @default(0) @map("sort_order")
+  metadata            Json?
+  createdAt           DateTime           @default(now()) @map("created_at")
+  updatedAt           DateTime           @updatedAt @map("updated_at")
+
+  checkouts     BillingCheckoutSession[]
+  subscriptions BillingSubscription[]
+
+  @@map("credit_products")
+}
+
+model BillingCheckoutSession {
+  id                      String                @id @default(cuid())
+  userId                  String                @map("user_id")
+  billingAccountId        String                @map("billing_account_id")
+  productId               String                @map("product_id")
+  stripeCheckoutSessionId String                @unique @map("stripe_checkout_session_id")
+  stripePaymentIntentId   String?               @unique @map("stripe_payment_intent_id")
+  stripeInvoiceId         String?               @unique @map("stripe_invoice_id")
+  status                  BillingCheckoutStatus @default(PENDING)
+  amountTotal             Int?                  @map("amount_total")
+  currency                String                @default("usd")
+  creditsGrantedMicrocredits BigInt             @default(0) @map("credits_granted_microcredits")
+  completedAt             DateTime?             @map("completed_at")
+  expiresAt               DateTime?             @map("expires_at")
+  metadata                Json?
+  createdAt               DateTime              @default(now()) @map("created_at")
+  updatedAt               DateTime              @updatedAt @map("updated_at")
+
+  user           User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  billingAccount BillingAccount      @relation(fields: [billingAccountId], references: [id], onDelete: Cascade)
+  product        CreditProduct       @relation(fields: [productId], references: [id], onDelete: Restrict)
+  ledgerEntries  CreditLedgerEntry[]
+
+  @@index([userId, status])
+  @@map("billing_checkout_sessions")
+}
+
+model BillingSubscription {
+  id                   String                    @id @default(cuid())
+  userId               String                    @map("user_id")
+  billingAccountId     String                    @map("billing_account_id")
+  productId            String                    @map("product_id")
+  stripeSubscriptionId String                    @unique @map("stripe_subscription_id")
+  stripeCustomerId     String                    @map("stripe_customer_id")
+  stripeLatestInvoiceId String?                  @map("stripe_latest_invoice_id")
+  status               BillingSubscriptionStatus @default(INCOMPLETE)
+  currentPeriodStart   DateTime?                 @map("current_period_start")
+  currentPeriodEnd     DateTime?                 @map("current_period_end")
+  cancelAtPeriodEnd    Boolean                   @default(false) @map("cancel_at_period_end")
+  canceledAt           DateTime?                 @map("canceled_at")
+  metadata             Json?
+  createdAt            DateTime                  @default(now()) @map("created_at")
+  updatedAt            DateTime                  @updatedAt @map("updated_at")
+
+  user           User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  billingAccount BillingAccount      @relation(fields: [billingAccountId], references: [id], onDelete: Cascade)
+  product        CreditProduct       @relation(fields: [productId], references: [id], onDelete: Restrict)
+  ledgerEntries  CreditLedgerEntry[]
+
+  @@index([userId, status])
+  @@map("billing_subscriptions")
+}
+
+model StripeWebhookEvent {
+  id            String                  @id @default(cuid())
+  stripeEventId String                  @unique @map("stripe_event_id")
+  type          String
+  status        StripeWebhookEventStatus @default(PROCESSED)
+  payload       Json?
+  errorMessage  String?                 @db.Text @map("error_message")
+  processedAt   DateTime                @default(now()) @map("processed_at")
+  createdAt     DateTime                @default(now()) @map("created_at")
+
+  @@map("stripe_webhook_events")
+}
+
+model AiModelPricing {
+  id                            String   @id @default(cuid())
+  provider                      String
+  model                         String
+  displayName                   String?  @map("display_name")
+  active                        Boolean  @default(true)
+  promptMicrocreditsPerMillion  BigInt   @default(0) @map("prompt_microcredits_per_million")
+  completionMicrocreditsPerMillion BigInt @default(0) @map("completion_microcredits_per_million")
+  cacheWriteMicrocreditsPerMillion BigInt @default(0) @map("cache_write_microcredits_per_million")
+  cacheReadMicrocreditsPerMillion BigInt  @default(0) @map("cache_read_microcredits_per_million")
+  minimumChargeMicrocredits     BigInt   @default(0) @map("minimum_charge_microcredits")
+  metadata                      Json?
+  createdAt                     DateTime @default(now()) @map("created_at")
+  updatedAt                     DateTime @updatedAt @map("updated_at")
+
+  usageRecords AiUsageRecord[]
+
+  @@unique([provider, model])
+  @@index([active])
+  @@map("ai_model_pricing")
+}
+
+model AiUsageRecord {
+  id                   String        @id @default(cuid())
+  userId               String        @map("user_id")
+  billingAccountId     String        @map("billing_account_id")
+  apiKeyId             String?       @map("api_key_id")
+  pricingId            String?       @map("pricing_id")
+  externalId           String?       @unique @map("external_id")
+  provider             String
+  model                String
+  inputTokens          BigInt        @default(0) @map("input_tokens")
+  outputTokens         BigInt        @default(0) @map("output_tokens")
+  cacheWriteTokens     BigInt        @default(0) @map("cache_write_tokens")
+  cacheReadTokens      BigInt        @default(0) @map("cache_read_tokens")
+  totalTokens          BigInt        @default(0) @map("total_tokens")
+  chargedMicrocredits  BigInt        @default(0) @map("charged_microcredits")
+  status               AiUsageStatus @default(COMPLETED)
+  pricingSnapshot      Json?         @map("pricing_snapshot")
+  metadata             Json?
+  createdAt            DateTime      @default(now()) @map("created_at")
+  updatedAt            DateTime      @updatedAt @map("updated_at")
+
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  billingAccount BillingAccount @relation(fields: [billingAccountId], references: [id], onDelete: Cascade)
+  apiKey         ApiKey?        @relation(fields: [apiKeyId], references: [id], onDelete: SetNull)
+  pricing        AiModelPricing? @relation(fields: [pricingId], references: [id], onDelete: SetNull)
+  ledgerEntry    CreditLedgerEntry?
+
+  @@index([userId, createdAt])
+  @@index([provider, model])
+  @@map("ai_usage_records")
+}
+
+model CreditLedgerEntry {
+  id                     String                 @id @default(cuid())
+  userId                 String                 @map("user_id")
+  billingAccountId       String                 @map("billing_account_id")
+  aiUsageId              String?                @unique @map("ai_usage_id")
+  checkoutSessionId      String?                @map("checkout_session_id")
+  subscriptionId         String?                @map("subscription_id")
+  type                   CreditLedgerEntryType
+  source                 CreditLedgerEntrySource
+  sourceRef              String?                @map("source_ref")
+  amountMicrocredits     BigInt                 @map("amount_microcredits")
+  balanceAfterMicrocredits BigInt               @map("balance_after_microcredits")
+  description            String?                @db.Text
+  metadata               Json?
+  createdAt              DateTime               @default(now()) @map("created_at")
+
+  user           User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  billingAccount BillingAccount         @relation(fields: [billingAccountId], references: [id], onDelete: Cascade)
+  aiUsage        AiUsageRecord?         @relation(fields: [aiUsageId], references: [id], onDelete: SetNull)
+  checkoutSession BillingCheckoutSession? @relation(fields: [checkoutSessionId], references: [id], onDelete: SetNull)
+  subscription   BillingSubscription?   @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  @@unique([source, sourceRef])
+  @@index([userId, createdAt])
+  @@map("credit_ledger_entries")
 }
 
 enum AchievementRarity {
@@ -337,4 +534,61 @@ enum Difficulty {
 enum CompletionStatus {
   IN_PROGRESS
   COMPLETED
+}
+
+enum BillingProductType {
+  TOP_UP
+  MEMBERSHIP
+}
+
+enum BillingInterval {
+  ONE_TIME
+  MONTH
+  YEAR
+}
+
+enum BillingCheckoutStatus {
+  PENDING
+  COMPLETED
+  EXPIRED
+  FAILED
+}
+
+enum BillingSubscriptionStatus {
+  INCOMPLETE
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+  PAUSED
+}
+
+enum StripeWebhookEventStatus {
+  PROCESSED
+  IGNORED
+  FAILED
+}
+
+enum CreditLedgerEntryType {
+  CREDIT
+  DEBIT
+  REFUND
+  ADJUSTMENT
+  EXPIRE
+}
+
+enum CreditLedgerEntrySource {
+  TOP_UP
+  MEMBERSHIP
+  AI_USAGE
+  MANUAL_ADJUSTMENT
+  REFUND
+  PROMOTION
+}
+
+enum AiUsageStatus {
+  COMPLETED
+  FAILED
+  REFUNDED
 }

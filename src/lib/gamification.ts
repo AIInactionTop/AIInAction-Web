@@ -223,3 +223,64 @@ export async function getUserAchievements(userId: string) {
     unlockedAt: unlockedMap.get(a.id) ?? null,
   }));
 }
+
+export type MemberInfo = {
+  id: string;
+  name: string | null;
+  image: string | null;
+  bio: string | null;
+  githubUrl: string | null;
+  createdAt: Date;
+  xp: number;
+  level: number;
+  currentStreak: number;
+  levelInfo: Level;
+  challengesCompleted: number;
+  projectsShared: number;
+};
+
+export async function getMembers(
+  sortBy: "xp" | "newest" = "xp",
+  limit = 50
+): Promise<MemberInfo[]> {
+  const users = await prisma.user.findMany({
+    take: limit,
+    orderBy: sortBy === "newest" ? { createdAt: "desc" } : undefined,
+    select: {
+      id: true,
+      name: true,
+      image: true,
+      bio: true,
+      githubUrl: true,
+      createdAt: true,
+      stats: true,
+      _count: {
+        select: {
+          completions: { where: { status: "COMPLETED" } },
+          projects: true,
+        },
+      },
+    },
+  });
+
+  const members = users.map((u) => ({
+    id: u.id,
+    name: u.name,
+    image: u.image,
+    bio: u.bio,
+    githubUrl: u.githubUrl,
+    createdAt: u.createdAt,
+    xp: u.stats?.xp ?? 0,
+    level: u.stats?.level ?? 1,
+    currentStreak: u.stats?.currentStreak ?? 0,
+    levelInfo: getLevelFromXP(u.stats?.xp ?? 0),
+    challengesCompleted: u._count.completions,
+    projectsShared: u._count.projects,
+  }));
+
+  if (sortBy === "xp") {
+    members.sort((a, b) => b.xp - a.xp);
+  }
+
+  return members;
+}
