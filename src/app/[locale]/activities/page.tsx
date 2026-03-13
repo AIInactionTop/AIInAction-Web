@@ -19,6 +19,13 @@ import {
   Target,
   Bot,
   Sparkles,
+  Palette,
+  Scale,
+  UserSearch,
+  GraduationCap,
+  HeartPulse,
+  Mic,
+  Home,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -188,6 +195,90 @@ const caseConfigs = [
     glowColor: "#d97706",
     htmlUrl: "/usercase/content-creator-passive-income.html",
     htmlUrlEn: "/usercase/content-creator-passive-income-en.html",
+  },
+  {
+    id: "freelance-designer",
+    name: "Maya Chen",
+    icon: Palette,
+    color: "from-violet-500 to-purple-600",
+    colorBg: "bg-violet-500/10",
+    colorText: "text-violet-400",
+    colorBorder: "border-violet-500/30",
+    glowColor: "#8b5cf6",
+    htmlUrl: "/usercase/freelance-designer-automation.html",
+    htmlUrlEn: "/usercase/freelance-designer-automation-en.html",
+  },
+  {
+    id: "legal-advisor",
+    name: "David Park",
+    icon: Scale,
+    color: "from-emerald-500 to-teal-600",
+    colorBg: "bg-emerald-500/10",
+    colorText: "text-emerald-400",
+    colorBorder: "border-emerald-500/30",
+    glowColor: "#10b981",
+    htmlUrl: "/usercase/legal-advisor-automation.html",
+    htmlUrlEn: "/usercase/legal-advisor-automation-en.html",
+  },
+  {
+    id: "hr-recruiter",
+    name: "Rachel Kim",
+    icon: UserSearch,
+    color: "from-indigo-500 to-blue-600",
+    colorBg: "bg-indigo-500/10",
+    colorText: "text-indigo-400",
+    colorBorder: "border-indigo-500/30",
+    glowColor: "#6366f1",
+    htmlUrl: "/usercase/hr-recruiter-automation.html",
+    htmlUrlEn: "/usercase/hr-recruiter-automation-en.html",
+  },
+  {
+    id: "education-entrepreneur",
+    name: "Alex Wu",
+    icon: GraduationCap,
+    color: "from-amber-500 to-yellow-600",
+    colorBg: "bg-amber-500/10",
+    colorText: "text-amber-400",
+    colorBorder: "border-amber-500/30",
+    glowColor: "#f59e0b",
+    htmlUrl: "/usercase/education-entrepreneur-automation.html",
+    htmlUrlEn: "/usercase/education-entrepreneur-automation-en.html",
+  },
+  {
+    id: "healthcare-practitioner",
+    name: "Dr. Emily Zhang",
+    icon: HeartPulse,
+    color: "from-cyan-500 to-teal-600",
+    colorBg: "bg-cyan-500/10",
+    colorText: "text-cyan-400",
+    colorBorder: "border-cyan-500/30",
+    glowColor: "#06b6d4",
+    htmlUrl: "/usercase/healthcare-practitioner-automation.html",
+    htmlUrlEn: "/usercase/healthcare-practitioner-automation-en.html",
+  },
+  {
+    id: "podcaster-creator",
+    name: "Jordan Rivera",
+    icon: Mic,
+    color: "from-rose-500 to-pink-600",
+    colorBg: "bg-rose-500/10",
+    colorText: "text-rose-400",
+    colorBorder: "border-rose-500/30",
+    glowColor: "#e11d48",
+    htmlUrl: "/usercase/podcaster-creator-automation.html",
+    htmlUrlEn: "/usercase/podcaster-creator-automation-en.html",
+  },
+  {
+    id: "real-estate-agent",
+    name: "Lisa Chen",
+    icon: Home,
+    color: "from-yellow-600 to-amber-700",
+    colorBg: "bg-yellow-600/10",
+    colorText: "text-yellow-400",
+    colorBorder: "border-yellow-600/30",
+    glowColor: "#d97706",
+    htmlUrl: "/usercase/real-estate-agent-automation.html",
+    htmlUrlEn: "/usercase/real-estate-agent-automation-en.html",
   },
 ];
 
@@ -526,8 +617,8 @@ export default function ActivitiesPage() {
             className="mx-auto mt-16 grid max-w-lg grid-cols-3 gap-8"
           >
             {[
-              { value: "11", labelKey: "statCases" as const },
-              { value: "30+", labelKey: "statAgents" as const },
+              { value: "18", labelKey: "statCases" as const },
+              { value: "70+", labelKey: "statAgents" as const },
               { value: "60%+", labelKey: "statEfficiency" as const },
             ].map((stat) => (
               <div key={stat.labelKey} className="text-center">
@@ -663,7 +754,14 @@ export default function ActivitiesPage() {
                 | "content-creator"
                 | "amazon-seller"
                 | "investor-intelligence"
-                | "pm-brain-trust";
+                | "pm-brain-trust"
+                | "freelance-designer"
+                | "legal-advisor"
+                | "hr-recruiter"
+                | "education-entrepreneur"
+                | "healthcare-practitioner"
+                | "podcaster-creator"
+                | "real-estate-agent";
               const resolvedUrl =
                 locale === "en" ? config.htmlUrlEn : config.htmlUrl;
               return (

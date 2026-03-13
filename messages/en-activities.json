@@ -3,7 +3,7 @@
     "heroBadge": "OpenClaw Practice Challenge",
     "heroTitle1": "Redefine Your Work",
     "heroTitle2": "with AI Agents",
-    "heroSubtitle": "11 real user cases, 11 AI Agent configurations.\nPick your role, follow the guide, and build your own OpenClaw automation workflow.",
+    "heroSubtitle": "18 real user cases, 18 AI Agent configurations.\nPick your role, follow the guide, and build your own OpenClaw automation workflow.",
     "browseCases": "Browse Cases",
     "learnOpenClaw": "Learn OpenClaw",
     "joinChallenge": "Join Challenge",
@@ -15,7 +15,7 @@
     "howTitle": "How to Participate",
     "howSubtitle": "Four steps to complete your OpenClaw practice journey",
     "step1Title": "Choose Your Role",
-    "step1Desc": "Browse the 11 real user cases below and find the role and scenario that best matches you",
+    "step1Desc": "Browse the 18 real user cases below and find the role and scenario that best matches you",
     "step2Title": "Read the Config Guide",
     "step2Desc": "Dive deep into the Agent configuration, skill combinations, and workflow design for that role",
     "step3Title": "Configure OpenClaw",
@@ -153,6 +153,83 @@
           { "value": "4", "label": "AI Agents" }
         ],
         "highlights": ["Competitive Intel", "PRD Generation", "Meeting Insights"]
+      },
+      "freelance-designer": {
+        "title": "The Freelancer's AI Growth Engine",
+        "subtitle": "67% revenue growth, fully automated 1-person studio",
+        "persona": "Freelance UI/Brand Designer",
+        "personaTag": "Freelance Design",
+        "stats": [
+          { "value": "67%", "label": "Revenue Growth" },
+          { "value": "5", "label": "AI Agents" }
+        ],
+        "highlights": ["Smart Lead Gen", "Auto Pricing", "Project Management"]
+      },
+      "legal-advisor": {
+        "title": "The Attorney's AI Legal Engine",
+        "subtitle": "10x faster contract review, zero missed regulatory changes",
+        "persona": "Tech Corporate Attorney",
+        "personaTag": "Legal Tech",
+        "stats": [
+          { "value": "10x", "label": "Review Speed" },
+          { "value": "4", "label": "AI Agents" }
+        ],
+        "highlights": ["Contract Review", "Regulatory Monitor", "Legal Research"]
+      },
+      "hr-recruiter": {
+        "title": "The Recruiter's AI Talent Engine",
+        "subtitle": "20x faster resume screening, zero dropped candidates",
+        "persona": "Tech Recruiting Consultant",
+        "personaTag": "Recruiting Tech",
+        "stats": [
+          { "value": "20x", "label": "Screening Speed" },
+          { "value": "40+", "label": "Annual Placements" }
+        ],
+        "highlights": ["Resume Screening", "Pipeline Management", "Interview Scheduling"]
+      },
+      "education-entrepreneur": {
+        "title": "The Educator's AI Growth Engine",
+        "subtitle": "5x course output, student completion rate doubled",
+        "persona": "Online Education Founder",
+        "personaTag": "Online Education",
+        "stats": [
+          { "value": "5x", "label": "Course Output" },
+          { "value": "2x", "label": "Completion Rate" }
+        ],
+        "highlights": ["Course Production", "Student Analytics", "Auto Q&A"]
+      },
+      "healthcare-practitioner": {
+        "title": "The Physician's AI Care Engine",
+        "subtitle": "8x faster patient follow-up, zero missed research papers",
+        "persona": "Family Physician",
+        "personaTag": "HealthTech",
+        "stats": [
+          { "value": "8x", "label": "Follow-Up Speed" },
+          { "value": "800+", "label": "Patients Managed" }
+        ],
+        "highlights": ["Patient Follow-Up", "Literature Tracking", "Chart Assistant"]
+      },
+      "podcaster-creator": {
+        "title": "The Creator's AI Content Engine",
+        "subtitle": "4x content output, full pipeline automation",
+        "persona": "Tech Podcaster",
+        "personaTag": "Content Creation",
+        "stats": [
+          { "value": "4x", "label": "Content Output" },
+          { "value": "50K+", "label": "Subscribers" }
+        ],
+        "highlights": ["Topic Research", "Post-Production", "Multi-Platform Distribution"]
+      },
+      "real-estate-agent": {
+        "title": "The Agent's AI Deal Engine",
+        "subtitle": "6x faster client nurturing, 95% listing match accuracy",
+        "persona": "Luxury Residential Agent",
+        "personaTag": "PropTech",
+        "stats": [
+          { "value": "6x", "label": "Nurturing Speed" },
+          { "value": "$15M+", "label": "Annual Sales" }
+        ],
+        "highlights": ["Client Nurturing", "Listing Match", "Market Analysis"]
       }
     }
   }

@@ -3,7 +3,7 @@
     "heroBadge": "OpenClaw 实践挑战",
     "heroTitle1": "用 AI Agent 重新定义",
     "heroTitle2": "你的工作方式",
-    "heroSubtitle": "11 个真实用户案例，11 种 AI Agent 配置方案。\n选择你的角色，跟随配置指南，亲手搭建属于自己的 OpenClaw 自动化工作流。",
+    "heroSubtitle": "18 个真实用户案例，18 种 AI Agent 配置方案。\n选择你的角色，跟随配置指南，亲手搭建属于自己的 OpenClaw 自动化工作流。",
     "browseCases": "浏览案例",
     "learnOpenClaw": "了解 OpenClaw",
     "joinChallenge": "参与挑战",
@@ -15,7 +15,7 @@
     "howTitle": "如何参与挑战",
     "howSubtitle": "四步完成你的 OpenClaw 实践之旅",
     "step1Title": "选择你的角色",
-    "step1Desc": "浏览下方 11 个真实用户案例，找到与你最匹配的角色和场景",
+    "step1Desc": "浏览下方 18 个真实用户案例，找到与你最匹配的角色和场景",
     "step2Title": "阅读配置指南",
     "step2Desc": "深入了解该角色的 Agent 配置方案、技能组合和工作流设计",
     "step3Title": "动手配置OpenClaw",
@@ -153,6 +153,83 @@
           { "value": "4", "label": "AI Agent" }
         ],
         "highlights": ["竞品情报", "PRD 生成", "会议洞察"]
+      },
+      "freelance-designer": {
+        "title": "自由设计师的 AI 接单引擎",
+        "subtitle": "收入增长 67%，1 人工作室的全自动化运营",
+        "persona": "自由职业设计师",
+        "personaTag": "自由设计",
+        "stats": [
+          { "value": "67%", "label": "收入增长" },
+          { "value": "5", "label": "AI Agent" }
+        ],
+        "highlights": ["智能获客", "自动报价", "项目管理"]
+      },
+      "legal-advisor": {
+        "title": "律师的 AI 法务引擎",
+        "subtitle": "合同审查提速 10 倍，法规变更零遗漏",
+        "persona": "科技商事律师",
+        "personaTag": "法律科技",
+        "stats": [
+          { "value": "10x", "label": "审查速度" },
+          { "value": "4", "label": "AI Agent" }
+        ],
+        "highlights": ["合同审查", "法规监控", "法律研究"]
+      },
+      "hr-recruiter": {
+        "title": "猎头的 AI 招聘引擎",
+        "subtitle": "简历筛选提速 20 倍，候选人跟进零遗漏",
+        "persona": "科技猎头顾问",
+        "personaTag": "招聘科技",
+        "stats": [
+          { "value": "20x", "label": "筛选效率" },
+          { "value": "40+", "label": "年成交" }
+        ],
+        "highlights": ["简历筛选", "流程管理", "面试安排"]
+      },
+      "education-entrepreneur": {
+        "title": "教培创业者的 AI 增长引擎",
+        "subtitle": "课程产量提升 5 倍，学员完课率翻倍",
+        "persona": "在线教育创始人",
+        "personaTag": "在线教育",
+        "stats": [
+          { "value": "5x", "label": "课程产量" },
+          { "value": "2x", "label": "完课率" }
+        ],
+        "highlights": ["课程生产", "学员分析", "自动答疑"]
+      },
+      "healthcare-practitioner": {
+        "title": "医疗从业者的 AI 诊疗引擎",
+        "subtitle": "患者随访提效 8 倍，科研文献零遗漏",
+        "persona": "全科医生",
+        "personaTag": "医疗科技",
+        "stats": [
+          { "value": "8x", "label": "随访效率" },
+          { "value": "800+", "label": "患者管理" }
+        ],
+        "highlights": ["患者随访", "文献追踪", "病历助手"]
+      },
+      "podcaster-creator": {
+        "title": "播客主的 AI 内容引擎",
+        "subtitle": "内容产量提升 4 倍，全链路自动化",
+        "persona": "科技播客主",
+        "personaTag": "内容创作",
+        "stats": [
+          { "value": "4x", "label": "内容产量" },
+          { "value": "50K+", "label": "订阅" }
+        ],
+        "highlights": ["选题研究", "后期制作", "多平台分发"]
+      },
+      "real-estate-agent": {
+        "title": "房产经纪的 AI 成交引擎",
+        "subtitle": "客户培育提效 6 倍，房源匹配精准度 95%",
+        "persona": "高端住宅经纪人",
+        "personaTag": "房产科技",
+        "stats": [
+          { "value": "6x", "label": "培育效率" },
+          { "value": "$15M+", "label": "年成交" }
+        ],
+        "highlights": ["客户培育", "房源匹配", "市场分析"]
       }
     }
   }
