@@ -888,7 +888,7 @@ export default function ActivitiesPage() {
               asChild
             >
               <a
-                href="https://github.com/nicepkg/openclaw"
+                href="https://github.com/openclaw/openclaw"
                 target="_blank"
                 rel="noopener noreferrer"
               >
