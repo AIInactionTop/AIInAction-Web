@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getProjects } from "@/lib/challenges";
 import { getLeaderboard, getMembers } from "@/lib/gamification";
+import { getJobs } from "@/lib/jobs";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { setRequestLocale, getTranslations } from "next-intl/server";
@@ -27,9 +28,10 @@ export default async function CommunityPage({ params }: Props) {
 
   const session = await auth();
 
-  const [{ projects, total }, xpBoard, streakBoard, members, likedProjectIds] =
+  const [{ projects, total }, { jobs, total: totalJobs }, xpBoard, streakBoard, members, likedProjectIds] =
     await Promise.all([
       getProjects(),
+      getJobs({ pageSize: 10 }),
       getLeaderboard("xp", 50),
       getLeaderboard("streak", 50),
       getMembers("xp", 100),
@@ -60,6 +62,8 @@ export default async function CommunityPage({ params }: Props) {
         xpBoard={serialize(xpBoard)}
         streakBoard={serialize(streakBoard)}
         members={serialize(members)}
+        jobs={serialize(jobs)}
+        totalJobs={totalJobs}
       />
     </div>
   );

@@ -68,6 +68,8 @@ model User {
   billingSubscriptions BillingSubscription[]
   creditLedgerEntries CreditLedgerEntry[]
   aiUsageRecords     AiUsageRecord[]
+  postedJobs         Job[]               @relation("PostedJobs")
+  jobApplications    JobApplication[]    @relation("JobApplications")
   marketplaceItems   MarketplaceItem[]     @relation("MarketplaceSeller")
   marketplaceReviews MarketplaceReview[]
   marketplacePurchases MarketplacePurchase[]
@@ -594,6 +596,86 @@ enum AiUsageStatus {
   COMPLETED
   FAILED
   REFUNDED
+}
+
+// ── Jobs Module ──
+
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  FREELANCE
+  INTERNSHIP
+}
+
+enum JobLocationType {
+  REMOTE
+  ONSITE
+  HYBRID
+}
+
+enum JobStatus {
+  OPEN
+  CLOSED
+  DRAFT
+}
+
+enum JobApplicationStatus {
+  PENDING
+  REVIEWING
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+model Job {
+  id              String          @id @default(cuid())
+  slug            String          @unique
+  title           String
+  description     String          @db.Text
+  company         String
+  companyUrl      String?         @map("company_url")
+  companyLogo     String?         @map("company_logo")
+  location        String?
+  locationType    JobLocationType @default(REMOTE) @map("location_type")
+  type            JobType         @default(FULL_TIME)
+  salaryMin       Int?            @map("salary_min")
+  salaryMax       Int?            @map("salary_max")
+  salaryCurrency  String          @default("USD") @map("salary_currency")
+  skills          String[]
+  contactEmail    String?         @map("contact_email")
+  applyUrl        String?         @map("apply_url")
+  status          JobStatus       @default(OPEN)
+
+  authorId        String          @map("author_id")
+  author          User            @relation("PostedJobs", fields: [authorId], references: [id], onDelete: Cascade)
+
+  applications    JobApplication[]
+
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+
+  @@index([status, createdAt])
+  @@map("jobs")
+}
+
+model JobApplication {
+  id          String               @id @default(cuid())
+  jobId       String               @map("job_id")
+  userId      String               @map("user_id")
+  coverLetter String?              @db.Text @map("cover_letter")
+  resumeUrl   String?              @map("resume_url")
+  status      JobApplicationStatus @default(PENDING)
+
+  job         Job                  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  user        User                 @relation("JobApplications", fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime             @default(now()) @map("created_at")
+  updatedAt   DateTime             @updatedAt @map("updated_at")
+
+  @@unique([jobId, userId])
+  @@index([userId, status])
+  @@map("job_applications")
 }
 
 // ─── Marketplace ─────────────────────────────────────────────────
