@@ -3,12 +3,13 @@
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { FolderOpen, Trophy, Users } from "lucide-react";
+import { Briefcase, FolderOpen, Trophy, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ShowcaseClient } from "../showcase/showcase-client";
 import { LeaderboardContent } from "../leaderboard/leaderboard-content";
 import { MembersContent, type SerializedMember } from "./members-content";
 import type { Level } from "@/lib/xp";
+import { JobsContent } from "./jobs-content";
 
 type LeaderboardEntry = {
   userId: string;
@@ -34,6 +35,25 @@ type SerializedProject = {
   challenge: { id: string; slug: string; title: string } | null;
 };
 
+export type SerializedJob = {
+  id: string;
+  slug: string;
+  title: string;
+  company: string;
+  companyUrl: string | null;
+  location: string | null;
+  locationType: string;
+  type: string;
+  salaryMin: number | null;
+  salaryMax: number | null;
+  salaryCurrency: string;
+  skills: string[];
+  status: string;
+  createdAt: string;
+  author: { id: string; name: string | null; image: string | null };
+  _count: { applications: number };
+};
+
 export function CommunityClient({
   projects,
   totalProjects,
@@ -41,6 +61,8 @@ export function CommunityClient({
   xpBoard,
   streakBoard,
   members,
+  jobs,
+  totalJobs,
 }: {
   projects: SerializedProject[];
   totalProjects: number;
@@ -48,6 +70,8 @@ export function CommunityClient({
   xpBoard: LeaderboardEntry[];
   streakBoard: LeaderboardEntry[];
   members: SerializedMember[];
+  jobs: SerializedJob[];
+  totalJobs: number;
 }) {
   const t = useTranslations("community");
   const searchParams = useSearchParams();
@@ -62,13 +86,14 @@ export function CommunityClient({
 
   const tabs = [
     { value: "showcase", icon: FolderOpen, label: t("showcaseTab"), count: totalProjects },
+    { value: "jobs", icon: Briefcase, label: t("jobsTab"), count: totalJobs },
     { value: "leaderboard", icon: Trophy, label: t("leaderboardTab") },
     { value: "members", icon: Users, label: t("membersTab"), count: members.length },
   ] as const;
 
   return (
     <div className="mt-8">
-      <div className="grid grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
         {tabs.map((tab) => {
           const isActive = currentTab === tab.value;
           const Icon = tab.icon;
@@ -124,6 +149,9 @@ export function CommunityClient({
             likedProjectIds={likedProjectIds}
             embedded
           />
+        )}
+        {currentTab === "jobs" && (
+          <JobsContent jobs={jobs} totalJobs={totalJobs} />
         )}
         {currentTab === "leaderboard" && (
           <LeaderboardContent xpBoard={xpBoard} streakBoard={streakBoard} />
