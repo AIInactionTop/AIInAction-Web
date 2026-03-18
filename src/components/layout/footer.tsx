@@ -21,6 +21,7 @@ export function Footer() {
       links: [
         { href: "https://github.com/AIInactionTop", label: t("github"), external: true },
         { href: "/community" as const, label: t("projects") },
+        { href: "/jobs" as const, label: t("jobs") },
         { href: "/about" as const, label: t("about") },
       ],
     },
