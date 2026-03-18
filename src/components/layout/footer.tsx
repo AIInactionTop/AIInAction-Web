@@ -13,6 +13,7 @@ export function Footer() {
       links: [
         { href: "/challenges" as const, label: t("challenges") },
         { href: "/paths" as const, label: t("learningPaths") },
+        { href: "/marketplace" as const, label: t("marketplace") },
         { href: "/community" as const, label: t("showcase") },
       ],
     },

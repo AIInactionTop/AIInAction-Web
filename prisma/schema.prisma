@@ -68,6 +68,9 @@ model User {
   billingSubscriptions BillingSubscription[]
   creditLedgerEntries CreditLedgerEntry[]
   aiUsageRecords     AiUsageRecord[]
+  marketplaceItems   MarketplaceItem[]     @relation("MarketplaceSeller")
+  marketplaceReviews MarketplaceReview[]
+  marketplacePurchases MarketplacePurchase[]
 
   @@map("users")
 }
@@ -591,4 +594,86 @@ enum AiUsageStatus {
   COMPLETED
   FAILED
   REFUNDED
+}
+
+// ─── Marketplace ─────────────────────────────────────────────────
+
+enum MarketplaceItemType {
+  SKILL
+  TEMPLATE
+  PRODUCT
+  SERVICE
+}
+
+enum MarketplaceItemStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model MarketplaceItem {
+  id          String                @id @default(cuid())
+  slug        String                @unique
+  title       String
+  description String                @db.Text
+  longDescription String?           @db.Text @map("long_description")
+  type        MarketplaceItemType
+  status      MarketplaceItemStatus @default(DRAFT)
+
+  price       Int                   @default(0)
+  currency    String                @default("usd")
+
+  imageUrl    String?               @map("image_url")
+  demoUrl     String?               @map("demo_url")
+  sourceUrl   String?               @map("source_url")
+
+  tags        String[]
+  features    String[]
+
+  sellerId    String                @map("seller_id")
+  seller      User                  @relation("MarketplaceSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+
+  viewsCount     Int               @default(0) @map("views_count")
+  salesCount     Int               @default(0) @map("sales_count")
+  avgRating      Float             @default(0) @map("avg_rating")
+  reviewsCount   Int               @default(0) @map("reviews_count")
+
+  reviews        MarketplaceReview[]
+  purchases      MarketplacePurchase[]
+
+  createdAt   DateTime              @default(now()) @map("created_at")
+  updatedAt   DateTime              @updatedAt @map("updated_at")
+
+  @@index([type, status])
+  @@index([sellerId])
+  @@map("marketplace_items")
+}
+
+model MarketplaceReview {
+  id        String          @id @default(cuid())
+  rating    Int
+  comment   String?         @db.Text
+  userId    String          @map("user_id")
+  itemId    String          @map("item_id")
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item      MarketplaceItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  createdAt DateTime        @default(now()) @map("created_at")
+  updatedAt DateTime        @updatedAt @map("updated_at")
+
+  @@unique([userId, itemId])
+  @@map("marketplace_reviews")
+}
+
+model MarketplacePurchase {
+  id        String          @id @default(cuid())
+  userId    String          @map("user_id")
+  itemId    String          @map("item_id")
+  price     Int
+  currency  String          @default("usd")
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item      MarketplaceItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  createdAt DateTime        @default(now()) @map("created_at")
+
+  @@unique([userId, itemId])
+  @@map("marketplace_purchases")
 }

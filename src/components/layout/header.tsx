@@ -33,6 +33,7 @@ export function Header() {
     { href: "/challenges" as const, label: t("challenges") },
     { href: "/activities" as const, label: t("activities") },
     { href: "/paths" as const, label: t("paths") },
+    { href: "/marketplace" as const, label: t("marketplace") },
     { href: "/community" as const, label: t("community") },
     { href: "/ai-studio" as const, label: t("aiStudio") },
   ];
