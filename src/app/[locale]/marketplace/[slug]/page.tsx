@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { getMarketplaceItemBySlug } from "@/lib/marketplace";
 import { auth } from "@/lib/auth";
 import { MarketplaceItemDetail } from "./marketplace-item-detail";
-import { setRequestLocale, getTranslations } from "next-intl/server";
+import { setRequestLocale } from "next-intl/server";
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>;
