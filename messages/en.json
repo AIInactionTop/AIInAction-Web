@@ -23,6 +23,7 @@
     "all": "All"
   },
   "nav": {
+    "learn": "Learn",
     "challenges": "Challenges",
     "activities": "Activities",
     "paths": "Learning Paths",
@@ -453,7 +454,11 @@
     "termsTitle": "Terms of Service",
     "termsDescription": "AI In Action Terms of Service — rules and guidelines for using our platform.",
     "jobsTitle": "Jobs",
-    "jobsDescription": "Find AI & tech job opportunities posted by the community."
+    "jobsDescription": "Find AI & tech job opportunities posted by the community.",
+    "learnTitle": "Learn - AI In Action",
+    "learnDescription": "Discover AI challenges, learning paths, and activities",
+    "activitiesTitle": "Activities - AI In Action",
+    "activitiesDescription": "Join hackathons, themed events, and community activities"
   },
   "categories": {
     "web-development": { "name": "Web Development", "description": "Build modern web applications from responsive portfolios to full-stack platforms." },
@@ -688,5 +693,46 @@
     "confirmOutline": "The outline looks good, please generate the details for all challenges.",
     "saved": "Learning path saved successfully!",
     "published": "Learning path published successfully!"
+  },
+  "learn": {
+    "title": "Learn",
+    "subtitle": "Discover challenges, learning paths, and activities",
+    "continueLearning": "Continue Learning",
+    "popularChallenges": "Popular Challenges",
+    "learningPaths": "Learning Paths",
+    "activeActivities": "Activities",
+    "viewAll": "View All",
+    "all": "All",
+    "official": "Official",
+    "community": "Community"
+  },
+  "activities": {
+    "title": "Activities",
+    "subtitle": "Join hackathons, themed events, and community activities",
+    "create": "Create Activity",
+    "type": "Type",
+    "status": "Status",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "externalUrl": "External URL",
+    "content": "Content",
+    "coverImage": "Cover Image",
+    "description": "Description",
+    "hackathon": "Hackathon",
+    "themed": "Themed",
+    "external": "External",
+    "general": "General",
+    "draft": "Draft",
+    "upcoming": "Upcoming",
+    "active": "Active",
+    "ended": "Ended",
+    "noActivities": "No activities yet",
+    "viewDetails": "View Details",
+    "joinNow": "Join Now",
+    "visitSite": "Visit Site",
+    "editActivity": "Edit Activity",
+    "deleteActivity": "Delete Activity",
+    "associatedChallenges": "Associated Challenges",
+    "backToActivities": "Activities"
   }
 }

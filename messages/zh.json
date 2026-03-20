@@ -23,6 +23,7 @@
     "all": "全部"
   },
   "nav": {
+    "learn": "学习",
     "challenges": "挑战",
     "activities": "活动",
     "paths": "学习路径",
@@ -453,7 +454,11 @@
     "termsTitle": "服务条款",
     "termsDescription": "AI In Action 服务条款 — 使用本平台的规则与准则。",
     "jobsTitle": "招聘",
-    "jobsDescription": "发现社区发布的 AI 和技术岗位机会。"
+    "jobsDescription": "发现社区发布的 AI 和技术岗位机会。",
+    "learnTitle": "学习 - AI In Action",
+    "learnDescription": "探索 AI 挑战、学习路径和活动",
+    "activitiesTitle": "活动 - AI In Action",
+    "activitiesDescription": "参加黑客松、主题活动和社区活动"
   },
   "categories": {
     "web-development": { "name": "Web 开发", "description": "从响应式作品集到全栈平台，构建现代 Web 应用。" },
@@ -688,5 +693,46 @@
     "confirmOutline": "大纲看起来不错，请为所有挑战生成详细内容。",
     "saved": "学习路径保存成功！",
     "published": "学习路径发布成功！"
+  },
+  "learn": {
+    "title": "学习",
+    "subtitle": "探索挑战、学习路径和活动",
+    "continueLearning": "继续学习",
+    "popularChallenges": "热门挑战",
+    "learningPaths": "学习路径",
+    "activeActivities": "活动",
+    "viewAll": "查看全部",
+    "all": "全部",
+    "official": "官方",
+    "community": "社区"
+  },
+  "activities": {
+    "title": "活动",
+    "subtitle": "参加黑客松、主题活动和社区活动",
+    "create": "创建活动",
+    "type": "类型",
+    "status": "状态",
+    "startDate": "开始日期",
+    "endDate": "结束日期",
+    "externalUrl": "外部链接",
+    "content": "内容",
+    "coverImage": "封面图片",
+    "description": "描述",
+    "hackathon": "黑客松",
+    "themed": "主题活动",
+    "external": "外部活动",
+    "general": "通用活动",
+    "draft": "草稿",
+    "upcoming": "即将开始",
+    "active": "进行中",
+    "ended": "已结束",
+    "noActivities": "暂无活动",
+    "viewDetails": "查看详情",
+    "joinNow": "立即加入",
+    "visitSite": "访问网站",
+    "editActivity": "编辑活动",
+    "deleteActivity": "删除活动",
+    "associatedChallenges": "关联挑战",
+    "backToActivities": "活动"
   }
 }
