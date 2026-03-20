@@ -10,6 +10,12 @@ import {
   Gamepad2,
   Smartphone,
   Bot,
+  Pen,
+  Image,
+  Video,
+  BarChart3,
+  AudioLines,
+  Terminal,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { difficultyConfig } from "@/lib/constants";
@@ -38,6 +44,12 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Gamepad2,
   Smartphone,
   Bot,
+  Pen,
+  Image,
+  Video,
+  BarChart3,
+  AudioLines,
+  Terminal,
 };
 
 const stagger = {

@@ -9,7 +9,30 @@ import {
   Calendar,
   ChevronRight,
   Shield,
+  Code2,
+  Gamepad2,
+  Smartphone,
+  Bot,
+  Pen,
+  Image,
+  Video,
+  BarChart3,
+  AudioLines,
+  Terminal,
 } from "lucide-react";
+
+const pathIconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  Code2,
+  Gamepad2,
+  Smartphone,
+  Bot,
+  Pen,
+  Image,
+  Video,
+  BarChart3,
+  AudioLines,
+  Terminal,
+};
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -117,6 +140,7 @@ export function LearnClient({
   const t = useTranslations("learn");
   const tc = useTranslations("common");
   const td = useTranslations("difficulty");
+  const tPath = useTranslations("pathContent");
   const [challengeFilter, setChallengeFilter] = useState<
     "all" | "official" | "community"
   >("all");
@@ -258,12 +282,16 @@ export function LearnClient({
                       className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg text-lg"
                       style={{
                         backgroundColor: `${path.color || "#6366f1"}15`,
+                        color: path.color || "#6366f1",
                       }}
                     >
-                      {path.icon || "📚"}
+                      {(() => {
+                        const Icon = pathIconMap[path.icon || ""];
+                        return Icon ? <Icon className="h-5 w-5" /> : "📚";
+                      })()}
                     </div>
                     <h3 className="font-semibold transition-colors group-hover:text-primary">
-                      {path.title}
+                    {tPath.has(`${path.slug}.title`) ? tPath(`${path.slug}.title`) : path.title}
                     </h3>
                     <p className="mt-1 text-xs text-muted-foreground">
                       {path.challengeCount} {tc("challenges")}

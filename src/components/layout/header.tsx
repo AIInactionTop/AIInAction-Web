@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Github, Moon, Sun, Zap, Plus, ChevronDown, Building2 } from "lucide-react";
+import { Menu, X, Github, Moon, Sun, Zap, Plus, ChevronDown, Building2, Coins, Crown, UserCircle, LogOut } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { signIn, signOut, useSession } from "next-auth/react";
@@ -182,23 +182,33 @@ export function Header() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem asChild>
+                  <Link href="/credits">
+                    <Coins className="mr-2 h-4 w-4" />
+                    Credits
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/membership">
+                    <Crown className="mr-2 h-4 w-4" />
+                    Membership
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href={`/profile/${session.user.id}` as never}>
+                    <UserCircle className="mr-2 h-4 w-4" />
+                    Profile
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
                   <Link href="/enterprise">
                     <Building2 className="mr-2 h-4 w-4" />
                     {t("enterprise")}
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/credits">Credits</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/membership">Membership</Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href={`/profile/${session.user.id}` as never}>Profile</Link>
-                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => signOut()}>
+                  <LogOut className="mr-2 h-4 w-4" />
                   {tc("signOut")}
                 </DropdownMenuItem>
               </DropdownMenuContent>

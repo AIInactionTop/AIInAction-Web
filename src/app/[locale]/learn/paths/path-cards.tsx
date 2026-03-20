@@ -2,7 +2,7 @@
 
 import { Link } from "@/i18n/navigation";
 import { motion } from "framer-motion";
-import { ChevronRight, Code2, Gamepad2, Smartphone, Bot } from "lucide-react";
+import { ChevronRight, Code2, Gamepad2, Smartphone, Bot, Pen, Image, Video, BarChart3, AudioLines, Terminal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useTranslations } from "next-intl";
 
@@ -27,6 +27,12 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Gamepad2,
   Smartphone,
   Bot,
+  Pen,
+  Image,
+  Video,
+  BarChart3,
+  AudioLines,
+  Terminal,
 };
 
 const stagger = {
