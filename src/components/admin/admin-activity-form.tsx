@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { ArrowUp, ArrowDown, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +28,7 @@ import {
   reorderActivityChallenges,
 } from "@/actions/admin/activities";
 import { ChallengePicker } from "@/components/admin/challenge-picker";
+import { ImageUpload } from "@/components/ui/image-upload";
 import type { ActivityType, ActivityStatus } from "@prisma/client";
 
 type Challenge = {
@@ -64,6 +65,7 @@ function formatDateForInput(dateStr: string | null): string {
 
 export function AdminActivityForm({ activity }: { activity: Activity }) {
   const [isReordering, startReorder] = useTransition();
+  const [coverImage, setCoverImage] = useState(activity.coverImage ?? "");
   const challengeIds = activity.challenges.map((ac) => ac.challengeId);
 
   function handleMoveUp(index: number) {
@@ -186,14 +188,12 @@ export function AdminActivityForm({ activity }: { activity: Activity }) {
               </div>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">
-                Cover Image URL
-              </label>
-              <Input
-                name="coverImage"
-                type="url"
-                defaultValue={activity.coverImage ?? ""}
+              <ImageUpload
+                value={coverImage}
+                onChange={setCoverImage}
+                label="Cover Image"
               />
+              <input type="hidden" name="coverImage" value={coverImage} />
             </div>
             <Button type="submit" className="w-full">
               Save Changes

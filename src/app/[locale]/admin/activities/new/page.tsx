@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { createAdminActivity } from "@/actions/admin/activities";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,8 +13,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ImageUpload } from "@/components/ui/image-upload";
 
 export default function NewActivityPage() {
+  const [coverImage, setCoverImage] = useState("");
+
   return (
     <div className="mx-auto max-w-2xl">
       <h1 className="mb-6 text-2xl font-bold">New Activity</h1>
@@ -70,10 +76,12 @@ export default function NewActivityPage() {
               </div>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">
-                Cover Image URL
-              </label>
-              <Input name="coverImage" type="url" />
+              <ImageUpload
+                value={coverImage}
+                onChange={setCoverImage}
+                label="Cover Image"
+              />
+              <input type="hidden" name="coverImage" value={coverImage} />
             </div>
             <Button type="submit" className="w-full">
               Create Activity
