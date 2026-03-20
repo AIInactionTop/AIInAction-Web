@@ -99,7 +99,7 @@ export async function markComplete(
   }
 
   if (challenge) {
-    revalidatePath(`/challenges/${challenge.slug}`);
+    revalidatePath(`/learn/challenges/${challenge.slug}`);
   }
 
   return {
@@ -138,6 +138,6 @@ export async function saveReflection(
   });
 
   if (completion.challenge) {
-    revalidatePath(`/challenges/${completion.challenge.slug}`);
+    revalidatePath(`/learn/challenges/${completion.challenge.slug}`);
   }
 }

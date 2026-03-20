@@ -208,7 +208,7 @@ export function ShowcaseDetailClient({
 
       {project.challenge && (
         <div className="mt-4">
-          <Link href={`/challenges/${project.challenge.slug}`}>
+          <Link href={`/learn/challenges/${project.challenge.slug}`}>
             <Badge
               variant="secondary"
               className="transition-colors hover:bg-secondary/80"

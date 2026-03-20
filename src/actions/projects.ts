@@ -57,7 +57,7 @@ export async function createProject(formData: FormData) {
 
   revalidatePath("/showcase");
   if (challengeSlug) {
-    revalidatePath(`/challenges/${challengeSlug}`);
+    revalidatePath(`/learn/challenges/${challengeSlug}`);
   }
 }
 
