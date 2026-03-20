@@ -16,20 +16,41 @@ Future plan: weekly newsletter emails to users.
 
 ## Data Models
 
+Follow existing schema conventions: `@@map` for table names, `@map` for column names, Prisma enums for status fields.
+
+### New Enums
+
+```prisma
+enum EmailTemplateStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum EmailSendStatus {
+  PENDING
+  SENDING
+  COMPLETED
+  FAILED
+}
+```
+
 ### EmailTemplate
 
 ```prisma
 model EmailTemplate {
-  id          String   @id @default(cuid())
-  name        String                    // Template name, e.g. "Weekly Newsletter"
-  subject     String                    // Email subject, supports variables like {{userName}}
-  content     Json                      // TipTap JSON document structure
-  htmlContent String?  @db.Text         // Cached HTML generated from TipTap JSON
-  variables   String[] @default([])     // Declared available variables ["userName", "email"]
-  status      String   @default("draft") // draft | active
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id          String              @id @default(cuid())
+  name        String                                     // Template name, e.g. "Weekly Newsletter"
+  subject     String                                     // Email subject, supports variables like {{userName}}
+  content     Json                                       // TipTap JSON document structure
+  htmlContent String?             @map("html_content") @db.Text  // Cached HTML generated from TipTap JSON
+  variables   String[]            @default([])           // Declared available variables ["userName", "email"]
+  status      EmailTemplateStatus @default(DRAFT)
+  createdAt   DateTime            @default(now()) @map("created_at")
+  updatedAt   DateTime            @updatedAt @map("updated_at")
   sendLogs    EmailSendLog[]
+
+  @@map("email_templates")
 }
 ```
 
@@ -37,20 +58,48 @@ model EmailTemplate {
 
 ```prisma
 model EmailSendLog {
-  id              String   @id @default(cuid())
-  templateId      String
-  template        EmailTemplate @relation(fields: [templateId], references: [id])
-  recipientFilter String               // Filter key: "all" / "active_30d" / "completed_challenge" / "has_project"
-  totalCount      Int                  // Target recipient count
-  successCount    Int      @default(0)
-  failCount       Int      @default(0)
-  status          String   @default("pending") // pending | sending | completed | failed
-  sentAt          DateTime?
-  sentBy          String               // Admin user id who triggered the send
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id              String          @id @default(cuid())
+  templateId      String          @map("template_id")
+  template        EmailTemplate   @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  recipientFilter String          @map("recipient_filter")  // "all" / "active_30d" / "completed_challenge" / "has_project"
+  totalCount      Int             @map("total_count")
+  successCount    Int             @default(0) @map("success_count")
+  failCount       Int             @default(0) @map("fail_count")
+  status          EmailSendStatus @default(PENDING)
+  sentAt          DateTime?       @map("sent_at")
+  sentById        String          @map("sent_by_id")
+  sentBy          User            @relation("emailSendLogs", fields: [sentById], references: [id])
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+
+  @@index([templateId])
+  @@index([status])
+  @@map("email_send_logs")
 }
 ```
+
+**Note**: Add `emailSendLogs EmailSendLog[] @relation("emailSendLogs")` to the `User` model.
+
+## Auth: Admin Page Guard
+
+The existing `requireAdminUser()` returns JSON error responses designed for API routes. For Server Components/layouts, create a new helper:
+
+```typescript
+// src/lib/admin-auth.ts
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
+import { isAdminEmail } from "@/lib/billing/admin";
+
+export async function requireAdminPage() {
+  const session = await auth();
+  if (!session?.user?.email || !isAdminEmail(session.user.email)) {
+    redirect("/");
+  }
+  return session.user;
+}
+```
+
+This is used in `admin/layout.tsx` to redirect non-admins.
 
 ## Route Structure
 
@@ -58,7 +107,7 @@ All admin pages live under `src/app/[locale]/admin/` following the existing i18n
 
 ```
 src/app/[locale]/admin/
-├── layout.tsx                    # Admin layout with sidebar, requireAdminUser() auth guard
+├── layout.tsx                    # Admin layout with sidebar, requireAdminPage() auth guard
 ├── page.tsx                      # Admin dashboard (simple overview)
 └── emails/
     ├── page.tsx                  # Email template list
@@ -76,39 +125,49 @@ src/app/[locale]/admin/
 
 ### Layout (admin/layout.tsx)
 
-- Calls `requireAdminUser()` — redirects non-admins to homepage
+- Calls `requireAdminPage()` — redirects non-admins to homepage
 - Sidebar navigation with "Email Management" section (expandable for future admin modules)
 - Independent layout from the public-facing site (no Header/Footer)
 
-## Server Actions
+### Admin i18n
 
-Located in `src/actions/admin/`.
+Admin UI uses English only. Translation keys are not required for admin pages. The `[locale]` prefix is inherited from the routing structure but admin content is not translated.
 
-### email-templates.ts
+## Query Functions & Server Actions
 
-| Action | Description |
-|--------|-------------|
-| `createEmailTemplate(data)` | Create template with status `draft` |
-| `updateEmailTemplate(id, data)` | Update template; regenerate `htmlContent` from TipTap JSON |
-| `deleteEmailTemplate(id)` | Delete template (block if has send logs; must archive instead) |
-| `getEmailTemplates()` | List all templates |
+Following existing codebase conventions: **read operations** go in `src/lib/`, **mutations** go in `src/actions/`.
+
+### src/lib/admin-emails.ts (Read Operations)
+
+| Function | Description |
+|----------|-------------|
+| `getEmailTemplates()` | List all templates (non-archived) |
 | `getEmailTemplate(id)` | Get single template details |
+| `getRecipientCount(filter)` | Query matching user count for a filter condition |
+| `getEmailSendLogs()` | List send history with template info |
 
-### email-send.ts
+### src/actions/admin/email-templates.ts (Mutations)
 
 | Action | Description |
 |--------|-------------|
-| `getRecipientCount(filter)` | Query matching user count for a filter condition |
+| `createEmailTemplate(data)` | Create template with status `DRAFT` |
+| `updateEmailTemplate(id, data)` | Update template; regenerate `htmlContent` from TipTap JSON |
+| `archiveEmailTemplate(id)` | Set status to `ARCHIVED` (templates with send logs cannot be deleted) |
+| `deleteEmailTemplate(id)` | Hard delete (only if no send logs exist) |
+
+### src/actions/admin/email-send.ts (Mutations)
+
+| Action | Description |
+|--------|-------------|
 | `sendTestEmail(templateId)` | Send test email to current admin's email with sample data |
-| `sendBulkEmail(templateId, filter)` | Bulk send: create log, query users, send via Resend, update counts |
-| `getEmailSendLogs()` | List send history |
+| `sendBulkEmail(templateId, filter)` | Bulk send using Resend batch API (see Sending Strategy below) |
 
 ### Recipient Filters (Presets)
 
 | Filter Key | Description | Query Logic |
 |------------|-------------|-------------|
 | `all` | All users | `email IS NOT NULL` |
-| `active_30d` | Active in last 30 days | Recent session in `Session` table |
+| `active_30d` | Active in last 30 days | `UserStats.lastActiveDate` within 30 days |
 | `completed_challenge` | Completed a challenge | Has record in `ChallengeCompletion` |
 | `has_project` | Submitted a project | Has record in `SharedProject` |
 
@@ -122,7 +181,34 @@ Built-in variables available at send time:
 | `{{userEmail}}` | User's email |
 | `{{siteUrl}}` | Site URL (from `NEXTAUTH_URL`) |
 
-Replacement uses regex `/\{\{(\w+)\}\}/g` on both `htmlContent` and `subject`.
+Replacement is performed on both `htmlContent` and `subject` using regex `/\{\{(\w+)\}\}/g`.
+
+## Bulk Email Sending Strategy
+
+Synchronous per-user sending will time out for large user bases. Use **Resend's batch API** (`resend.batch.send()`) which accepts up to 100 emails per call:
+
+```
+sendBulkEmail(templateId, filter):
+  1. Create EmailSendLog (status: PENDING)
+  2. Update status to SENDING
+  3. Query all matching users
+  4. Chunk users into batches of 100
+  5. For each batch:
+     a. Build email payloads with variable replacement per user
+     b. Call resend.batch.send(payloads)
+     c. Increment successCount / failCount based on batch result
+     d. Update EmailSendLog counts
+  6. Update status to COMPLETED (or FAILED if all failed)
+  7. Set sentAt timestamp
+```
+
+For very large sends (1000+ users), the action still runs in a single request. If this becomes a problem, a background job queue can be added in a future iteration. For now, Next.js server action timeout is configurable and sufficient for the expected user base.
+
+### Error Handling
+
+- Failed sends are counted in `failCount` and visible in the logs UI
+- No automatic retry — admin can view the log and manually re-send if needed
+- `onDelete: Restrict` on `EmailSendLog.templateId` prevents accidental template deletion
 
 ## Frontend Components
 
@@ -149,7 +235,7 @@ src/components/admin/
 - TipTap editor with toolbar: bold, italic, headings (H1-H3), link, image, ordered/unordered lists, blockquote
 - Right-side variable panel: lists available variables, click to insert `{{variableName}}` at cursor
 - Bottom: template name input, email subject input (also supports variables)
-- Auto-save: debounce 2 seconds, calls `updateEmailTemplate`
+- Auto-save: debounce 2 seconds, calls `updateEmailTemplate`. Saves are queued sequentially to prevent race conditions from rapid edits.
 
 ### email-preview.tsx
 
@@ -169,31 +255,13 @@ src/components/admin/
 Uses existing shadcn/ui components: `Card`, `Table`, `Button`, `Input`, `Select`, `Dialog`, `Badge`, `Tabs`.
 Admin sidebar uses a custom fixed sidebar component. Design language consistent with the public site.
 
-## Email Sending Flow
-
-```
-Admin clicks "Send" on send page
-  → send-confirm-dialog shows recipient count + template preview
-  → Admin confirms
-  → sendBulkEmail(templateId, filter) called
-    → Create EmailSendLog (status: "pending")
-    → Update status to "sending"
-    → Query users matching filter
-    → For each user:
-      → Replace variables in subject + htmlContent
-      → Call Resend API to send email
-      → Increment successCount or failCount
-    → Update EmailSendLog status to "completed" (or "failed" if all failed)
-    → Update sentAt timestamp
-  → Redirect to send logs page
-```
-
 ## Existing Infrastructure Leveraged
 
-- **Auth**: `requireAdminUser()` from `src/lib/billing/admin.ts` (email-based admin check via `ADMIN_EMAILS` env var)
+- **Auth**: `isAdminEmail()` from `src/lib/billing/admin.ts` + new `requireAdminPage()` for page-level auth
 - **Email**: Resend client already configured in `src/lib/email.ts`
-- **Database**: Prisma + PostgreSQL, existing patterns for model relations
+- **Database**: Prisma + PostgreSQL, existing `@@map`/`@map` conventions, Prisma enums
 - **UI**: shadcn/ui component library, Tailwind CSS v4
+- **Activity tracking**: `UserStats.lastActiveDate` for the `active_30d` filter
 
 ## Out of Scope (Future Iterations)
 
@@ -202,3 +270,5 @@ Admin clicks "Send" on send page
 - Unsubscribe mechanism
 - Rich template library / pre-built designs
 - Per-recipient send log (currently only aggregate counts)
+- Retry mechanism for failed sends
+- Background job queue for very large sends
