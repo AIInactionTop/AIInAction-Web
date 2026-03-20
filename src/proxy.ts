@@ -5,7 +5,7 @@ import { locales } from './i18n/config';
 
 const handleI18nRouting = createMiddleware(routing);
 
-const OLD_ROUTES = ['/challenges', '/paths', '/activities'];
+const OLD_ROUTES = ['/challenges', '/paths'];
 
 export default function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
