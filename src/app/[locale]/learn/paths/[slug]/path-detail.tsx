@@ -80,7 +80,7 @@ export function PathDetail({
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Link
-          href="/paths"
+          href="/learn/paths"
           className="flex items-center gap-1 transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" />

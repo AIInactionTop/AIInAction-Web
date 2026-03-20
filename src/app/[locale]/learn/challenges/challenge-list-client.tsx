@@ -294,7 +294,7 @@ export function ChallengeListClient({
         </div>
         {session && (
           <Button asChild className="gap-2 shrink-0">
-            <Link href="/challenges/new">
+            <Link href="/learn/challenges/new">
               <Plus className="h-4 w-4" />
               {tc("create")}
             </Link>
