@@ -104,6 +104,16 @@ export async function getSurveyById(id: string) {
   });
 }
 
+export async function getSurveyBySlug(slug: string) {
+  return prisma.survey.findUnique({
+    where: { slug },
+    include: {
+      organization: true,
+      _count: { select: { responses: true } },
+    },
+  });
+}
+
 export async function getSurveyByShareToken(shareToken: string) {
   return prisma.survey.findUnique({
     where: { shareToken },
