@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Github, Moon, Sun, Zap, Plus, ChevronDown } from "lucide-react";
+import { Menu, X, Github, Moon, Sun, Zap, Plus, ChevronDown, Building2 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { signIn, signOut, useSession } from "next-auth/react";
@@ -182,6 +182,12 @@ export function Header() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem asChild>
+                  <Link href="/enterprise">
+                    <Building2 className="mr-2 h-4 w-4" />
+                    {t("enterprise")}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
                   <Link href="/credits">Credits</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
@@ -291,6 +297,14 @@ export function Header() {
               ))}
               {session?.user && (
                 <>
+                  <Link
+                    href="/enterprise"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    <Building2 className="mr-2 h-4 w-4" />
+                    {t("enterprise")}
+                  </Link>
                   <Link
                     href="/credits"
                     onClick={() => setMobileOpen(false)}
