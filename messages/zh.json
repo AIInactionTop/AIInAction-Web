@@ -842,6 +842,27 @@
     "ENTERPRISE_1000_PLUS": "1000人以上",
     "OWNER": "所有者",
     "ADMIN": "管理员",
-    "MEMBER": "成员"
+    "MEMBER": "成员",
+    "featureSurvey": "AI 就绪度调研",
+    "featureSurveyDesc": "通过结构化的诊断调研，评估团队在关键维度上的 AI 能力水平。",
+    "featureReport": "诊断报告",
+    "featureReportDesc": "获取 AI 生成的洞察，包括维度评分、部门分析和可执行的建议。",
+    "featureTraining": "培训计划",
+    "featureTrainingDesc": "获取根据企业技能缺口和目标量身定制的个性化学习路径。",
+    "featureROI": "ROI 计算器",
+    "featureROIDesc": "通过详细的成本效益预测，评估 AI 采用的投资回报率。",
+    "featureProgress": "进度追踪",
+    "featureProgressDesc": "通过趋势分析，监控企业 AI 转型旅程的进展。",
+    "signInToStart": "登录以开始使用",
+    "viewDashboard": "查看概览",
+    "membersCount": "{count} 名成员",
+    "joinOrgTitle": "加入企业",
+    "joinOrgButton": "加入企业",
+    "inviteNotFound": "此邀请链接无效或已被使用。",
+    "inviteExpired": "此邀请链接已过期。",
+    "inviteAccepted": "此邀请已被接受。",
+    "orgNamePlaceholder": "输入企业名称",
+    "orgDescPlaceholder": "简要描述您的企业",
+    "create": "创建"
   }
 }

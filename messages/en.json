@@ -842,6 +842,27 @@
     "ENTERPRISE_1000_PLUS": "1000+ employees",
     "OWNER": "Owner",
     "ADMIN": "Admin",
-    "MEMBER": "Member"
+    "MEMBER": "Member",
+    "featureSurvey": "AI Readiness Survey",
+    "featureSurveyDesc": "Assess your team's AI proficiency with structured diagnostic surveys across key dimensions.",
+    "featureReport": "Diagnostic Reports",
+    "featureReportDesc": "Get AI-generated insights with dimension scores, department breakdowns, and actionable recommendations.",
+    "featureTraining": "Training Plans",
+    "featureTrainingDesc": "Receive personalized learning paths tailored to your organization's skill gaps and goals.",
+    "featureROI": "ROI Calculator",
+    "featureROIDesc": "Estimate the return on investment for AI adoption with detailed cost-benefit projections.",
+    "featureProgress": "Progress Tracking",
+    "featureProgressDesc": "Monitor your organization's AI transformation journey with trend analysis over time.",
+    "signInToStart": "Sign in to get started",
+    "viewDashboard": "View Dashboard",
+    "membersCount": "{count} members",
+    "joinOrgTitle": "Join Organization",
+    "joinOrgButton": "Join Organization",
+    "inviteNotFound": "This invite link is invalid or has already been used.",
+    "inviteExpired": "This invite link has expired.",
+    "inviteAccepted": "This invite has already been accepted.",
+    "orgNamePlaceholder": "Enter organization name",
+    "orgDescPlaceholder": "Brief description of your organization",
+    "create": "Create"
   }
 }
