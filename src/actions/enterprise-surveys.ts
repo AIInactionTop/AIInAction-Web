@@ -225,14 +225,14 @@ export async function sendSurveyInvites(surveyId: string) {
   const baseUrl = process.env.NEXTAUTH_URL || "https://aiinaction.top";
 
   for (const inviteToken of tokens) {
-    const email = inviteToken.member.user.email;
+    const email = inviteToken.member.email ?? inviteToken.member.user?.email;
     if (!email) {
       skipped++;
       continue;
     }
 
     const surveyUrl = `${baseUrl}/survey/${survey.shareToken}?t=${inviteToken.token}`;
-    const memberName = inviteToken.member.user.name?.split(" ")[0] || "there";
+    const memberName = inviteToken.member.name?.split(" ")[0] ?? inviteToken.member.user?.name?.split(" ")[0] ?? "there";
 
     try {
       const { Resend } = await import("resend");
@@ -352,8 +352,8 @@ export async function submitSurveyResponse(
     inviteTokenId = inviteToken.id;
     tokenMemberDepartment = inviteToken.member.department1;
     tokenMemberJobTitle = inviteToken.member.jobTitle;
-    tokenMemberEmail = inviteToken.member.user.email;
-    tokenMemberUserId = inviteToken.member.user.id;
+    tokenMemberEmail = inviteToken.member.email ?? inviteToken.member.user?.email ?? null;
+    tokenMemberUserId = inviteToken.member.user?.id ?? null;
   } else {
     // Anonymous/cookie-based submission: apply rate limiting
 

@@ -67,6 +67,8 @@ type InviteToken = {
   createdAt: string;
   member: {
     id: string;
+    name: string | null;
+    email: string | null;
     department1: string | null;
     department2: string | null;
     department3: string | null;
@@ -75,7 +77,7 @@ type InviteToken = {
       name: string | null;
       email: string | null;
       image: string | null;
-    };
+    } | null;
   };
 };
 
@@ -330,23 +332,32 @@ export function SurveyDetailClient({
                   <TableHead>{t("email")}</TableHead>
                   <TableHead>{t("department")}</TableHead>
                   <TableHead>{t("inviteStatus")}</TableHead>
+                  <TableHead>{t("shareLink")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {inviteTokens.map((tok) => (
-                  <TableRow key={tok.id}>
-                    <TableCell>{tok.member.user.name || "—"}</TableCell>
-                    <TableCell>{tok.member.user.email || "—"}</TableCell>
-                    <TableCell>{tok.member.department1 || "—"}</TableCell>
-                    <TableCell>
-                      {tok.usedAt ? (
-                        <Badge variant="default">{t("tokenUsed")}</Badge>
-                      ) : (
-                        <Badge variant="secondary">{t("tokenPending")}</Badge>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {inviteTokens.map((tok) => {
+                  const inviteLink = `${typeof window !== "undefined" ? window.location.origin : ""}/survey/${survey.shareToken}?t=${tok.token}`;
+                  return (
+                    <TableRow key={tok.id}>
+                      <TableCell>{tok.member.name ?? tok.member.user?.name ?? "—"}</TableCell>
+                      <TableCell>{tok.member.email ?? tok.member.user?.email ?? "—"}</TableCell>
+                      <TableCell>{tok.member.department1 || "—"}</TableCell>
+                      <TableCell>
+                        {tok.usedAt ? (
+                          <Badge variant="default">{t("tokenUsed")}</Badge>
+                        ) : (
+                          <Badge variant="secondary">{t("tokenPending")}</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {!tok.usedAt && (
+                          <CopyLinkButton link={inviteLink} />
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </CardContent>
@@ -486,5 +497,37 @@ export function SurveyDetailClient({
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function CopyLinkButton({ link }: { link: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // fallback
+      const textarea = document.createElement("textarea");
+      textarea.value = link;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  return (
+    <Button variant="ghost" size="sm" onClick={handleCopy} className="h-7 px-2">
+      {copied ? (
+        <Check className="h-3 w-3 text-green-600" />
+      ) : (
+        <Copy className="h-3 w-3" />
+      )}
+    </Button>
   );
 }

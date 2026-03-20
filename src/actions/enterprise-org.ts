@@ -286,76 +286,56 @@ export async function batchImportMembers(orgId: string, formData: FormData) {
   if (!org) throw new Error("Organization not found");
 
   let imported = 0;
-  let invited = 0;
   let skipped = 0;
 
   for (const row of rows) {
     const email = row.email.toLowerCase();
 
-    // Check if user exists
+    // Check if already a member by email
+    const existingByEmail = await prisma.organizationMember.findFirst({
+      where: { organizationId: orgId, email },
+    });
+    if (existingByEmail) {
+      skipped++;
+      continue;
+    }
+
+    // Check if user exists on platform — link if so
     const user = await prisma.user.findUnique({
       where: { email },
     });
 
     if (user) {
-      // Check if already a member
-      const existing = await prisma.organizationMember.findUnique({
+      // Also check if already a member by userId
+      const existingByUser = await prisma.organizationMember.findUnique({
         where: {
           organizationId_userId: { organizationId: orgId, userId: user.id },
         },
       });
-
-      if (existing) {
+      if (existingByUser) {
         skipped++;
         continue;
       }
-
-      // Create member directly
-      await prisma.organizationMember.create({
-        data: {
-          organizationId: orgId,
-          userId: user.id,
-          role: row.role,
-          department1: row.department1,
-          department2: row.department2,
-          department3: row.department3,
-          jobTitle: row.jobTitle,
-        },
-      });
-      imported++;
-    } else {
-      // Check if invite already exists
-      const existingInvite = await prisma.organizationInvite.findFirst({
-        where: {
-          organizationId: orgId,
-          email,
-          acceptedAt: null,
-        },
-      });
-
-      if (existingInvite) {
-        skipped++;
-        continue;
-      }
-
-      // Create invite
-      const token = crypto.randomBytes(32).toString("hex");
-      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
-
-      await prisma.organizationInvite.create({
-        data: {
-          organizationId: orgId,
-          email,
-          token,
-          role: row.role,
-          expiresAt,
-        },
-      });
-      invited++;
     }
+
+    // Create member directly (userId is optional — will be linked when user registers)
+    await prisma.organizationMember.create({
+      data: {
+        organizationId: orgId,
+        userId: user?.id ?? null,
+        name: row.name,
+        email,
+        role: row.role,
+        department1: row.department1,
+        department2: row.department2,
+        department3: row.department3,
+        jobTitle: row.jobTitle,
+      },
+    });
+    imported++;
   }
 
   revalidatePath(`/${locale}/enterprise/${org.slug}/members`);
 
-  return { imported, invited, skipped, errors };
+  return { imported, skipped, errors };
 }

@@ -52,6 +52,8 @@ import {
 type Member = {
   id: string;
   role: string;
+  name: string | null;
+  email: string | null;
   department1: string | null;
   department2: string | null;
   department3: string | null;
@@ -62,7 +64,7 @@ type Member = {
     name: string | null;
     email: string | null;
     image: string | null;
-  };
+  } | null;
 };
 
 type Invite = {
@@ -74,7 +76,6 @@ type Invite = {
 
 type ImportResult = {
   imported: number;
-  invited: number;
   skipped: number;
   errors: string[];
 };
@@ -158,7 +159,6 @@ export function MembersClient({
       } catch (err) {
         setImportResult({
           imported: 0,
-          invited: 0,
           skipped: 0,
           errors: [err instanceof Error ? err.message : "Import failed"],
         });
@@ -278,25 +278,25 @@ export function MembersClient({
               {members.map((member) => (
                 <TableRow key={member.id}>
                   <TableCell>
-                    {member.user.image ? (
+                    {member.user?.image ? (
                       <Image
                         src={member.user.image}
-                        alt={member.user.name ?? ""}
+                        alt={member.name ?? member.user.name ?? ""}
                         width={32}
                         height={32}
                         className="rounded-full"
                       />
                     ) : (
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-medium">
-                        {(member.user.name ?? "?")[0]?.toUpperCase()}
+                        {(member.name ?? member.user?.name ?? "?")[0]?.toUpperCase()}
                       </div>
                     )}
                   </TableCell>
                   <TableCell className="font-medium">
-                    {member.user.name ?? "—"}
+                    {member.name ?? member.user?.name ?? "—"}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {member.user.email ?? "—"}
+                    {member.email ?? member.user?.email ?? "—"}
                   </TableCell>
                   <TableCell>{formatDepartment(member)}</TableCell>
                   <TableCell>{member.jobTitle ?? "—"}</TableCell>
@@ -389,21 +389,13 @@ export function MembersClient({
           </DialogHeader>
           {importResult && (
             <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="rounded-lg border p-3 text-center">
                   <p className="text-2xl font-bold text-green-600">
                     {importResult.imported}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     {t("imported")}
-                  </p>
-                </div>
-                <div className="rounded-lg border p-3 text-center">
-                  <p className="text-2xl font-bold text-blue-600">
-                    {importResult.invited}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {t("invited")}
                   </p>
                 </div>
                 <div className="rounded-lg border p-3 text-center">

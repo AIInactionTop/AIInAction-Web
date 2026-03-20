@@ -945,8 +945,10 @@ model OrganizationMember {
   id             String        @id @default(cuid())
   organizationId String        @map("organization_id")
   organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  userId         String        @map("user_id")
-  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String?       @map("user_id")
+  user           User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name           String?
+  email          String?
   role           OrgMemberRole @default(MEMBER)
   department1    String?       @map("department_1")
   department2    String?       @map("department_2")
@@ -957,6 +959,7 @@ model OrganizationMember {
   surveyInviteTokens SurveyInviteToken[]
 
   @@unique([organizationId, userId])
+  @@index([organizationId, email])
   @@map("organization_members")
 }
 
