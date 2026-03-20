@@ -290,9 +290,10 @@ export async function GET(
 
   // 4. Generate PDF
   const buffer = await renderToBuffer(<ReportPDF report={report} />);
+  const uint8 = new Uint8Array(buffer);
 
   // 5. Return PDF response
-  return new NextResponse(buffer, {
+  return new NextResponse(uint8, {
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": `attachment; filename="report-${report.id}.pdf"`,
