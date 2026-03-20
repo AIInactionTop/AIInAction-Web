@@ -53,7 +53,7 @@ export async function generateDiagnosticReport(surveyId: string) {
   }
 
   // Aggregate scores
-  const { overallScore, dimensionScores, departmentScores } =
+  const { overallScore, dimensionScores } =
     aggregateOrgScores(
       responses.map((r) => ({
         answers: r.answers as unknown as SurveyAnswers,

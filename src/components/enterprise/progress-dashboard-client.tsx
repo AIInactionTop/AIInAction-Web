@@ -48,11 +48,10 @@ type ProgressRecord = {
 };
 
 type Props = {
-  orgSlug: string;
   records: ProgressRecord[];
 };
 
-export function ProgressDashboardClient({ orgSlug, records }: Props) {
+export function ProgressDashboardClient({ records }: Props) {
   const t = useTranslations("enterprise");
   const [selectedPeriod, setSelectedPeriod] = useState<string>("all");
 

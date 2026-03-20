@@ -28,7 +28,6 @@ export default async function ProgressPage({ params }: Props) {
 
   return (
     <ProgressDashboardClient
-      orgSlug={slug}
       records={serialize(records)}
     />
   );
