@@ -8,6 +8,17 @@
 
 **商业模式：** 先全免费上线验证需求，后续再加付费逻辑。
 
+## 0. User 模型扩展
+
+需要在现有 `User` 模型中添加以下反向关系字段：
+
+```prisma
+// 在 User 模型中添加
+ownedOrganizations     Organization[]          @relation("OrgOwner")
+organizationMemberships OrganizationMember[]
+surveyResponses        SurveyResponse[]
+```
+
 ## 1. 数据模型
 
 ### 1.1 组织核心
@@ -129,7 +140,7 @@ model SurveyResponse {
   surveyId        String    @map("survey_id")
   survey          Survey    @relation(fields: [surveyId], references: [id], onDelete: Cascade)
   respondentId    String?   @map("respondent_id")
-  respondent      User?     @relation(fields: [respondentId], references: [id])
+  respondent      User?     @relation(fields: [respondentId], references: [id], onDelete: SetNull)
   respondentEmail String?   @map("respondent_email")
   department      String?
   jobTitle        String?   @map("job_title")
@@ -137,8 +148,20 @@ model SurveyResponse {
   aiReadinessScore Float?   @map("ai_readiness_score")
   submittedAt     DateTime  @default(now())
 
+  @@index([surveyId, submittedAt])
   @@map("survey_responses")
 }
+```
+
+#### SurveyAnswers TypeScript 类型
+
+```typescript
+// src/types/enterprise.ts
+type SurveyAnswers = {
+  modules: Record<string, Record<string, number | string | string[]>>;
+  // e.g. { "module2": { "q1": 3, "q2": ["ChatGPT", "Claude"], ... } }
+  custom?: Record<string, number | string | string[]>;
+};
 ```
 
 ### 1.3 诊断报告
@@ -147,9 +170,9 @@ model SurveyResponse {
 model DiagnosticReport {
   id                  String        @id @default(cuid())
   surveyId            String        @map("survey_id")
-  survey              Survey        @relation(fields: [surveyId], references: [id])
+  survey              Survey        @relation(fields: [surveyId], references: [id], onDelete: Cascade)
   organizationId      String        @map("organization_id")
-  organization        Organization  @relation(fields: [organizationId], references: [id])
+  organization        Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   overallScore        Float         @map("overall_score")
   dimensionScores     Json          @map("dimension_scores")
   // 维度: AI认知, AI使用频率, 工具覆盖率, 流程自动化, 数据驱动决策
@@ -161,6 +184,7 @@ model DiagnosticReport {
   trainingPlans       TrainingPlan[]
   roiEstimates        ROIEstimate[]
 
+  @@index([organizationId, generatedAt])
   @@map("diagnostic_reports")
 }
 ```
@@ -171,9 +195,9 @@ model DiagnosticReport {
 model TrainingPlan {
   id              String           @id @default(cuid())
   organizationId  String           @map("organization_id")
-  organization    Organization     @relation(fields: [organizationId], references: [id])
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   reportId        String           @map("report_id")
-  report          DiagnosticReport @relation(fields: [reportId], references: [id])
+  report          DiagnosticReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
   targetRoles     Json             @map("target_roles")
   recommendations Json             // 推荐的 LearningPath 和 Challenge
   aiSuggestions   String?          @db.Text @map("ai_suggestions")
@@ -185,9 +209,9 @@ model TrainingPlan {
 model ROIEstimate {
   id                  String           @id @default(cuid())
   organizationId      String           @map("organization_id")
-  organization        Organization     @relation(fields: [organizationId], references: [id])
+  organization        Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   reportId            String           @map("report_id")
-  report              DiagnosticReport @relation(fields: [reportId], references: [id])
+  report              DiagnosticReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
   currentCosts        Json             @map("current_costs")
   projectedSavings    Json             @map("projected_savings")
   implementationCosts Json             @map("implementation_costs")
@@ -202,16 +226,17 @@ model ROIEstimate {
 model TransformationProgress {
   id               String              @id @default(cuid())
   organizationId   String              @map("organization_id")
-  organization     Organization        @relation(fields: [organizationId], references: [id])
+  organization     Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   surveyId         String              @map("survey_id")
-  survey           Survey              @relation(fields: [surveyId], references: [id])
+  survey           Survey              @relation(fields: [surveyId], references: [id], onDelete: Cascade)
   period           String              // "2026-Q1"
   metrics          Json                // AI工具采用率, 平均AI熟练度, 自动化流程数, 培训完成率
   previousPeriodId String?             @map("previous_period_id")
-  previousPeriod   TransformationProgress? @relation("ProgressChain", fields: [previousPeriodId], references: [id])
+  previousPeriod   TransformationProgress? @relation("ProgressChain", fields: [previousPeriodId], references: [id], onDelete: SetNull)
   nextPeriod       TransformationProgress? @relation("ProgressChain")
   createdAt        DateTime            @default(now())
 
+  @@unique([organizationId, period])
   @@map("transformation_progress")
 }
 ```
@@ -329,8 +354,9 @@ model TransformationProgress {
 | D | 0-39 |
 
 ### 报告触发规则
-- 调研回收率 ≥ 50% 时自动触发报告生成
-- 管理员可手动触发（任意回收量）
+- **自动触发：** 当调研回收率 ≥ 50%（回收数 / 组织成员数）时，在 `SurveyResponse` 创建的 Server Action 末尾检查并触发异步报告生成（调用单独的 `generateDiagnosticReport` Server Action）
+- **手动触发：** 管理员可在调研详情页手动触发（任意回收量）
+- **异步处理：** 报告生成在 Server Action 中同步计算评分，然后异步调用 Claude API 生成叙述。前端轮询 `DiagnosticReport` 的 `aiNarrative` 字段是否已填充来显示生成状态
 
 ## 6. AI 集成
 
@@ -355,13 +381,18 @@ model TransformationProgress {
 
 ## 7. 技术实现要点
 
-- **AI 调用：** Server Action 中调用 Claude API，报告生成为异步任务（生成中显示 loading 状态）
+- **AI 调用：** Server Action 中通过 `ANTHROPIC_API_KEY` 环境变量调用 Claude API（复用现有 `src/lib/ai.ts` 如已存在，否则新建 `src/lib/enterprise-ai.ts`）。报告生成为异步任务（生成中显示 loading 状态）
 - **问卷存储：** `standardModules`、`customQuestions`、`answers` 均使用 JSON 字段
 - **图表库：** Recharts（雷达图、折线图、柱状图）
 - **PDF 导出：** @react-pdf/renderer
 - **邀请机制：** 唯一 token 链接，通过 Resend 发送邮件（复用现有基础设施）
 - **行业对比：** 匿名聚合同行业组织的 overallScore 和 dimensionScores
-- **国际化：** 在 `messages/en.json` 和 `messages/zh.json` 中添加 `enterprise` 命名空间
+- **国际化：** 在 `messages/en.json` 和 `messages/zh.json` 中添加 `enterprise` 命名空间，包含所有调研题目和选项的翻译
+- **公开调研防滥用：** `/survey/[shareToken]` 页面实施 IP 限流（同一 IP 每小时最多 3 次提交）+ 提交后设置 cookie 防重复填写
+- **Slug 保留字：** 组织 slug 创建时校验黑名单（`create`、`join`、`new`、`settings` 等），避免与静态路由冲突
+- **PDF 导出：** @react-pdf/renderer 仅在 Server Action / API Route 中使用，不打包到客户端
+- **行业对比数据：** MVP 阶段平台数据不足时，显示"数据积累中"提示；后续可引入外部行业研究数据作为基准
+- **数据库迁移：** 使用 `prisma migrate dev` 生成正式迁移文件
 
 ## 8. 文件结构
 
@@ -395,10 +426,21 @@ src/app/[locale]/survey/
 src/lib/enterprise.ts                # 查询函数
 src/lib/enterprise-scoring.ts        # 评分规则引擎
 src/lib/enterprise-ai.ts             # AI 报告生成
-src/actions/enterprise.ts            # Server Actions（组织 CRUD、调研、报告等）
+src/actions/enterprise-org.ts         # Server Actions — 组织 CRUD、成员、邀请
+src/actions/enterprise-surveys.ts    # Server Actions — 调研 CRUD、回答提交
+src/actions/enterprise-reports.ts    # Server Actions — 报告生成、培训、ROI
+src/types/enterprise.ts              # TypeScript 类型定义（SurveyAnswers 等）
 src/components/enterprise/           # 企业模块客户端组件
 ```
 
 ## 9. 导航集成
 
-在 `header.tsx` 的 `navLinks` 中添加 `/enterprise` 链接。企业子页面使用独立的 layout 提供侧边导航（概览/成员/调研/报告/培训/ROI/进度）。
+考虑到主导航已有 6 项，`/enterprise` 链接放在用户菜单下拉中（仅登录用户可见），而非主导航栏。企业子页面使用独立的 layout 提供侧边导航（概览/成员/调研/报告/培训/ROI/进度）。
+
+## 10. 环境变量
+
+在 `.env` 中新增：
+
+```
+ANTHROPIC_API_KEY    # Claude API key，用于 AI 报告生成和培训推荐
+```
