@@ -32,7 +32,7 @@ export async function updateEmailTemplate(
   data: {
     name?: string;
     subject?: string;
-    content?: Record<string, unknown>;
+    content?: unknown;
     htmlContent?: string;
     variables?: string[];
     status?: "DRAFT" | "ACTIVE";
@@ -45,7 +45,7 @@ export async function updateEmailTemplate(
     data: {
       ...(data.name !== undefined && { name: data.name }),
       ...(data.subject !== undefined && { subject: data.subject }),
-      ...(data.content !== undefined && { content: data.content }),
+      ...(data.content !== undefined && { content: data.content as import("@prisma/client").Prisma.InputJsonValue }),
       ...(data.htmlContent !== undefined && { htmlContent: data.htmlContent }),
       ...(data.variables !== undefined && { variables: data.variables }),
       ...(data.status !== undefined && { status: data.status }),

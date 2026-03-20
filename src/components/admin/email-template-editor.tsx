@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import LinkExtension from "@tiptap/extension-link";
@@ -69,8 +69,8 @@ export function EmailTemplateEditor({ template }: Props) {
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const nameRef = useRef(name);
   const subjectRef = useRef(subject);
-  nameRef.current = name;
-  subjectRef.current = subject;
+  useEffect(() => { nameRef.current = name; }, [name]);
+  useEffect(() => { subjectRef.current = subject; }, [subject]);
 
   const triggerSave = useCallback(
     (editorHtml?: string, editorJson?: Record<string, unknown>) => {
