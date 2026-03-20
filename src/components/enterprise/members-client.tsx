@@ -1,9 +1,16 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef } from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { UserPlus, MoreHorizontal, Trash2 } from "lucide-react";
+import {
+  UserPlus,
+  MoreHorizontal,
+  Trash2,
+  Upload,
+  Download,
+  FileSpreadsheet,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,15 +37,24 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   inviteMember,
   updateMemberRole,
   removeMember,
+  batchImportMembers,
 } from "@/actions/enterprise-org";
 
 type Member = {
   id: string;
   role: string;
-  department: string | null;
+  department1: string | null;
+  department2: string | null;
+  department3: string | null;
   jobTitle: string | null;
   joinedAt: string;
   user: {
@@ -56,6 +72,13 @@ type Invite = {
   expiresAt: string;
 };
 
+type ImportResult = {
+  imported: number;
+  invited: number;
+  skipped: number;
+  errors: string[];
+};
+
 type Props = {
   orgId: string;
   orgSlug: string;
@@ -64,6 +87,14 @@ type Props = {
   currentUserRole: string;
   locale: string;
 };
+
+function formatDepartment(member: Member): string {
+  return (
+    [member.department1, member.department2, member.department3]
+      .filter(Boolean)
+      .join(" / ") || "—"
+  );
+}
 
 export function MembersClient({
   orgId,
@@ -77,6 +108,9 @@ export function MembersClient({
   const [isPending, startTransition] = useTransition();
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("MEMBER");
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [showImportResult, setShowImportResult] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const canInvite = currentUserRole === "OWNER" || currentUserRole === "ADMIN";
   const canManageMembers = currentUserRole === "OWNER";
@@ -108,6 +142,36 @@ export function MembersClient({
     });
   }
 
+  function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.set("file", file);
+    formData.set("locale", locale);
+
+    startTransition(async () => {
+      try {
+        const result = await batchImportMembers(orgId, formData);
+        setImportResult(result);
+        setShowImportResult(true);
+      } catch (err) {
+        setImportResult({
+          imported: 0,
+          invited: 0,
+          skipped: 0,
+          errors: [err instanceof Error ? err.message : "Import failed"],
+        });
+        setShowImportResult(true);
+      }
+    });
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  }
+
   const roleBadgeVariant = (role: string) => {
     switch (role) {
       case "OWNER":
@@ -124,11 +188,39 @@ export function MembersClient({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">{t("members")}</h1>
-        <p className="mt-1 text-muted-foreground">
-          {t("membersCount", { count: members.length })}
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">{t("members")}</h1>
+          <p className="mt-1 text-muted-foreground">
+            {t("membersCount", { count: members.length })}
+          </p>
+        </div>
+        {canInvite && (
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <a href="/api/enterprise/members/template" download>
+                <Download className="mr-2 h-4 w-4" />
+                {t("downloadTemplate")}
+              </a>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isPending}
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              {t("batchImport")}
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".xlsx,.xls"
+              className="hidden"
+              onChange={handleFileUpload}
+            />
+          </div>
+        )}
       </div>
 
       {/* Invite section */}
@@ -206,7 +298,7 @@ export function MembersClient({
                   <TableCell className="text-muted-foreground">
                     {member.user.email ?? "—"}
                   </TableCell>
-                  <TableCell>{member.department ?? "—"}</TableCell>
+                  <TableCell>{formatDepartment(member)}</TableCell>
                   <TableCell>{member.jobTitle ?? "—"}</TableCell>
                   <TableCell>
                     <Badge variant={roleBadgeVariant(member.role)}>
@@ -285,6 +377,62 @@ export function MembersClient({
           </CardContent>
         </Card>
       )}
+
+      {/* Import Result Dialog */}
+      <Dialog open={showImportResult} onOpenChange={setShowImportResult}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileSpreadsheet className="h-5 w-5" />
+              {t("importResult")}
+            </DialogTitle>
+          </DialogHeader>
+          {importResult && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="rounded-lg border p-3 text-center">
+                  <p className="text-2xl font-bold text-green-600">
+                    {importResult.imported}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("imported")}
+                  </p>
+                </div>
+                <div className="rounded-lg border p-3 text-center">
+                  <p className="text-2xl font-bold text-blue-600">
+                    {importResult.invited}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("invited")}
+                  </p>
+                </div>
+                <div className="rounded-lg border p-3 text-center">
+                  <p className="text-2xl font-bold text-gray-500">
+                    {importResult.skipped}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("skipped")}
+                  </p>
+                </div>
+              </div>
+              {importResult.errors.length > 0 && (
+                <div>
+                  <p className="mb-2 text-sm font-medium text-destructive">
+                    {t("importErrors")} ({importResult.errors.length})
+                  </p>
+                  <ul className="max-h-40 overflow-y-auto rounded-md border p-3 text-sm">
+                    {importResult.errors.map((err, i) => (
+                      <li key={i} className="text-muted-foreground">
+                        {err}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -121,7 +121,7 @@ export function calculateAiReadinessScore(answers: SurveyAnswers): number {
 }
 
 export function aggregateOrgScores(
-  responses: { answers: SurveyAnswers; department?: string }[],
+  responses: { answers: SurveyAnswers; department?: string; department1?: string }[],
 ) {
   if (responses.length === 0) {
     return {
@@ -153,8 +153,9 @@ export function aggregateOrgScores(
     allDimensions.push(dims);
     allReadiness.push(readiness);
 
-    // Group by department (from basicInfo module or the response-level field)
+    // Group by department1 (top-level department), falling back to legacy department field
     const dept =
+      resp.department1 ||
       resp.department ||
       (resp.answers.modules?.basicInfo?.department as string) ||
       "Unknown";
