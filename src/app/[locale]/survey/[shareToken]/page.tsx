@@ -2,7 +2,8 @@ import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { getSurveyByShareToken, getSurveyInviteTokenByToken } from "@/lib/enterprise";
-import { standardModules } from "@/data/survey-modules";
+import { standardModules as defaultModules } from "@/data/survey-modules";
+import type { StandardModule } from "@/data/survey-modules";
 import { SurveyFillClient } from "@/components/enterprise/survey-fill-client";
 import { Card, CardContent } from "@/components/ui/card";
 import { XCircle } from "lucide-react";
@@ -48,11 +49,24 @@ export default async function SurveyFillPage({ params, searchParams }: Props) {
     inviteToken = inviteTokenParam;
   }
 
-  // Get enabled standard modules
-  const enabledModuleIds = survey.standardModules as string[];
-  const enabledModules = standardModules.filter((m) =>
-    enabledModuleIds.includes(m.id),
-  );
+  // Get enabled standard modules.
+  // New format: standardModules stores full module definitions.
+  // Legacy format: standardModules stores an array of module ID strings.
+  const rawModules = survey.standardModules as unknown;
+  let enabledModules: StandardModule[];
+  if (
+    Array.isArray(rawModules) &&
+    rawModules.length > 0 &&
+    typeof rawModules[0] === "string"
+  ) {
+    // Legacy: array of IDs — look up from defaults
+    enabledModules = (rawModules as string[])
+      .map((id) => defaultModules.find((m) => m.id === id))
+      .filter((m): m is StandardModule => !!m);
+  } else {
+    // New format: full module definitions
+    enabledModules = (rawModules as StandardModule[]) || [];
+  }
 
   const serialize = (data: unknown) => JSON.parse(JSON.stringify(data));
 

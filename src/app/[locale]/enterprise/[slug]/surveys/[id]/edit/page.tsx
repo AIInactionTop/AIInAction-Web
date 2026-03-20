@@ -7,6 +7,8 @@ import {
   getOrganizationMember,
   getSurveyBySlug,
 } from "@/lib/enterprise";
+import { standardModules as defaultModules } from "@/data/survey-modules";
+import type { StandardModule } from "@/data/survey-modules";
 import { SurveyForm } from "@/components/enterprise/survey-form";
 
 type Props = {
@@ -54,7 +56,21 @@ export default async function EditSurveyPage({ params }: Props) {
           id: survey.id,
           title: survey.title,
           description: survey.description,
-          standardModules: survey.standardModules as string[],
+          standardModules: (() => {
+            const raw = survey.standardModules as unknown;
+            if (
+              Array.isArray(raw) &&
+              raw.length > 0 &&
+              typeof raw[0] === "string"
+            ) {
+              // Legacy: convert IDs to full definitions
+              return (raw as string[])
+                .map((id) => defaultModules.find((m) => m.id === id))
+                .filter((m): m is StandardModule => !!m)
+                .map((m) => JSON.parse(JSON.stringify(m)));
+            }
+            return (raw as StandardModule[]) || [];
+          })(),
           customQuestions: survey.customQuestions as import("@/types/enterprise").CustomQuestion[] | null,
         }}
       />

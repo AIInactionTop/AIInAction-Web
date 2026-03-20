@@ -983,6 +983,17 @@
     "tokenPending": "Pending",
     "tokenSent": "Sent",
     "invalidToken": "This survey link is invalid or has already been used.",
-    "inviteStats": "Invite Statistics"
+    "inviteStats": "Invite Statistics",
+    "customizeQuestions": "Customize Questions",
+    "editQuestion": "Edit Question",
+    "questionsCount": "questions",
+    "questionTextEn": "Question Text (English)",
+    "questionTextZh": "Question Text (Chinese)",
+    "options": "Options",
+    "optionLabel": "Option Label",
+    "optionScore": "Score",
+    "addOption": "Add Option",
+    "removeOption": "Remove Option",
+    "judgment": "True/False"
   }
 }

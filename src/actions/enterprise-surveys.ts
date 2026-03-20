@@ -9,6 +9,7 @@ import { aggregateOrgScores } from "@/lib/enterprise-scoring";
 import { headers, cookies } from "next/headers";
 import crypto from "crypto";
 import type { SurveyAnswers } from "@/types/enterprise";
+import { standardModules as defaultModules } from "@/data/survey-modules";
 
 function slugify(text: string): string {
   return text
@@ -66,9 +67,26 @@ export async function createSurvey(orgSlug: string, formData: FormData) {
   const slug = await generateUniqueSurveySlug(title);
   const shareToken = crypto.randomBytes(16).toString("hex");
 
-  const standardModules = standardModulesRaw
+  const parsedModules = standardModulesRaw
     ? JSON.parse(standardModulesRaw)
     : [];
+
+  // If the input is an array of strings (module IDs), expand to full definitions.
+  // If it's already full module objects (from the question editor), use as-is.
+  let standardModules: unknown[];
+  if (
+    Array.isArray(parsedModules) &&
+    parsedModules.length > 0 &&
+    typeof parsedModules[0] === "string"
+  ) {
+    standardModules = (parsedModules as string[])
+      .map((id) => defaultModules.find((m) => m.id === id))
+      .filter(Boolean)
+      .map((m) => JSON.parse(JSON.stringify(m)));
+  } else {
+    standardModules = parsedModules;
+  }
+
   const customQuestions = customQuestionsRaw
     ? JSON.parse(customQuestionsRaw)
     : null;

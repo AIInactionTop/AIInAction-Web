@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { Plus, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,15 +16,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { standardModules } from "@/data/survey-modules";
+import { standardModules as defaultModules } from "@/data/survey-modules";
+import type { StandardModule } from "@/data/survey-modules";
 import { createSurvey, updateSurvey } from "@/actions/enterprise-surveys";
+import { SurveyQuestionEditor } from "@/components/enterprise/survey-question-editor";
 import type { CustomQuestion } from "@/types/enterprise";
 
 type SurveyData = {
   id: string;
   title: string;
   description: string | null;
-  standardModules: string[];
+  standardModules: StandardModule[];
   customQuestions: CustomQuestion[] | null;
 };
 
@@ -42,19 +44,61 @@ export function SurveyForm({ orgSlug, locale, survey }: Props) {
 
   const [title, setTitle] = useState(survey?.title ?? "");
   const [description, setDescription] = useState(survey?.description ?? "");
-  const [enabledModules, setEnabledModules] = useState<string[]>(
-    survey?.standardModules ?? standardModules.map((m) => m.id),
-  );
+
+  // When editing, survey.standardModules is the full module definitions.
+  // When creating, start with all default modules enabled.
+  const [enabledModuleIds, setEnabledModuleIds] = useState<string[]>(() => {
+    if (survey?.standardModules) {
+      return survey.standardModules.map((m) => m.id);
+    }
+    return defaultModules.map((m) => m.id);
+  });
+
+  // Store the full module definitions (deep cloned from defaults or from survey)
+  const [moduleDefinitions, setModuleDefinitions] = useState<
+    Record<string, StandardModule>
+  >(() => {
+    const defs: Record<string, StandardModule> = {};
+    if (survey?.standardModules) {
+      // Editing: use the stored definitions
+      for (const m of survey.standardModules) {
+        defs[m.id] = JSON.parse(JSON.stringify(m));
+      }
+    }
+    // Fill in any missing modules from defaults
+    for (const m of defaultModules) {
+      if (!defs[m.id]) {
+        defs[m.id] = JSON.parse(JSON.stringify(m));
+      }
+    }
+    return defs;
+  });
+
   const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>(
     survey?.customQuestions ?? [],
   );
 
+  // Build the enabled modules list from IDs + definitions
+  const enabledModules = useMemo(() => {
+    return enabledModuleIds
+      .map((id) => moduleDefinitions[id])
+      .filter(Boolean);
+  }, [enabledModuleIds, moduleDefinitions]);
+
   function toggleModule(moduleId: string) {
-    setEnabledModules((prev) =>
+    setEnabledModuleIds((prev) =>
       prev.includes(moduleId)
         ? prev.filter((id) => id !== moduleId)
         : [...prev, moduleId],
     );
+  }
+
+  function handleModulesChange(updatedModules: StandardModule[]) {
+    const updated = { ...moduleDefinitions };
+    for (const m of updatedModules) {
+      updated[m.id] = m;
+    }
+    setModuleDefinitions(updated);
   }
 
   function addCustomQuestion() {
@@ -88,6 +132,7 @@ export function SurveyForm({ orgSlug, locale, survey }: Props) {
     const formData = new FormData();
     formData.set("title", title.trim());
     formData.set("description", description);
+    // Always send full module definitions (not just IDs)
     formData.set("standardModules", JSON.stringify(enabledModules));
     formData.set(
       "customQuestions",
@@ -132,20 +177,20 @@ export function SurveyForm({ orgSlug, locale, survey }: Props) {
         </CardContent>
       </Card>
 
-      {/* Standard Modules */}
+      {/* Standard Modules Selection */}
       <Card>
         <CardHeader>
           <CardTitle>{t("standardModules")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {standardModules.map((module) => (
+          {defaultModules.map((module) => (
             <div
               key={module.id}
               className="flex items-start gap-3 rounded-md border p-4"
             >
               <Checkbox
                 id={`module-${module.id}`}
-                checked={enabledModules.includes(module.id)}
+                checked={enabledModuleIds.includes(module.id)}
                 onCheckedChange={() => toggleModule(module.id)}
               />
               <div className="flex-1">
@@ -159,13 +204,30 @@ export function SurveyForm({ orgSlug, locale, survey }: Props) {
                   {isZh ? module.descriptionZh : module.descriptionEn}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {module.questions.length} questions
+                  {(moduleDefinitions[module.id] || module).questions.length}{" "}
+                  {t("questionsCount")}
                 </p>
               </div>
             </div>
           ))}
         </CardContent>
       </Card>
+
+      {/* Customize Questions in Enabled Modules */}
+      {enabledModules.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("customizeQuestions")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SurveyQuestionEditor
+              modules={enabledModules}
+              onChange={handleModulesChange}
+              locale={locale}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {/* Custom Questions */}
       <Card>

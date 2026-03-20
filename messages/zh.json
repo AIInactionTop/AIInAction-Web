@@ -983,6 +983,17 @@
     "tokenPending": "待填写",
     "tokenSent": "已发送",
     "invalidToken": "此调研链接无效或已被使用。",
-    "inviteStats": "邀请统计"
+    "inviteStats": "邀请统计",
+    "customizeQuestions": "自定义题目",
+    "editQuestion": "编辑题目",
+    "questionsCount": "道题",
+    "questionTextEn": "题目文本（英文）",
+    "questionTextZh": "题目文本（中文）",
+    "options": "选项",
+    "optionLabel": "选项文本",
+    "optionScore": "分值",
+    "addOption": "添加选项",
+    "removeOption": "删除选项",
+    "judgment": "判断题"
   }
 }
