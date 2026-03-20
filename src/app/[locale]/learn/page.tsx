@@ -34,7 +34,7 @@ export default async function LearnPage({ params }: Props) {
 
   // 2. Continue Learning (auth users only)
   const session = await auth();
-  let inProgressChallenges: any[] = [];
+  let inProgressChallenges: Array<Record<string, unknown>> = [];
   if (session?.user?.id) {
     const registrations = await prisma.challengeRegistration.findMany({
       where: {
