@@ -48,6 +48,21 @@ export async function getOrganizationMember(orgId: string, userId: string) {
 }
 
 // ---------------------
+// Invite queries
+// ---------------------
+
+export async function getPendingInvites(orgId: string) {
+  return prisma.organizationInvite.findMany({
+    where: {
+      organizationId: orgId,
+      acceptedAt: null,
+      expiresAt: { gt: new Date() },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+// ---------------------
 // Survey queries
 // ---------------------
 
