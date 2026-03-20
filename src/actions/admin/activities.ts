@@ -2,7 +2,7 @@
 
 import { requireAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
-import { getNextChallengeOrder } from "@/lib/admin-activities";
+import { getNextChallengeOrder, searchChallenges } from "@/lib/admin-activities";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { ActivityType, ActivityStatus } from "@prisma/client";
@@ -135,4 +135,12 @@ export async function reorderActivityChallenges(
     )
   );
   revalidatePath(`/admin/activities/${activityId}`);
+}
+
+export async function searchChallengesAction(
+  query: string,
+  excludeIds: string[]
+) {
+  await requireAdmin();
+  return searchChallenges(query, excludeIds);
 }
