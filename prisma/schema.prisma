@@ -73,6 +73,8 @@ model User {
   marketplaceItems   MarketplaceItem[]     @relation("MarketplaceSeller")
   marketplaceReviews MarketplaceReview[]
   marketplacePurchases MarketplacePurchase[]
+  emailSendLogs    EmailSendLog[]  @relation("emailSendLogs")
+  activities           Activity[]
 
   @@map("users")
 }
@@ -171,7 +173,8 @@ model Challenge {
   likes         ChallengeLike[]
   comments      ChallengeComment[]
   registrations ChallengeRegistration[]
-  translations  ChallengeTranslation[]
+  translations        ChallengeTranslation[]
+  activityChallenges  ActivityChallenge[]
 
   createdAt     DateTime   @default(now()) @map("created_at")
   updatedAt     DateTime   @updatedAt @map("updated_at")
@@ -536,6 +539,20 @@ enum Difficulty {
   EXPERT
 }
 
+enum ActivityType {
+  HACKATHON
+  THEMED
+  EXTERNAL
+  GENERAL
+}
+
+enum ActivityStatus {
+  DRAFT
+  UPCOMING
+  ACTIVE
+  ENDED
+}
+
 enum CompletionStatus {
   IN_PROGRESS
   COMPLETED
@@ -693,6 +710,19 @@ enum MarketplaceItemStatus {
   ARCHIVED
 }
 
+enum EmailTemplateStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum EmailSendStatus {
+  PENDING
+  SENDING
+  COMPLETED
+  FAILED
+}
+
 model MarketplaceItem {
   id          String                @id @default(cuid())
   slug        String                @unique
@@ -758,4 +788,93 @@ model MarketplacePurchase {
 
   @@unique([userId, itemId])
   @@map("marketplace_purchases")
+}
+
+// ─── Activities ─────────────────────────────────────────────────
+
+model Activity {
+  id          String          @id @default(cuid())
+  slug        String          @unique
+  title       String
+  description String          @db.Text
+  coverImage  String?         @map("cover_image")
+
+  type        ActivityType
+  status      ActivityStatus
+
+  startDate   DateTime?       @map("start_date")
+  endDate     DateTime?       @map("end_date")
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+
+  externalUrl String?         @map("external_url")
+  content     String?         @db.Text
+
+  authorId    String          @map("author_id")
+  author      User            @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  challenges  ActivityChallenge[]
+  translations ActivityTranslation[]
+
+  @@index([status])
+  @@index([type])
+  @@map("activities")
+}
+
+model ActivityChallenge {
+  activityId  String          @map("activity_id")
+  challengeId String          @map("challenge_id")
+  order       Int             @default(0)
+  activity    Activity        @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  challenge   Challenge       @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  @@id([activityId, challengeId])
+  @@map("activity_challenges")
+}
+
+model ActivityTranslation {
+  id          String          @id @default(cuid())
+  activityId  String          @map("activity_id")
+  locale      String
+  title       String
+  description String          @db.Text
+  content     String?         @db.Text
+  activity    Activity        @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@unique([activityId, locale])
+  @@map("activity_translations")
+}
+
+model EmailTemplate {
+  id          String              @id @default(cuid())
+  name        String
+  subject     String
+  content     Json
+  htmlContent String?             @map("html_content") @db.Text
+  variables   String[]            @default([])
+  status      EmailTemplateStatus @default(DRAFT)
+  createdAt   DateTime            @default(now()) @map("created_at")
+  updatedAt   DateTime            @updatedAt @map("updated_at")
+  sendLogs    EmailSendLog[]
+
+  @@map("email_templates")
+}
+
+model EmailSendLog {
+  id              String          @id @default(cuid())
+  templateId      String          @map("template_id")
+  template        EmailTemplate   @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  recipientFilter String          @map("recipient_filter")
+  totalCount      Int             @map("total_count")
+  successCount    Int             @default(0) @map("success_count")
+  failCount       Int             @default(0) @map("fail_count")
+  status          EmailSendStatus @default(PENDING)
+  sentAt          DateTime?       @map("sent_at")
+  sentById        String          @map("sent_by_id")
+  sentBy          User            @relation("emailSendLogs", fields: [sentById], references: [id])
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+
+  @@index([templateId])
+  @@index([status])
+  @@map("email_send_logs")
 }
