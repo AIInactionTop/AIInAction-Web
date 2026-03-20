@@ -16,6 +16,12 @@ import { submitSurveyResponse } from "@/actions/enterprise-surveys";
 import type { StandardModule, QuestionDef } from "@/data/survey-modules";
 import type { CustomQuestion, SurveyAnswers } from "@/types/enterprise";
 
+type PrefillData = {
+  name?: string;
+  department?: string;
+  jobTitle?: string;
+};
+
 type Props = {
   surveyId: string;
   surveyTitle: string;
@@ -26,6 +32,7 @@ type Props = {
   customQuestions: CustomQuestion[] | null;
   locale: string;
   inviteToken?: string;
+  prefillData?: PrefillData;
 };
 
 // Use a simple radio group component since we might not have RadioGroup from shadcn
@@ -42,6 +49,7 @@ export function SurveyFillClient({
   customQuestions,
   locale,
   inviteToken,
+  prefillData,
 }: Props) {
   const t = useTranslations("enterprise");
   const isZh = locale.startsWith("zh");
@@ -62,6 +70,11 @@ export function SurveyFillClient({
     for (const m of modules) {
       init[m.id] = {};
     }
+    // Pre-fill basicInfo fields from member data if available
+    if (prefillData && init.basicInfo) {
+      if (prefillData.department) init.basicInfo.department = prefillData.department;
+      if (prefillData.jobTitle) init.basicInfo.jobTitle = prefillData.jobTitle;
+    }
     return init;
   });
 
@@ -81,6 +94,15 @@ export function SurveyFillClient({
     },
     [],
   );
+
+  // Compute which basicInfo fields should be read-only (pre-filled from system)
+  const basicInfoReadOnlyFields = (() => {
+    if (!prefillData) return undefined;
+    const fields = new Set<string>();
+    if (prefillData.department) fields.add("department");
+    if (prefillData.jobTitle) fields.add("jobTitle");
+    return fields.size > 0 ? fields : undefined;
+  })();
 
   const updateCustomAnswer = useCallback(
     (questionId: string, value: number | string | string[]) => {
@@ -209,6 +231,11 @@ export function SurveyFillClient({
             updateModuleAnswer(modules[currentStep].id, qId, val)
           }
           isZh={isZh}
+          readOnlyFields={
+            modules[currentStep].id === "basicInfo" && prefillData
+              ? basicInfoReadOnlyFields
+              : undefined
+          }
         />
       )}
 
@@ -311,11 +338,13 @@ function ModuleRenderer({
   answers,
   onAnswer,
   isZh,
+  readOnlyFields,
 }: {
   module: StandardModule;
   answers: Record<string, number | string | string[]>;
   onAnswer: (questionId: string, value: number | string | string[]) => void;
   isZh: boolean;
+  readOnlyFields?: Set<string>;
 }) {
   return (
     <Card>
@@ -333,6 +362,7 @@ function ModuleRenderer({
             value={answers[q.id]}
             onChange={(val) => onAnswer(q.id, val)}
             isZh={isZh}
+            readOnly={readOnlyFields?.has(q.id)}
           />
         ))}
       </CardContent>
@@ -347,13 +377,30 @@ function QuestionRenderer({
   value,
   onChange,
   isZh,
+  readOnly,
 }: {
   question: QuestionDef;
   value: number | string | string[] | undefined;
   onChange: (value: number | string | string[]) => void;
   isZh: boolean;
+  readOnly?: boolean;
 }) {
   const label = isZh ? question.labelZh : question.labelEn;
+
+  // Read-only: show pre-filled value as static text
+  if (readOnly && value !== undefined && value !== "") {
+    return (
+      <div className="space-y-2">
+        <Label className="text-base font-medium">{label}</Label>
+        <div className="rounded-md border bg-muted/50 px-3 py-2 text-sm">
+          {Array.isArray(value) ? value.join(", ") : String(value)}
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {isZh ? "已从系统自动填入" : "Auto-filled from system"}
+        </p>
+      </div>
+    );
+  }
 
   switch (question.type) {
     case "rating":

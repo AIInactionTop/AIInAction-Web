@@ -29,8 +29,14 @@ export default async function SurveyFillPage({ params, searchParams }: Props) {
   const survey = await getSurveyByShareToken(shareToken);
   if (!survey || survey.status !== "ACTIVE") notFound();
 
-  // If invite token is provided, validate it
+  // If invite token is provided, validate it and extract member info
   let inviteToken: string | undefined;
+  let prefillData: {
+    name?: string;
+    department?: string;
+    jobTitle?: string;
+  } | undefined;
+
   if (inviteTokenParam) {
     const tokenRecord = await getSurveyInviteTokenByToken(inviteTokenParam);
     if (!tokenRecord || tokenRecord.surveyId !== survey.id || tokenRecord.usedAt) {
@@ -47,6 +53,18 @@ export default async function SurveyFillPage({ params, searchParams }: Props) {
       );
     }
     inviteToken = inviteTokenParam;
+
+    // Extract member info for pre-filling basicInfo module
+    const member = tokenRecord.member;
+    const memberName = member.name ?? member.user?.name ?? undefined;
+    const dept = [member.department1, member.department2, member.department3]
+      .filter(Boolean)
+      .join(" / ") || undefined;
+    const jobTitle = member.jobTitle ?? undefined;
+
+    if (memberName || dept || jobTitle) {
+      prefillData = { name: memberName, department: dept, jobTitle };
+    }
   }
 
   // Get enabled standard modules.
@@ -82,6 +100,7 @@ export default async function SurveyFillPage({ params, searchParams }: Props) {
         customQuestions={serialize(survey.customQuestions)}
         locale={locale}
         inviteToken={inviteToken}
+        prefillData={prefillData}
       />
     </div>
   );
