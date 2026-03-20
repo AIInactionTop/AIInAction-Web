@@ -31,9 +31,9 @@ Consolidate Challenges, Learning Paths, and Activities into a unified **Learn** 
 /learn/paths                    → Learning paths list (migrated from /paths)
 /learn/paths/[slug]             → Path detail
 /learn/activities               → Activity list
-/learn/activities/new           → Create activity (requires auth)
+/learn/activities/new           → Create activity (requires auth, admin only)
 /learn/activities/[slug]        → Activity detail
-/learn/activities/[slug]/edit   → Edit activity (requires auth + ownership)
+/learn/activities/[slug]/edit   → Edit activity (requires auth + ownership or admin)
 ```
 
 ### 301 Redirects (in `src/proxy.ts`)
@@ -45,6 +45,19 @@ Consolidate Challenges, Learning Paths, and Activities into a unified **Learn** 
 | `/paths` | `/learn/paths` |
 | `/paths/*` | `/learn/paths/*` |
 | `/activities` | `/learn/activities` |
+
+#### Redirect Implementation Details
+
+Redirects are implemented in `src/proxy.ts` **before** the `handleI18nRouting` call. The redirect logic must:
+
+1. Extract the raw pathname from the request
+2. Strip the locale prefix if present (e.g., `/en/challenges` → `/challenges`)
+3. Match against old route patterns (`/challenges`, `/challenges/*`, `/paths`, `/paths/*`, `/activities`)
+4. Build the new URL with `/learn/` prefix, preserving the locale prefix and any query params
+5. Return a 301 redirect response
+
+Example: `/en/challenges/my-challenge` → 301 → `/en/learn/challenges/my-challenge`
+Example: `/challenges` (no locale) → handled by i18n first, then redirected with locale
 
 ### Navigation
 
@@ -67,12 +80,13 @@ Four sections, top to bottom:
 - Hidden when no active/upcoming activities exist
 
 ### 2.2 Continue Learning (authenticated users only)
-- Up to 4 horizontal cards of challenges the user has **registered but not completed**
+- Up to 4 horizontal cards of challenges the user is working on
+- **Query logic:** challenges where the user has a `ChallengeRegistration` but either no `ChallengeCompletion` record or a `ChallengeCompletion` with status `IN_PROGRESS`
 - Each card: title, difficulty badge, path name (if any), progress status
 - Hidden for unauthenticated users or when no in-progress challenges
 
 ### 2.3 Learning Paths
-- Horizontal scrollable row of 10 path cards
+- Horizontal scrollable row of all published learning paths
 - Each card: icon, name, challenge count, user completion progress (if authenticated)
 - "View All" link → `/learn/paths`
 
@@ -94,49 +108,52 @@ model Activity {
   id          String          @id @default(cuid())
   slug        String          @unique
   title       String
-  description String
-  coverImage  String?
+  description String          @db.Text
+  coverImage  String?         @map("cover_image")
 
   type        ActivityType
   status      ActivityStatus
 
-  startDate   DateTime?
-  endDate     DateTime?
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  startDate   DateTime?       @map("start_date")
+  endDate     DateTime?       @map("end_date")
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
 
-  externalUrl String?
-  content     String?         // Markdown rich content
+  externalUrl String?         @map("external_url")
+  content     String?         @db.Text
 
-  authorId    String
-  author      User            @relation(fields: [authorId], references: [id])
+  authorId    String          @map("author_id")
+  author      User            @relation(fields: [authorId], references: [id], onDelete: Cascade)
   challenges  ActivityChallenge[]
   translations ActivityTranslation[]
 
   @@index([status])
   @@index([type])
+  @@map("activities")
 }
 
 model ActivityChallenge {
-  activityId  String
-  challengeId String
+  activityId  String          @map("activity_id")
+  challengeId String          @map("challenge_id")
   order       Int             @default(0)
-  activity    Activity        @relation(fields: [activityId], references: [id])
-  challenge   Challenge       @relation(fields: [challengeId], references: [id])
+  activity    Activity        @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  challenge   Challenge       @relation(fields: [challengeId], references: [id], onDelete: Cascade)
 
   @@id([activityId, challengeId])
+  @@map("activity_challenges")
 }
 
 model ActivityTranslation {
   id          String          @id @default(cuid())
-  activityId  String
+  activityId  String          @map("activity_id")
   locale      String
   title       String
-  description String
-  content     String?
-  activity    Activity        @relation(fields: [activityId], references: [id])
+  description String          @db.Text
+  content     String?         @db.Text
+  activity    Activity        @relation(fields: [activityId], references: [id], onDelete: Cascade)
 
   @@unique([activityId, locale])
+  @@map("activity_translations")
 }
 
 enum ActivityType {
@@ -154,6 +171,21 @@ enum ActivityStatus {
 }
 ```
 
+### Existing Model Updates
+
+The following reverse relations must be added to existing models:
+
+- **`User` model**: add `activities Activity[]`
+- **`Challenge` model**: add `activityChallenges ActivityChallenge[]`
+
+### Activity Status Lifecycle
+
+Status transitions are **manual** — the activity author (or admin) updates the status via the edit form. No cron jobs or automated transitions at this stage. The discovery homepage queries by `status` field directly. Automated status transitions (e.g., auto-activate on `startDate`) can be added later if needed.
+
+### Authorization
+
+Activity creation is restricted to **admin users only** (not all authenticated users). This prevents spam and ensures activity quality. The `User` model already has a `role` field that can be checked. Activity editing requires ownership or admin role.
+
 ### Design Decisions
 
 - **`type`** distinguishes activity format; **`status`** tracks lifecycle
@@ -161,6 +193,9 @@ enum ActivityStatus {
 - **`externalUrl`**: for external activities like the current OpenClaw page
 - **`content`**: Markdown for the activity detail page body
 - **Translations**: same pattern as `ChallengeTranslation`
+- **`@@map` and `@map`**: follows existing schema convention of snake_case table/column names
+- **`onDelete: Cascade`**: follows existing schema convention for user-owned models
+- **`@db.Text`**: used on all long-form text fields, matching existing patterns
 - Registration, leaderboards, and prizes are intentionally omitted — add when needed
 
 ---
@@ -194,9 +229,23 @@ Old route directories (`/challenges`, `/paths`, `/activities`) become thin redir
 | `src/components/activity-form.tsx` | Activity creation/edit form component |
 | `src/components/activity-card.tsx` | Activity card for lists and homepage |
 
+### Internal Link Updates
+
+All internal `Link` components and `href` references pointing to old routes must be updated to new `/learn/` paths. This is critical because client-side navigation via Next.js `Link` does NOT trigger proxy redirects. Files that need updating include (but are not limited to):
+
+- `src/app/[locale]/home-client.tsx`
+- `src/app/[locale]/profile/[id]/profile-content.tsx`
+- `src/app/[locale]/about/page.tsx`
+- `src/app/[locale]/showcase/[id]/detail-client.tsx`
+- `src/components/layout/footer.tsx`
+- `src/components/layout/header.tsx`
+- `src/lib/email.ts`
+
+A codebase-wide search for `/challenges`, `/paths`, and `/activities` hrefs should be performed during implementation to catch all references.
+
 ### Unchanged
 
-- Prisma models: `Challenge`, `LearningPath`, `Category`, `Tag`, etc. — no changes
+- Prisma models: `Challenge`, `LearningPath`, `Category`, `Tag`, etc. — schema unchanged (only reverse relation fields added)
 - Server Actions: `challenges.ts`, `completions.ts`, `likes.ts`, `comments.ts` — no changes
 - Query functions in `src/lib/challenges.ts` — no changes, just referenced from new routes
 - Component logic: `challenge-list-client.tsx`, `path-cards.tsx`, `path-detail.tsx` — reused as-is, only import paths updated
@@ -205,7 +254,11 @@ Old route directories (`/challenges`, `/paths`, `/activities`) become thin redir
 
 ### Redirect Implementation
 
-In `src/proxy.ts`, add redirect rules mapping old routes to new `/learn/` equivalents. All redirects are 301 (permanent).
+In `src/proxy.ts`, add redirect rules **before** the `handleI18nRouting` call, mapping old routes to new `/learn/` equivalents. All redirects are 301 (permanent). See Section 1 for implementation details.
+
+### SEO & Sitemap
+
+Update `src/app/sitemap.ts` to generate URLs under `/learn/challenges/*`, `/learn/paths/*`, and `/learn/activities/*` instead of old paths. Update `src/app/robots.ts` if any rules reference old paths.
 
 ### i18n
 
@@ -242,8 +295,11 @@ Clicking "Learn" text navigates to `/learn`.
 | New pages | Discovery homepage, Activity CRUD (list/detail/new/edit) |
 | Migrated pages | Challenges and Paths move under `/learn/` |
 | New data model | Activity, ActivityChallenge, ActivityTranslation + enums |
+| Existing model updates | Reverse relations on User and Challenge |
 | New data layer | `src/lib/activities.ts`, `src/actions/activities.ts` |
 | New components | Activity form, activity card |
 | Navigation | 3 items → 1 dropdown |
 | Redirects | 301 from old routes via `src/proxy.ts` |
+| Internal links | Update all `Link` hrefs across codebase |
+| SEO | Update sitemap and robots |
 | Unchanged | Challenge/Path data models, existing server actions, API routes, gamification, components (reused) |
