@@ -57,24 +57,8 @@ export function EnterpriseLanding({
         </p>
       </div>
 
-      {/* Feature cards */}
-      <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {FEATURES.map(({ key, descKey, icon: Icon }) => (
-          <Card
-            key={key}
-            className="flex flex-col gap-3 p-6 transition-colors hover:border-primary/30"
-          >
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <Icon className="h-5 w-5 text-primary" />
-            </div>
-            <h3 className="text-lg font-semibold">{t(key)}</h3>
-            <p className="text-sm text-muted-foreground">{t(descKey)}</p>
-          </Card>
-        ))}
-      </div>
-
-      {/* User section */}
-      <div className="mt-16">
+{/* User section */}
+<div className="mt-16">
         {isAuthenticated ? (
           orgs.length > 0 ? (
             <>
@@ -138,6 +122,24 @@ export function EnterpriseLanding({
           </div>
         )}
       </div>
+      
+      {/* Feature cards */}
+      <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {FEATURES.map(({ key, descKey, icon: Icon }) => (
+          <Card
+            key={key}
+            className="flex flex-col gap-3 p-6 transition-colors hover:border-primary/30"
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <Icon className="h-5 w-5 text-primary" />
+            </div>
+            <h3 className="text-lg font-semibold">{t(key)}</h3>
+            <p className="text-sm text-muted-foreground">{t(descKey)}</p>
+          </Card>
+        ))}
+      </div>
+
+      
     </div>
   );
 }

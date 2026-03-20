@@ -98,8 +98,8 @@ export async function createSurvey(orgSlug: string, formData: FormData) {
       description,
       organizationId: org.id,
       shareToken,
-      standardModules,
-      customQuestions,
+      standardModules: JSON.parse(JSON.stringify(standardModules)),
+      customQuestions: customQuestions ? JSON.parse(JSON.stringify(customQuestions)) : undefined,
     },
   });
 
