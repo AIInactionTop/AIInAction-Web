@@ -33,7 +33,7 @@ export async function sendWelcomeEmail(name: string, email: string) {
           <li>Share your work in the community showcase</li>
         </ul>
         <div style="margin-top: 32px;">
-          <a href="https://aiinaction.top/challenges" style="display: inline-block; background-color: #2563eb; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-size: 16px; font-weight: 500;">
+          <a href="https://aiinaction.top/learn/challenges" style="display: inline-block; background-color: #2563eb; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-size: 16px; font-weight: 500;">
             Explore Challenges
           </a>
         </div>

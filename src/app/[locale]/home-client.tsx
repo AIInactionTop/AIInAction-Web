@@ -228,7 +228,7 @@ export function HomeClient({
                 className="h-12 gap-2 px-8 text-base shadow-[0_0_25px_oklch(0.78_0.145_195/0.25)] transition-shadow hover:shadow-[0_0_35px_oklch(0.78_0.145_195/0.4)]"
                 asChild
               >
-                <Link href="/challenges">
+                <Link href="/learn/challenges">
                   {t("startBuilding")}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
@@ -240,7 +240,7 @@ export function HomeClient({
                   className="h-12 gap-2 border-primary/25 px-8 text-base hover:border-primary/50 hover:bg-primary/5"
                   asChild
                 >
-                  <Link href="/challenges/new">
+                  <Link href="/learn/challenges/new">
                     <Plus className="h-4 w-4" />
                     {t("createChallenge")}
                   </Link>
@@ -314,7 +314,7 @@ export function HomeClient({
                 return (
                   <motion.div key={cat.slug} variants={fadeUp}>
                     <Link
-                      href={`/challenges?categories=${cat.slug}`}
+                      href={`/learn/challenges?categories=${cat.slug}`}
                       className="group block"
                     >
                       <div className="h-full rounded-xl border border-border bg-card/50 p-5 backdrop-blur-sm transition-all duration-300 hover:border-primary/30 hover:bg-card/80 hover:shadow-[0_0_30px_oklch(0.78_0.145_195/0.08)]">
@@ -379,7 +379,7 @@ export function HomeClient({
                 className="hidden gap-1 text-primary hover:bg-primary/10 hover:text-primary sm:flex"
                 asChild
               >
-                <Link href="/challenges">
+                <Link href="/learn/challenges">
                   {tc("viewAll")}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
@@ -392,7 +392,7 @@ export function HomeClient({
                 return (
                   <motion.div key={c.id} variants={fadeUp}>
                     <Link
-                      href={`/challenges/${c.slug}`}
+                      href={`/learn/challenges/${c.slug}`}
                       className="group block"
                     >
                       <div className="h-full rounded-xl border border-border bg-card/50 p-5 backdrop-blur-sm transition-all duration-300 hover:border-primary/25 hover:bg-card/80 hover:shadow-[0_0_30px_oklch(0.78_0.145_195/0.08)]">
@@ -461,7 +461,7 @@ export function HomeClient({
                 className="gap-1 border-primary/25"
                 asChild
               >
-                <Link href="/challenges">
+                <Link href="/learn/challenges">
                   {t("viewAllChallenges")}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
@@ -514,7 +514,7 @@ export function HomeClient({
                   className="h-12 gap-2 px-8 shadow-[0_0_25px_oklch(0.78_0.145_195/0.25)] transition-shadow hover:shadow-[0_0_35px_oklch(0.78_0.145_195/0.4)]"
                   asChild
                 >
-                  <Link href="/challenges">
+                  <Link href="/learn/challenges">
                     {t("browseChallenges")}
                     <ArrowRight className="h-4 w-4" />
                   </Link>
@@ -525,7 +525,7 @@ export function HomeClient({
                   className="h-12 gap-2 border-primary/25 px-8 hover:border-primary/50 hover:bg-primary/5"
                   asChild
                 >
-                  <Link href="/challenges/new">
+                  <Link href="/learn/challenges/new">
                     <Plus className="h-4 w-4" />
                     {t("createChallenge")}
                   </Link>

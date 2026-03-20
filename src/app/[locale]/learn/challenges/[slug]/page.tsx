@@ -165,7 +165,7 @@ export default async function ChallengeDetailPage({ params }: Props) {
             <GitFork className="inline h-3.5 w-3.5 mr-1" />
             {t("forkedFrom")}{" "}
             <Link
-              href={`/challenges/${challenge.forkedFrom.slug}`}
+              href={`/learn/challenges/${challenge.forkedFrom.slug}`}
               className="text-primary hover:underline"
             >
               {challenge.forkedFrom.title}
@@ -317,7 +317,7 @@ export default async function ChallengeDetailPage({ params }: Props) {
           <Separator className="my-8" />
           <div className="flex items-center justify-between">
             {prevChallenge ? (
-              <Link href={`/challenges/${prevChallenge.slug}`}>
+              <Link href={`/learn/challenges/${prevChallenge.slug}`}>
                 <Button variant="ghost" size="sm" className="gap-2">
                   <ArrowLeft className="h-4 w-4" />
                   {prevChallenge.title}
@@ -327,7 +327,7 @@ export default async function ChallengeDetailPage({ params }: Props) {
               <div />
             )}
             {nextChallenge ? (
-              <Link href={`/challenges/${nextChallenge.slug}`}>
+              <Link href={`/learn/challenges/${nextChallenge.slug}`}>
                 <Button variant="ghost" size="sm" className="gap-2">
                   {nextChallenge.title}
                   <ChevronRight className="h-4 w-4" />

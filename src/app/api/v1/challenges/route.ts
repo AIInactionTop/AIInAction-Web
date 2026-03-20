@@ -132,6 +132,6 @@ export async function POST(request: Request) {
     id: challenge.id,
     slug: challenge.slug,
     title: challenge.title,
-    url: `https://aiinaction.top/challenges/${challenge.slug}`,
+    url: `https://aiinaction.top/learn/challenges/${challenge.slug}`,
   }, 201);
 }

@@ -29,7 +29,7 @@ export default async function EditChallengePage({ params }: Props) {
   if (!challenge) notFound();
 
   if (challenge.authorId !== session.user.id) {
-    redirect(`/challenges/${slug}`);
+    redirect(`/learn/challenges/${slug}`);
   }
 
   const categories = await getCategories();

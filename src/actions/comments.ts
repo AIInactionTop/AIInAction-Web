@@ -30,7 +30,7 @@ export async function createComment(challengeId: string, content: string) {
     select: { slug: true },
   });
   if (challenge) {
-    revalidatePath(`/challenges/${challenge.slug}`);
+    revalidatePath(`/learn/challenges/${challenge.slug}`);
   }
 }
 
@@ -47,5 +47,5 @@ export async function deleteComment(commentId: string) {
   }
 
   await prisma.challengeComment.delete({ where: { id: commentId } });
-  revalidatePath(`/challenges/${comment.challenge.slug}`);
+  revalidatePath(`/learn/challenges/${comment.challenge.slug}`);
 }

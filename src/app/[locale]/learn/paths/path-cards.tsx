@@ -59,7 +59,7 @@ export function PathCards({ paths }: { paths: PathWithStats[] }) {
         const Icon = iconMap[path.icon];
         return (
           <motion.div key={path.slug} variants={fadeUp}>
-            <Link href={`/paths/${path.slug}`} className="group block">
+            <Link href={`/learn/paths/${path.slug}`} className="group block">
               <div className="relative overflow-hidden rounded-xl border border-border/60 bg-card/50 p-6 transition-all hover:border-border hover:bg-card hover:shadow-lg sm:p-8">
                 <div
                   className="absolute -right-8 -top-8 h-32 w-32 rounded-full opacity-10"

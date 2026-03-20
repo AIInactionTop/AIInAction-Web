@@ -34,8 +34,8 @@ const featureKeys = [
   "Leaderboard",
 ] as const;
 const featureHrefs = [
-  "/challenges",
-  "/paths",
+  "/learn/challenges",
+  "/learn/paths",
   "/showcase",
   "/leaderboard",
 ] as const;
@@ -113,7 +113,7 @@ export default async function AboutPage({ params }: Props) {
         <p className="mt-3 text-muted-foreground">{t("ctaSubtitle")}</p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
           <Link
-            href="/challenges"
+            href="/learn/challenges"
             className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30"
           >
             {t("browseChallenges")}

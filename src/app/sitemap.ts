@@ -43,30 +43,35 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly",
       priority: 1,
     }),
-    localizedEntry("/challenges", {
+    localizedEntry("/learn", {
       lastModified: now,
       changeFrequency: "weekly",
       priority: 0.9,
     }),
-    localizedEntry("/paths", {
+    localizedEntry("/learn/challenges", {
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    }),
+    localizedEntry("/learn/paths", {
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.9,
+    }),
+    localizedEntry("/learn/activities", {
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.8,
     }),
     localizedEntry("/showcase", {
       lastModified: now,
       changeFrequency: "daily",
       priority: 0.8,
     }),
-    localizedEntry("/activities", {
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    }),
   ];
 
   const challenges = allChallenges.map((c) =>
-    localizedEntry(`/challenges/${c.slug}`, {
+    localizedEntry(`/learn/challenges/${c.slug}`, {
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.7,
@@ -74,7 +79,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   );
 
   const paths = allPaths.map((p) =>
-    localizedEntry(`/paths/${p.slug}`, {
+    localizedEntry(`/learn/paths/${p.slug}`, {
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.8,

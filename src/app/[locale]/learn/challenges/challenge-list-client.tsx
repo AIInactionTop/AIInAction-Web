@@ -522,7 +522,7 @@ function ChallengeCard({ challenge }: { challenge: SerializedChallenge }) {
 
   return (
     <motion.div variants={fadeUp}>
-      <Link href={`/challenges/${challenge.slug}`} className="group block">
+      <Link href={`/learn/challenges/${challenge.slug}`} className="group block">
         <div className="h-full rounded-xl border border-border/60 bg-card/50 p-5 transition-all hover:border-border hover:bg-card hover:shadow-lg">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-2">

@@ -146,11 +146,11 @@ export async function saveAILearningPath(input: SavePathInput) {
 
   await awardXP(userId, 50);
 
-  revalidatePath("/paths");
-  revalidatePath("/challenges");
+  revalidatePath("/learn/paths");
+  revalidatePath("/learn/challenges");
 
   if (input.isPublished) {
-    redirect(`/paths/${pathSlug}`);
+    redirect(`/learn/paths/${pathSlug}`);
   }
 
   return { pathSlug, pathId: learningPath.id };

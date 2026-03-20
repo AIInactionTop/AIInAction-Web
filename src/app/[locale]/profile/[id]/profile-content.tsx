@@ -325,7 +325,7 @@ export function ProfileContent({
                   >
                     <div className="flex items-center justify-between">
                       <Link
-                        href={`/challenges/${completion.challenge.slug}`}
+                        href={`/learn/challenges/${completion.challenge.slug}`}
                         className="font-medium text-sm hover:text-primary transition-colors"
                       >
                         {completion.challenge.title}
@@ -372,7 +372,7 @@ export function ProfileContent({
                 {t("noCompletions")}
               </p>
               <Button variant="outline" size="sm" className="mt-4" asChild>
-                <Link href="/challenges">{t("browseChallenges")}</Link>
+                <Link href="/learn/challenges">{t("browseChallenges")}</Link>
               </Button>
             </div>
           )}
@@ -386,7 +386,7 @@ export function ProfileContent({
                 return (
                   <Link
                     key={challenge.id}
-                    href={`/challenges/${challenge.slug}`}
+                    href={`/learn/challenges/${challenge.slug}`}
                     className="group flex items-center gap-4 rounded-lg border border-border/40 bg-card/30 px-4 py-3.5 transition-all hover:border-border hover:bg-card hover:shadow-sm"
                   >
                     <div className="flex-1 min-w-0">
@@ -423,7 +423,7 @@ export function ProfileContent({
               </p>
               {isOwnProfile && (
                 <Button variant="outline" size="sm" className="mt-4" asChild>
-                  <Link href="/challenges/new">{t("createChallenge")}</Link>
+                  <Link href="/learn/challenges/new">{t("createChallenge")}</Link>
                 </Button>
               )}
             </div>

@@ -113,7 +113,7 @@ export function ChallengeActions({ challengeId, slug, likesCount, liked, complet
             {isAuthor && (
               <>
                 <Button variant="outline" className="gap-2" asChild>
-                  <Link href={`/challenges/${slug}/edit`}>
+                  <Link href={`/learn/challenges/${slug}/edit`}>
                     <Pencil className="h-4 w-4" />
                     {tc("edit")}
                   </Link>

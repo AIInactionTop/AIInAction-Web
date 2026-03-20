@@ -144,7 +144,7 @@ export function PathDetail({
                   {items.map((challenge) => (
                     <motion.div key={challenge.slug} variants={fadeUp}>
                       <Link
-                        href={`/challenges/${challenge.slug}`}
+                        href={`/learn/challenges/${challenge.slug}`}
                         className="group flex items-center gap-4 rounded-lg border border-border/40 bg-card/30 px-4 py-3.5 transition-all hover:border-border hover:bg-card hover:shadow-sm"
                       >
                         <span className="w-10 shrink-0 font-mono text-xs text-muted-foreground">

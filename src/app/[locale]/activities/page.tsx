@@ -604,7 +604,7 @@ export default function ActivitiesPage() {
               className="border-white/10 bg-white/5 text-white/70 backdrop-blur-sm hover:bg-white/10 hover:text-white"
               asChild
             >
-              <Link href="/challenges/openclaw">
+              <Link href="/learn/challenges/openclaw">
                 {t("joinChallenge")}
                 <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
