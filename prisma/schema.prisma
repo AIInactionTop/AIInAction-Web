@@ -948,9 +948,13 @@ model OrganizationMember {
   userId         String        @map("user_id")
   user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   role           OrgMemberRole @default(MEMBER)
-  department     String?
+  department1    String?       @map("department_1")
+  department2    String?       @map("department_2")
+  department3    String?       @map("department_3")
   jobTitle       String?       @map("job_title")
   joinedAt       DateTime      @default(now()) @map("joined_at")
+
+  surveyInviteTokens SurveyInviteToken[]
 
   @@unique([organizationId, userId])
   @@map("organization_members")
@@ -989,8 +993,23 @@ model Survey {
   responses       SurveyResponse[]
   reports         DiagnosticReport[]
   progressRecords TransformationProgress[]
+  inviteTokens    SurveyInviteToken[]
 
   @@map("surveys")
+}
+
+model SurveyInviteToken {
+  id             String              @id @default(cuid())
+  surveyId       String              @map("survey_id")
+  survey         Survey              @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  memberId       String              @map("member_id")
+  member         OrganizationMember  @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  token          String              @unique
+  usedAt         DateTime?           @map("used_at")
+  createdAt      DateTime            @default(now()) @map("created_at")
+
+  @@unique([surveyId, memberId])
+  @@map("survey_invite_tokens")
 }
 
 model SurveyResponse {
@@ -1003,6 +1022,7 @@ model SurveyResponse {
   department      String?
   jobTitle        String?   @map("job_title")
   ip              String?
+  inviteTokenId   String?   @unique @map("invite_token_id")
   answers         Json
   aiReadinessScore Float?   @map("ai_readiness_score")
   submittedAt     DateTime  @default(now()) @map("submitted_at")

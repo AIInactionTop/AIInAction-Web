@@ -64,6 +64,7 @@
     "stripe": "^20.4.1",
     "tailwind-merge": "^3.5.0",
     "three": "^0.183.2",
+    "xlsx": "^0.18.5",
     "zustand": "^5.0.11"
   },
   "devDependencies": {
