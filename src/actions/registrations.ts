@@ -19,7 +19,7 @@ export async function registerForChallenge(challengeId: string) {
     select: { slug: true },
   });
   if (challenge) {
-    revalidatePath(`/challenges/${challenge.slug}`);
+    revalidatePath(`/learn/challenges/${challenge.slug}`);
   }
 }
 
@@ -36,6 +36,6 @@ export async function unregisterFromChallenge(challengeId: string) {
     select: { slug: true },
   });
   if (challenge) {
-    revalidatePath(`/challenges/${challenge.slug}`);
+    revalidatePath(`/learn/challenges/${challenge.slug}`);
   }
 }

@@ -108,8 +108,8 @@ export async function createChallenge(formData: FormData) {
   await awardXP(session.user.id, 20);
   await checkAndAwardAchievements(session.user.id, "challenge_publish");
 
-  revalidatePath("/challenges");
-  redirect(`/challenges/${challenge.slug}`);
+  revalidatePath("/learn/challenges");
+  redirect(`/learn/challenges/${challenge.slug}`);
 }
 
 export async function updateChallenge(challengeId: string, formData: FormData) {
@@ -179,8 +179,8 @@ export async function updateChallenge(challengeId: string, formData: FormData) {
     // Graceful degradation
   }
 
-  revalidatePath(`/challenges/${existing.slug}`);
-  redirect(`/challenges/${existing.slug}`);
+  revalidatePath(`/learn/challenges/${existing.slug}`);
+  redirect(`/learn/challenges/${existing.slug}`);
 }
 
 export async function deleteChallenge(challengeId: string) {
@@ -194,8 +194,8 @@ export async function deleteChallenge(challengeId: string) {
 
   await prisma.challenge.delete({ where: { id: challengeId } });
 
-  revalidatePath("/challenges");
-  redirect("/challenges");
+  revalidatePath("/learn/challenges");
+  redirect("/learn/challenges");
 }
 
 export async function forkChallenge(originalSlug: string) {
@@ -253,6 +253,6 @@ export async function forkChallenge(originalSlug: string) {
     await checkAndAwardAchievements(original.authorId, "fork_received");
   }
 
-  revalidatePath("/challenges");
-  redirect(`/challenges/${forked.slug}/edit`);
+  revalidatePath("/learn/challenges");
+  redirect(`/learn/challenges/${forked.slug}/edit`);
 }

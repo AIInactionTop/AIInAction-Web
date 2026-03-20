@@ -140,6 +140,6 @@ export async function PUT(
     id: updated.id,
     slug: updated.slug,
     title: updated.title,
-    url: `https://aiinaction.top/challenges/${updated.slug}`,
+    url: `https://aiinaction.top/learn/challenges/${updated.slug}`,
   });
 }

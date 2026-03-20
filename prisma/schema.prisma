@@ -70,6 +70,14 @@ model User {
   aiUsageRecords     AiUsageRecord[]
   postedJobs         Job[]               @relation("PostedJobs")
   jobApplications    JobApplication[]    @relation("JobApplications")
+  marketplaceItems   MarketplaceItem[]     @relation("MarketplaceSeller")
+  marketplaceReviews MarketplaceReview[]
+  marketplacePurchases MarketplacePurchase[]
+  emailSendLogs    EmailSendLog[]  @relation("emailSendLogs")
+  activities           Activity[]
+  ownedOrganizations      Organization[]          @relation("OrgOwner")
+  organizationMemberships OrganizationMember[]
+  surveyResponses         SurveyResponse[]
 
   @@map("users")
 }
@@ -168,7 +176,8 @@ model Challenge {
   likes         ChallengeLike[]
   comments      ChallengeComment[]
   registrations ChallengeRegistration[]
-  translations  ChallengeTranslation[]
+  translations        ChallengeTranslation[]
+  activityChallenges  ActivityChallenge[]
 
   createdAt     DateTime   @default(now()) @map("created_at")
   updatedAt     DateTime   @updatedAt @map("updated_at")
@@ -533,6 +542,20 @@ enum Difficulty {
   EXPERT
 }
 
+enum ActivityType {
+  HACKATHON
+  THEMED
+  EXTERNAL
+  GENERAL
+}
+
+enum ActivityStatus {
+  DRAFT
+  UPCOMING
+  ACTIVE
+  ENDED
+}
+
 enum CompletionStatus {
   IN_PROGRESS
   COMPLETED
@@ -673,4 +696,385 @@ model JobApplication {
   @@unique([jobId, userId])
   @@index([userId, status])
   @@map("job_applications")
+}
+
+// ─── Marketplace ─────────────────────────────────────────────────
+
+enum MarketplaceItemType {
+  SKILL
+  TEMPLATE
+  PRODUCT
+  SERVICE
+}
+
+enum MarketplaceItemStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model MarketplaceItem {
+  id          String                @id @default(cuid())
+  slug        String                @unique
+  title       String
+  description String                @db.Text
+  longDescription String?           @db.Text @map("long_description")
+  type        MarketplaceItemType
+  status      MarketplaceItemStatus @default(DRAFT)
+
+  price       Int                   @default(0)
+  currency    String                @default("usd")
+
+  imageUrl    String?               @map("image_url")
+  demoUrl     String?               @map("demo_url")
+  sourceUrl   String?               @map("source_url")
+
+  tags        String[]
+  features    String[]
+
+  sellerId    String                @map("seller_id")
+  seller      User                  @relation("MarketplaceSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+
+  viewsCount     Int               @default(0) @map("views_count")
+  salesCount     Int               @default(0) @map("sales_count")
+  avgRating      Float             @default(0) @map("avg_rating")
+  reviewsCount   Int               @default(0) @map("reviews_count")
+
+  reviews        MarketplaceReview[]
+  purchases      MarketplacePurchase[]
+
+  createdAt   DateTime              @default(now()) @map("created_at")
+  updatedAt   DateTime              @updatedAt @map("updated_at")
+
+  @@index([type, status])
+  @@index([sellerId])
+  @@map("marketplace_items")
+}
+
+model MarketplaceReview {
+  id        String          @id @default(cuid())
+  rating    Int
+  comment   String?         @db.Text
+  userId    String          @map("user_id")
+  itemId    String          @map("item_id")
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item      MarketplaceItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  createdAt DateTime        @default(now()) @map("created_at")
+  updatedAt DateTime        @updatedAt @map("updated_at")
+
+  @@unique([userId, itemId])
+  @@map("marketplace_reviews")
+}
+
+model MarketplacePurchase {
+  id        String          @id @default(cuid())
+  userId    String          @map("user_id")
+  itemId    String          @map("item_id")
+  price     Int
+  currency  String          @default("usd")
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item      MarketplaceItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  createdAt DateTime        @default(now()) @map("created_at")
+
+  @@unique([userId, itemId])
+  @@map("marketplace_purchases")
+}
+
+// ─── Activities ─────────────────────────────────────────────────
+
+model Activity {
+  id          String          @id @default(cuid())
+  slug        String          @unique
+  title       String
+  description String          @db.Text
+  coverImage  String?         @map("cover_image")
+
+  type        ActivityType
+  status      ActivityStatus
+
+  startDate   DateTime?       @map("start_date")
+  endDate     DateTime?       @map("end_date")
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+
+  externalUrl String?         @map("external_url")
+  content     String?         @db.Text
+
+  authorId    String          @map("author_id")
+  author      User            @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  challenges  ActivityChallenge[]
+  translations ActivityTranslation[]
+
+  @@index([status])
+  @@index([type])
+  @@map("activities")
+}
+
+model ActivityChallenge {
+  activityId  String          @map("activity_id")
+  challengeId String          @map("challenge_id")
+  order       Int             @default(0)
+  activity    Activity        @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  challenge   Challenge       @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  @@id([activityId, challengeId])
+  @@map("activity_challenges")
+}
+
+model ActivityTranslation {
+  id          String          @id @default(cuid())
+  activityId  String          @map("activity_id")
+  locale      String
+  title       String
+  description String          @db.Text
+  content     String?         @db.Text
+  activity    Activity        @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@unique([activityId, locale])
+  @@map("activity_translations")
+}
+
+// ─── Email Templates ────────────────────────────────────────────
+
+enum EmailTemplateStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum EmailSendStatus {
+  PENDING
+  SENDING
+  COMPLETED
+  FAILED
+}
+
+model EmailTemplate {
+  id          String              @id @default(cuid())
+  name        String
+  subject     String
+  content     Json
+  htmlContent String?             @map("html_content") @db.Text
+  variables   String[]            @default([])
+  status      EmailTemplateStatus @default(DRAFT)
+  createdAt   DateTime            @default(now()) @map("created_at")
+  updatedAt   DateTime            @updatedAt @map("updated_at")
+  sendLogs    EmailSendLog[]
+
+  @@map("email_templates")
+}
+
+model EmailSendLog {
+  id              String          @id @default(cuid())
+  templateId      String          @map("template_id")
+  template        EmailTemplate   @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  recipientFilter String          @map("recipient_filter")
+  totalCount      Int             @map("total_count")
+  successCount    Int             @default(0) @map("success_count")
+  failCount       Int             @default(0) @map("fail_count")
+  status          EmailSendStatus @default(PENDING)
+  sentAt          DateTime?       @map("sent_at")
+  sentById        String          @map("sent_by_id")
+  sentBy          User            @relation("emailSendLogs", fields: [sentById], references: [id])
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+
+  @@index([templateId])
+  @@index([status])
+  @@map("email_send_logs")
+}
+
+// ─── Enterprise AI Transformation ───────────────────────────────
+
+enum Industry {
+  TECHNOLOGY
+  FINANCE
+  HEALTHCARE
+  EDUCATION
+  MANUFACTURING
+  RETAIL
+  OTHER
+}
+
+enum OrganizationSize {
+  SMALL_1_50
+  MEDIUM_51_200
+  LARGE_201_1000
+  ENTERPRISE_1000_PLUS
+}
+
+enum OrgMemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum SurveyStatus {
+  DRAFT
+  ACTIVE
+  CLOSED
+}
+
+model Organization {
+  id          String             @id @default(cuid())
+  name        String
+  slug        String             @unique
+  logo        String?
+  description String?            @db.Text
+  industry    Industry           @default(OTHER)
+  size        OrganizationSize   @default(SMALL_1_50)
+
+  ownerId     String             @map("owner_id")
+  owner       User               @relation("OrgOwner", fields: [ownerId], references: [id])
+
+  members     OrganizationMember[]
+  invites     OrganizationInvite[]
+  surveys     Survey[]
+  reports     DiagnosticReport[]
+  trainingPlans TrainingPlan[]
+  roiEstimates  ROIEstimate[]
+  progressRecords TransformationProgress[]
+
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
+
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  id             String        @id @default(cuid())
+  organizationId String        @map("organization_id")
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String        @map("user_id")
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           OrgMemberRole @default(MEMBER)
+  department     String?
+  jobTitle       String?       @map("job_title")
+  joinedAt       DateTime      @default(now()) @map("joined_at")
+
+  @@unique([organizationId, userId])
+  @@map("organization_members")
+}
+
+model OrganizationInvite {
+  id             String        @id @default(cuid())
+  organizationId String        @map("organization_id")
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  email          String
+  token          String        @unique
+  role           OrgMemberRole @default(MEMBER)
+  expiresAt      DateTime      @map("expires_at")
+  acceptedAt     DateTime?     @map("accepted_at")
+  createdAt      DateTime      @default(now()) @map("created_at")
+
+  @@map("organization_invites")
+}
+
+model Survey {
+  id              String        @id @default(cuid())
+  slug            String        @unique
+  title           String
+  description     String?       @db.Text
+  organizationId  String        @map("organization_id")
+  organization    Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  status          SurveyStatus  @default(DRAFT)
+  shareToken      String?       @unique
+  standardModules Json
+  customQuestions Json?
+  startsAt        DateTime?     @map("starts_at")
+  endsAt          DateTime?     @map("ends_at")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  responses       SurveyResponse[]
+  reports         DiagnosticReport[]
+  progressRecords TransformationProgress[]
+
+  @@map("surveys")
+}
+
+model SurveyResponse {
+  id              String    @id @default(cuid())
+  surveyId        String    @map("survey_id")
+  survey          Survey    @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  respondentId    String?   @map("respondent_id")
+  respondent      User?     @relation(fields: [respondentId], references: [id], onDelete: SetNull)
+  respondentEmail String?   @map("respondent_email")
+  department      String?
+  jobTitle        String?   @map("job_title")
+  ip              String?
+  answers         Json
+  aiReadinessScore Float?   @map("ai_readiness_score")
+  submittedAt     DateTime  @default(now()) @map("submitted_at")
+
+  @@index([surveyId, submittedAt])
+  @@map("survey_responses")
+}
+
+model DiagnosticReport {
+  id                  String        @id @default(cuid())
+  surveyId            String        @map("survey_id")
+  survey              Survey        @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  organizationId      String        @map("organization_id")
+  organization        Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  overallScore        Float         @map("overall_score")
+  dimensionScores     Json          @map("dimension_scores")
+  aiNarrative         String?       @db.Text @map("ai_narrative")
+  recommendations     Json?
+  benchmarkComparison Json?         @map("benchmark_comparison")
+  generatedAt         DateTime      @default(now()) @map("generated_at")
+
+  trainingPlans       TrainingPlan[]
+  roiEstimates        ROIEstimate[]
+
+  @@index([organizationId, generatedAt])
+  @@map("diagnostic_reports")
+}
+
+model TrainingPlan {
+  id              String           @id @default(cuid())
+  organizationId  String           @map("organization_id")
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  reportId        String           @map("report_id")
+  report          DiagnosticReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  targetRoles     Json             @map("target_roles")
+  recommendations Json
+  aiSuggestions   String?          @db.Text @map("ai_suggestions")
+  createdAt       DateTime         @default(now()) @map("created_at")
+
+  @@map("training_plans")
+}
+
+model ROIEstimate {
+  id                  String           @id @default(cuid())
+  organizationId      String           @map("organization_id")
+  organization        Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  reportId            String           @map("report_id")
+  report              DiagnosticReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  currentCosts        Json             @map("current_costs")
+  projectedSavings    Json             @map("projected_savings")
+  implementationCosts Json             @map("implementation_costs")
+  timelineMonths      Int              @map("timeline_months")
+  roiPercentage       Float            @map("roi_percentage")
+  aiAnalysis          String?          @db.Text @map("ai_analysis")
+  createdAt           DateTime         @default(now()) @map("created_at")
+
+  @@map("roi_estimates")
+}
+
+model TransformationProgress {
+  id               String              @id @default(cuid())
+  organizationId   String              @map("organization_id")
+  organization     Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  surveyId         String              @map("survey_id")
+  survey           Survey              @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  period           String
+  metrics          Json
+  previousPeriodId String?             @unique @map("previous_period_id")
+  previousPeriod   TransformationProgress? @relation("ProgressChain", fields: [previousPeriodId], references: [id], onDelete: SetNull)
+  nextPeriod       TransformationProgress? @relation("ProgressChain")
+  createdAt        DateTime            @default(now()) @map("created_at")
+
+  @@unique([organizationId, period])
+  @@map("transformation_progress")
 }

@@ -35,6 +35,6 @@ export async function toggleLike(challengeId: string) {
     select: { slug: true },
   });
   if (challenge) {
-    revalidatePath(`/challenges/${challenge.slug}`);
+    revalidatePath(`/learn/challenges/${challenge.slug}`);
   }
 }

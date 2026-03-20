@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Github, Moon, Sun, Zap, Plus } from "lucide-react";
+import { Menu, X, Github, Moon, Sun, Zap, Plus, ChevronDown, Building2 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { signIn, signOut, useSession } from "next-auth/react";
@@ -28,11 +28,17 @@ export function Header() {
   const { theme, setTheme } = useTheme();
   const { data: session } = useSession();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [learnOpen, setLearnOpen] = useState(false);
+  const [mobileLearnOpen, setMobileLearnOpen] = useState(false);
+
+  const learnSubLinks = [
+    { href: "/learn/challenges" as const, label: t("challenges") },
+    { href: "/learn/paths" as const, label: t("paths") },
+    { href: "/learn/activities" as const, label: t("activities") },
+  ];
 
   const navLinks = [
-    { href: "/challenges" as const, label: t("challenges") },
-    { href: "/activities" as const, label: t("activities") },
-    { href: "/paths" as const, label: t("paths") },
+    { href: "/marketplace" as const, label: t("marketplace") },
     { href: "/community" as const, label: t("community") },
     { href: "/ai-studio" as const, label: t("aiStudio") },
   ];
@@ -52,6 +58,53 @@ export function Header() {
 
         {/* Desktop nav */}
         <nav className="hidden items-center gap-1 md:flex">
+          {/* Learn dropdown */}
+          <div
+            className="relative"
+            onMouseEnter={() => setLearnOpen(true)}
+            onMouseLeave={() => setLearnOpen(false)}
+          >
+            <Link
+              href="/learn"
+              className={`relative flex items-center gap-1 rounded-md px-3.5 py-2 text-sm font-medium transition-colors ${
+                pathname.includes("/learn")
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {t("learn")}
+              <ChevronDown className={`h-3.5 w-3.5 transition-transform ${learnOpen ? "rotate-180" : ""}`} />
+              {pathname.includes("/learn") && (
+                <div className="absolute inset-x-1 -bottom-[1.125rem] h-px bg-primary shadow-[0_0_8px_oklch(0.78_0.145_195/0.5)]" />
+              )}
+            </Link>
+            <AnimatePresence>
+              {learnOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 4 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute left-0 top-full z-50 mt-1 w-48 rounded-md border border-border bg-popover p-1 shadow-md"
+                >
+                  {learnSubLinks.map((sub) => (
+                    <Link
+                      key={sub.href}
+                      href={sub.href}
+                      className={`block rounded-sm px-3 py-2 text-sm transition-colors ${
+                        pathname.includes(sub.href)
+                          ? "bg-primary/10 text-primary"
+                          : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                      }`}
+                    >
+                      {sub.label}
+                    </Link>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           {navLinks.map((link) => {
             const isActive = pathname.includes(link.href);
             return (
@@ -82,7 +135,7 @@ export function Header() {
               className="hidden gap-1.5 border-primary/25 hover:border-primary/50 hover:bg-primary/5 md:flex"
               asChild
             >
-              <Link href="/challenges/new">
+              <Link href="/learn/challenges/new">
                 <Plus className="h-3.5 w-3.5" />
                 {tc("create")}
               </Link>
@@ -128,6 +181,12 @@ export function Header() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link href="/enterprise">
+                    <Building2 className="mr-2 h-4 w-4" />
+                    {t("enterprise")}
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/credits">Credits</Link>
                 </DropdownMenuItem>
@@ -181,6 +240,47 @@ export function Header() {
             className="overflow-hidden border-t border-border md:hidden"
           >
             <nav className="flex flex-col gap-1 p-4">
+              {/* Learn expandable section */}
+              <button
+                onClick={() => setMobileLearnOpen(!mobileLearnOpen)}
+                className={`flex items-center justify-between rounded-md px-3 py-2.5 text-sm font-medium transition-colors ${
+                  pathname.includes("/learn")
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {t("learn")}
+                <ChevronDown className={`h-4 w-4 transition-transform ${mobileLearnOpen ? "rotate-180" : ""}`} />
+              </button>
+              <AnimatePresence>
+                {mobileLearnOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="flex flex-col gap-1 pl-4">
+                      {learnSubLinks.map((sub) => (
+                        <Link
+                          key={sub.href}
+                          href={sub.href}
+                          onClick={() => setMobileOpen(false)}
+                          className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                            pathname.includes(sub.href)
+                              ? "bg-primary/10 text-primary"
+                              : "text-muted-foreground hover:text-foreground"
+                          }`}
+                        >
+                          {sub.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
@@ -197,6 +297,14 @@ export function Header() {
               ))}
               {session?.user && (
                 <>
+                  <Link
+                    href="/enterprise"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    <Building2 className="mr-2 h-4 w-4" />
+                    {t("enterprise")}
+                  </Link>
                   <Link
                     href="/credits"
                     onClick={() => setMobileOpen(false)}
