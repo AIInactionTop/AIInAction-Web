@@ -13,6 +13,7 @@ import {
   Send,
   XCircle,
   FileBarChart,
+  Mail,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ import {
   publishSurvey,
   closeSurvey,
   deleteSurvey,
+  sendSurveyInvites,
 } from "@/actions/enterprise-surveys";
 import { generateDiagnosticReport } from "@/actions/enterprise-reports";
 
@@ -58,6 +60,25 @@ type Response = {
   } | null;
 };
 
+type InviteToken = {
+  id: string;
+  token: string;
+  usedAt: string | null;
+  createdAt: string;
+  member: {
+    id: string;
+    department1: string | null;
+    department2: string | null;
+    department3: string | null;
+    user: {
+      id: string;
+      name: string | null;
+      email: string | null;
+      image: string | null;
+    };
+  };
+};
+
 type Props = {
   orgSlug: string;
   survey: Survey;
@@ -65,6 +86,7 @@ type Props = {
   memberCount: number;
   currentUserRole: string;
   locale: string;
+  inviteTokens?: InviteToken[];
 };
 
 export function SurveyDetailClient({
@@ -73,11 +95,13 @@ export function SurveyDetailClient({
   responses,
   memberCount,
   currentUserRole,
+  inviteTokens = [],
 }: Props) {
   const t = useTranslations("enterprise");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [copied, setCopied] = useState(false);
+  const [inviteResult, setInviteResult] = useState<{ sent: number; skipped: number } | null>(null);
 
   const canManage =
     currentUserRole === "OWNER" || currentUserRole === "ADMIN";
@@ -126,6 +150,14 @@ export function SurveyDetailClient({
     startTransition(async () => {
       await generateDiagnosticReport(survey.id);
       router.push(`/enterprise/${orgSlug}/reports` as never);
+    });
+  }
+
+  function handleSendInvites() {
+    startTransition(async () => {
+      const result = await sendSurveyInvites(survey.id);
+      setInviteResult(result);
+      router.refresh();
     });
   }
 
@@ -244,6 +276,79 @@ export function SurveyDetailClient({
                 )}
               </Button>
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Invite Status */}
+      {canManage && inviteTokens.length > 0 && (
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>{t("inviteStatus")}</CardTitle>
+            {survey.status === "ACTIVE" && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSendInvites}
+                disabled={isPending}
+              >
+                <Mail className="mr-2 h-4 w-4" />
+                {t("sendInvites")}
+              </Button>
+            )}
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {inviteResult && (
+              <p className="text-sm text-green-600">
+                {t("invitesSent")} ({inviteResult.sent} sent, {inviteResult.skipped} skipped)
+              </p>
+            )}
+            {/* Invite Stats Summary */}
+            <div className="flex flex-wrap gap-3">
+              <div className="rounded-md border px-3 py-2 text-sm">
+                <span className="font-medium">{t("totalMembers")}</span>
+                <span className="ml-2 text-muted-foreground">{inviteTokens.length}</span>
+              </div>
+              <div className="rounded-md border px-3 py-2 text-sm">
+                <span className="font-medium">{t("tokenUsed")}</span>
+                <span className="ml-2 text-muted-foreground">
+                  {inviteTokens.filter((tok) => tok.usedAt).length}
+                </span>
+              </div>
+              <div className="rounded-md border px-3 py-2 text-sm">
+                <span className="font-medium">{t("tokenPending")}</span>
+                <span className="ml-2 text-muted-foreground">
+                  {inviteTokens.filter((tok) => !tok.usedAt).length}
+                </span>
+              </div>
+            </div>
+            {/* Member invite table */}
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t("name")}</TableHead>
+                  <TableHead>{t("email")}</TableHead>
+                  <TableHead>{t("department")}</TableHead>
+                  <TableHead>{t("inviteStatus")}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {inviteTokens.map((tok) => (
+                  <TableRow key={tok.id}>
+                    <TableCell>{tok.member.user.name || "—"}</TableCell>
+                    <TableCell>{tok.member.user.email || "—"}</TableCell>
+                    <TableCell>{tok.member.department1 || "—"}</TableCell>
+                    <TableCell>
+                      {tok.usedAt ? (
+                        <Badge variant="default">{t("tokenUsed")}</Badge>
+                      ) : (
+                        <Badge variant="secondary">{t("tokenPending")}</Badge>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
       )}

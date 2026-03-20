@@ -25,6 +25,7 @@ type Props = {
   modules: StandardModule[];
   customQuestions: CustomQuestion[] | null;
   locale: string;
+  inviteToken?: string;
 };
 
 // Use a simple radio group component since we might not have RadioGroup from shadcn
@@ -40,6 +41,7 @@ export function SurveyFillClient({
   modules,
   customQuestions,
   locale,
+  inviteToken,
 }: Props) {
   const t = useTranslations("enterprise");
   const isZh = locale.startsWith("zh");
@@ -117,6 +119,9 @@ export function SurveyFillClient({
 
     const formData = new FormData();
     formData.set("answers", JSON.stringify(answers));
+    if (inviteToken) {
+      formData.set("inviteToken", inviteToken);
+    }
 
     // Extract department and jobTitle from basicInfo module if available
     const basicInfo = moduleAnswers["basicInfo"];

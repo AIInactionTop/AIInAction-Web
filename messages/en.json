@@ -975,6 +975,14 @@
     "progressDescription": "Track your organization's AI transformation progress over time.",
     "needMoreSurveys": "Run at least 2 surveys to see progress trends.",
     "allPeriods": "All Periods",
-    "periodDetails": "Period Details"
+    "periodDetails": "Period Details",
+    "sendInvites": "Send Survey Invites",
+    "invitesSent": "Invites sent successfully",
+    "inviteStatus": "Invite Status",
+    "tokenUsed": "Filled",
+    "tokenPending": "Pending",
+    "tokenSent": "Sent",
+    "invalidToken": "This survey link is invalid or has already been used.",
+    "inviteStats": "Invite Statistics"
   }
 }

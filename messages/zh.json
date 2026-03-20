@@ -975,6 +975,14 @@
     "progressDescription": "跟踪企业 AI 转型进度。",
     "needMoreSurveys": "至少完成 2 次调研才能查看进度趋势。",
     "allPeriods": "所有周期",
-    "periodDetails": "周期详情"
+    "periodDetails": "周期详情",
+    "sendInvites": "发送调研邀请",
+    "invitesSent": "邀请已发送",
+    "inviteStatus": "邀请状态",
+    "tokenUsed": "已填写",
+    "tokenPending": "待填写",
+    "tokenSent": "已发送",
+    "invalidToken": "此调研链接无效或已被使用。",
+    "inviteStats": "邀请统计"
   }
 }

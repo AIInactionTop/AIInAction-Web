@@ -150,10 +150,106 @@ export async function publishSurvey(surveyId: string) {
     },
   });
 
+  // Generate invite tokens for all org members
+  const members = await prisma.organizationMember.findMany({
+    where: { organizationId: survey.organizationId },
+    select: { id: true },
+  });
+
+  if (members.length > 0) {
+    const tokenData = members.map((member) => ({
+      surveyId,
+      memberId: member.id,
+      token: crypto.randomBytes(16).toString("hex"),
+    }));
+
+    await prisma.surveyInviteToken.createMany({
+      data: tokenData,
+      skipDuplicates: true,
+    });
+  }
+
   revalidatePath(`/enterprise/${survey.organization.slug}/surveys`);
   revalidatePath(
     `/enterprise/${survey.organization.slug}/surveys/${survey.slug}`,
   );
+
+  return { tokensGenerated: members.length };
+}
+
+export async function sendSurveyInvites(surveyId: string) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
+  const survey = await prisma.survey.findUnique({
+    where: { id: surveyId },
+    include: { organization: { select: { id: true, name: true, slug: true } } },
+  });
+  if (!survey) throw new Error("Survey not found");
+  if (survey.status !== "ACTIVE") throw new Error("Survey is not active");
+
+  await requireOrgRole(survey.organizationId, session.user.id, [
+    "OWNER",
+    "ADMIN",
+  ]);
+
+  const tokens = await prisma.surveyInviteToken.findMany({
+    where: { surveyId, usedAt: null },
+    include: {
+      member: {
+        include: { user: { select: { email: true, name: true } } },
+      },
+    },
+  });
+
+  let sent = 0;
+  let skipped = 0;
+  const baseUrl = process.env.NEXTAUTH_URL || "https://aiinaction.top";
+
+  for (const inviteToken of tokens) {
+    const email = inviteToken.member.user.email;
+    if (!email) {
+      skipped++;
+      continue;
+    }
+
+    const surveyUrl = `${baseUrl}/survey/${survey.shareToken}?t=${inviteToken.token}`;
+    const memberName = inviteToken.member.user.name?.split(" ")[0] || "there";
+
+    try {
+      const { Resend } = await import("resend");
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      await resend.emails.send({
+        from: "AI In Action <noreply@aiinaction.top>",
+        to: email,
+        subject: `Survey Invite: ${survey.title} - ${survey.organization.name}`,
+        html: `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+            <h1 style="color: #1a1a1a; font-size: 24px; margin-bottom: 16px;">Hi ${memberName},</h1>
+            <p style="color: #4a4a4a; font-size: 16px; line-height: 1.6;">
+              You have been invited to participate in the survey <strong>"${survey.title}"</strong> by <strong>${survey.organization.name}</strong>.
+            </p>
+            <p style="color: #4a4a4a; font-size: 16px; line-height: 1.6;">
+              Please click the button below to fill out the survey. This is a unique link for you — please do not share it.
+            </p>
+            <div style="margin-top: 32px;">
+              <a href="${surveyUrl}" style="display: inline-block; background-color: #2563eb; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-size: 16px; font-weight: 500;">
+                Fill Survey
+              </a>
+            </div>
+            <p style="color: #9a9a9a; font-size: 14px; margin-top: 40px;">
+              — The ${survey.organization.name} Team
+            </p>
+          </div>
+        `,
+      });
+      sent++;
+    } catch {
+      skipped++;
+    }
+  }
+
+  return { sent, skipped };
 }
 
 export async function closeSurvey(surveyId: string) {
@@ -200,31 +296,75 @@ export async function submitSurveyResponse(
   if (!survey) throw new Error("Survey not found");
   if (survey.status !== "ACTIVE") throw new Error("Survey is not active");
 
-  // Get IP for rate limiting
+  // Get IP for recording
   const headerStore = await headers();
   const ip =
     headerStore.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     headerStore.get("x-real-ip") ||
     "unknown";
 
-  // Rate limit: max 3 responses per IP per hour
-  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-  const recentFromIp = await prisma.surveyResponse.count({
-    where: {
-      surveyId,
-      ip,
-      submittedAt: { gte: oneHourAgo },
-    },
-  });
-  if (recentFromIp >= 3) {
-    throw new Error("Rate limit exceeded. Please try again later.");
-  }
+  const inviteTokenValue = (formData.get("inviteToken") as string) || null;
+  let inviteTokenId: string | null = null;
+  let tokenMemberDepartment: string | null = null;
+  let tokenMemberJobTitle: string | null = null;
+  let tokenMemberEmail: string | null = null;
+  let tokenMemberUserId: string | null = null;
 
-  // Check cookie for double submit
-  const cookieStore = await cookies();
-  const submitCookieName = `survey_submitted_${surveyId}`;
-  if (cookieStore.get(submitCookieName)) {
-    throw new Error("You have already submitted a response to this survey.");
+  if (inviteTokenValue) {
+    // Token-based submission: validate the invite token
+    const inviteToken = await prisma.surveyInviteToken.findUnique({
+      where: { token: inviteTokenValue },
+      include: {
+        member: {
+          include: { user: { select: { id: true, email: true } } },
+        },
+      },
+    });
+
+    if (!inviteToken) throw new Error("Invalid invite token");
+    if (inviteToken.surveyId !== surveyId) throw new Error("Token does not match this survey");
+    if (inviteToken.usedAt) throw new Error("This invite link has already been used");
+
+    // Mark token as used
+    await prisma.surveyInviteToken.update({
+      where: { id: inviteToken.id },
+      data: { usedAt: new Date() },
+    });
+
+    inviteTokenId = inviteToken.id;
+    tokenMemberDepartment = inviteToken.member.department1;
+    tokenMemberJobTitle = inviteToken.member.jobTitle;
+    tokenMemberEmail = inviteToken.member.user.email;
+    tokenMemberUserId = inviteToken.member.user.id;
+  } else {
+    // Anonymous/cookie-based submission: apply rate limiting
+
+    // Rate limit: max 3 responses per IP per hour
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    const recentFromIp = await prisma.surveyResponse.count({
+      where: {
+        surveyId,
+        ip,
+        submittedAt: { gte: oneHourAgo },
+      },
+    });
+    if (recentFromIp >= 3) {
+      throw new Error("Rate limit exceeded. Please try again later.");
+    }
+
+    // Check cookie for double submit
+    const cookieStore = await cookies();
+    const submitCookieName = `survey_submitted_${surveyId}`;
+    if (cookieStore.get(submitCookieName)) {
+      throw new Error("You have already submitted a response to this survey.");
+    }
+
+    // Set cookie to prevent double submit (24 hours)
+    cookieStore.set(submitCookieName, "1", {
+      maxAge: 24 * 60 * 60,
+      httpOnly: true,
+      sameSite: "lax",
+    });
   }
 
   // Parse answers
@@ -235,12 +375,12 @@ export async function submitSurveyResponse(
   // Calculate score
   const aiReadinessScore = calculateAiReadinessScore(answers);
 
-  // Get optional respondent info
+  // Get respondent info: prefer token member data, fall back to form/session
   const session = await auth();
-  const respondentId = session?.user?.id || null;
-  const respondentEmail = (formData.get("email") as string) || null;
-  const department = (formData.get("department") as string) || null;
-  const jobTitle = (formData.get("jobTitle") as string) || null;
+  const respondentId = tokenMemberUserId || session?.user?.id || null;
+  const respondentEmail = tokenMemberEmail || (formData.get("email") as string) || null;
+  const department = tokenMemberDepartment || (formData.get("department") as string) || null;
+  const jobTitle = tokenMemberJobTitle || (formData.get("jobTitle") as string) || null;
 
   await prisma.surveyResponse.create({
     data: {
@@ -250,16 +390,10 @@ export async function submitSurveyResponse(
       department,
       jobTitle,
       ip,
+      inviteTokenId,
       answers: JSON.parse(JSON.stringify(answers)),
       aiReadinessScore,
     },
-  });
-
-  // Set cookie to prevent double submit (24 hours)
-  cookieStore.set(submitCookieName, "1", {
-    maxAge: 24 * 60 * 60,
-    httpOnly: true,
-    sameSite: "lax",
   });
 
   // Check if response rate >= 50% to auto-trigger report

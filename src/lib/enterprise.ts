@@ -138,6 +138,34 @@ export async function getSurveyResponseCount(surveyId: string): Promise<number> 
 }
 
 // ---------------------
+// Survey Invite Token queries
+// ---------------------
+
+export async function getSurveyInviteTokens(surveyId: string) {
+  return prisma.surveyInviteToken.findMany({
+    where: { surveyId },
+    include: {
+      member: {
+        include: { user: { select: { id: true, name: true, email: true, image: true } } },
+      },
+    },
+    orderBy: { createdAt: "asc" },
+  });
+}
+
+export async function getSurveyInviteTokenByToken(token: string) {
+  return prisma.surveyInviteToken.findUnique({
+    where: { token },
+    include: {
+      survey: { include: { organization: true } },
+      member: {
+        include: { user: { select: { id: true, name: true, email: true } } },
+      },
+    },
+  });
+}
+
+// ---------------------
 // Report queries
 // ---------------------
 

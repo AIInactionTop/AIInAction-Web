@@ -7,6 +7,7 @@ import {
   getOrganizationMember,
   getSurveyBySlug,
   getSurveyResponses,
+  getSurveyInviteTokens,
 } from "@/lib/enterprise";
 import { SurveyDetailClient } from "@/components/enterprise/survey-detail-client";
 
@@ -41,6 +42,7 @@ export default async function SurveyDetailPage({ params }: Props) {
   if (!survey || survey.organizationId !== org.id) notFound();
 
   const responses = await getSurveyResponses(survey.id);
+  const inviteTokens = await getSurveyInviteTokens(survey.id);
 
   const serialize = (data: unknown) => JSON.parse(JSON.stringify(data));
 
@@ -52,6 +54,7 @@ export default async function SurveyDetailPage({ params }: Props) {
       memberCount={org._count.members}
       currentUserRole={currentMember.role}
       locale={locale}
+      inviteTokens={serialize(inviteTokens)}
     />
   );
 }
