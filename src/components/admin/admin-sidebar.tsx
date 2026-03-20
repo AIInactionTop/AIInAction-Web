@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLocale } from "next-intl";
-import { Mail, LayoutDashboard, History } from "lucide-react";
+import { Mail, LayoutDashboard, History, CalendarDays } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { href: "/admin/activities", label: "Activities", icon: CalendarDays },
   { href: "/admin/emails", label: "Email Templates", icon: Mail },
   { href: "/admin/emails/logs", label: "Send History", icon: History },
 ];
