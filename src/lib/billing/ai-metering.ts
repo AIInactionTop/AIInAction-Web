@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { convertToModelMessages, streamText } from "ai";
-import type { LanguageModel, UIMessage } from "ai";
+import type { UIMessage } from "ai";
 import { jsonError } from "@/lib/api-auth";
 import {
   BillingConfigError,
@@ -43,7 +43,7 @@ export async function createMeteredChatResponse(input: {
   modelId: string;
   systemPrompt: string;
   messages: UIMessage[];
-  model: LanguageModel;
+  model: string;
   maxOutputTokens: number;
 }) {
   const estimatedInputTokens = estimatePromptTokens(

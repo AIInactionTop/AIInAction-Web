@@ -1,18 +1,6 @@
-import Anthropic from "@anthropic-ai/sdk";
-import { HttpsProxyAgent } from "https-proxy-agent";
+import { generateText } from "ai";
 import type { DimensionScores } from "@/types/enterprise";
 import { scoreToGrade } from "@/types/enterprise";
-
-const proxyUrl =
-  process.env.https_proxy ||
-  process.env.HTTPS_PROXY ||
-  process.env.http_proxy ||
-  process.env.HTTP_PROXY;
-
-const client = new Anthropic({
-  // @ts-expect-error httpAgent is supported at runtime but not in SDK types
-  httpAgent: proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined,
-});
 
 // ---------------------
 // Types
@@ -119,15 +107,13 @@ Important:
 - Recommendations should be concrete and implementable
 - Return ONLY the JSON object, no markdown fences`;
 
-  const response = await client.messages.create({
-    model: "claude-sonnet-4-6",
-    max_tokens: 4096,
-    messages: [{ role: "user", content: prompt }],
+  const { text } = await generateText({
+    model: "anthropic/claude-sonnet-4.6",
+    maxOutputTokens: 4096,
+    prompt,
   });
 
-  const text = response.content.find((b) => b.type === "text")?.text;
   if (!text) throw new Error("No text response from AI");
-
   return JSON.parse(text) as { narrative: string; recommendations: string[] };
 }
 
@@ -168,15 +154,13 @@ Generate a comprehensive training suggestion document in ${langLabel} (600-1000 
 
 Return ONLY the training suggestion text, no JSON wrapping.`;
 
-  const response = await client.messages.create({
-    model: "claude-sonnet-4-6",
-    max_tokens: 4096,
-    messages: [{ role: "user", content: prompt }],
+  const { text } = await generateText({
+    model: "anthropic/claude-sonnet-4.6",
+    maxOutputTokens: 4096,
+    prompt,
   });
 
-  const text = response.content.find((b) => b.type === "text")?.text;
   if (!text) throw new Error("No text response from AI");
-
   return text;
 }
 
@@ -228,14 +212,12 @@ Generate an ROI analysis narrative in ${langLabel} (400-800 words) that includes
 
 Return ONLY the analysis text, no JSON wrapping.`;
 
-  const response = await client.messages.create({
-    model: "claude-sonnet-4-6",
-    max_tokens: 4096,
-    messages: [{ role: "user", content: prompt }],
+  const { text } = await generateText({
+    model: "anthropic/claude-sonnet-4.6",
+    maxOutputTokens: 4096,
+    prompt,
   });
 
-  const text = response.content.find((b) => b.type === "text")?.text;
   if (!text) throw new Error("No text response from AI");
-
   return text;
 }

@@ -1,12 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
-import { HttpsProxyAgent } from "https-proxy-agent";
-
-const proxyUrl = process.env.https_proxy || process.env.HTTPS_PROXY || process.env.http_proxy || process.env.HTTP_PROXY;
-
-const client = new Anthropic({
-  // @ts-expect-error httpAgent is supported at runtime but not in SDK types
-  httpAgent: proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined,
-});
+import { generateText } from "ai";
 
 export type ChallengeContent = {
   title: string;
@@ -28,13 +20,10 @@ export type GeneratedChallenge = {
 export async function generateChallenge(
   topic: string,
 ): Promise<GeneratedChallenge> {
-  const response = await client.messages.create({
-    model: "claude-sonnet-4-6",
-    max_tokens: 4096,
-    messages: [
-      {
-        role: "user",
-        content: `Generate a hands-on AI challenge project about: "${topic}"
+  const { text } = await generateText({
+    model: "anthropic/claude-sonnet-4.6",
+    maxOutputTokens: 4096,
+    prompt: `Generate a hands-on AI challenge project about: "${topic}"
 
 Return a JSON object with this exact structure:
 {
@@ -63,13 +52,9 @@ Important:
 - Hints should guide without giving away the solution
 - Chinese translations should be natural, not literal
 - Return ONLY the JSON object, no markdown fences`,
-      },
-    ],
   });
 
-  const text = response.content.find((b) => b.type === "text")?.text;
   if (!text) throw new Error("No text response from AI");
-
   return JSON.parse(text) as GeneratedChallenge;
 }
 
@@ -83,13 +68,10 @@ export async function translateChallenge(
     zh: "Chinese",
   };
 
-  const response = await client.messages.create({
-    model: "claude-sonnet-4-6",
-    max_tokens: 2048,
-    messages: [
-      {
-        role: "user",
-        content: `Translate this challenge content from ${localeNames[sourceLocale] || sourceLocale} to ${localeNames[targetLocale] || targetLocale}.
+  const { text } = await generateText({
+    model: "anthropic/claude-sonnet-4.6",
+    maxOutputTokens: 2048,
+    prompt: `Translate this challenge content from ${localeNames[sourceLocale] || sourceLocale} to ${localeNames[targetLocale] || targetLocale}.
 
 Source content:
 ${JSON.stringify(content, null, 2)}
@@ -107,12 +89,8 @@ Important:
 - Keep technical terms in their commonly used form for the target language
 - Maintain the same level of detail and specificity
 - Return ONLY the JSON object, no markdown fences`,
-      },
-    ],
   });
 
-  const text = response.content.find((b) => b.type === "text")?.text;
   if (!text) throw new Error("No text response from AI");
-
   return JSON.parse(text) as ChallengeContent;
 }

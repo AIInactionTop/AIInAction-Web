@@ -1,10 +1,10 @@
-import { anthropic } from "@ai-sdk/anthropic";
 import { auth } from "@/lib/auth";
 import { createMeteredChatResponse } from "@/lib/billing/ai-metering";
 
 export const maxDuration = 60;
 const MODEL_PROVIDER = "anthropic";
 const MODEL_ID = "claude-sonnet-4-6";
+const GATEWAY_MODEL = "anthropic/claude-sonnet-4.6";
 const MAX_OUTPUT_TOKENS = 4096;
 
 const systemPrompt = `You are an expert challenge content creator for "AI In Action", a platform for learning AI through hands-on projects.
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
     modelId: MODEL_ID,
     systemPrompt,
     messages,
-    model: anthropic(MODEL_ID),
+    model: GATEWAY_MODEL,
     maxOutputTokens: MAX_OUTPUT_TOKENS,
   });
 }
