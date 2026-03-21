@@ -147,6 +147,15 @@ export function AIStudioClient({ categories, locale }: Props) {
           difficulty: detail.difficulty,
           isDetailGenerated: true,
         });
+      } else if (challengeId) {
+        // Parse failed — mark as generated to prevent infinite retry loop
+        useAIStudioStore.getState().updateChallenge(challengeId, {
+          isDetailGenerated: true,
+        });
+        setLocalErrorMessage(
+          `Failed to parse generated content for challenge. You can retry individually.`
+        );
+        isGeneratingAllRef.current = false;
       }
 
       generatingChallengeRef.current = null;
@@ -165,7 +174,13 @@ export function AIStudioClient({ categories, locale }: Props) {
         }
       }
     },
-    onError: (error) => setLocalErrorMessage(normalizeChatError(error.message)),
+    onError: (error) => {
+      // Stop "generate all" flow on error to prevent further credit consumption
+      isGeneratingAllRef.current = false;
+      generatingChallengeRef.current = null;
+      setGeneratingChallengeId(null);
+      setLocalErrorMessage(normalizeChatError(error.message));
+    },
   });
 
   const chatErrorMessage = normalizeChatError(

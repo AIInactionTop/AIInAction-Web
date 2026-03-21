@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
-import { useSearchParams } from "next/navigation";
-import { CheckCircle2, Coins, Crown, RefreshCcw } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { signIn, useSession } from "next-auth/react";
+import { CheckCircle2, Coins, Crown, Loader2, RefreshCcw } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -58,6 +59,207 @@ function formatPrice(unitAmount: number, currency: string) {
     currency: currency.toUpperCase(),
   }).format(unitAmount / 100);
 }
+
+// ---------------------
+// Flexible Amount Selector (for top-up)
+// ---------------------
+
+const PRESET_AMOUNTS = [20, 50, 100, 500] as const;
+const SERVICE_FEE_RATE = 0.055;
+const MIN_AMOUNT = 5;
+const MAX_AMOUNT = 10000;
+const DEFAULT_AMOUNT = 100;
+
+function AmountSelector() {
+  const pathname = usePathname();
+  const { data: session } = useSession();
+  const [amount, setAmount] = useState(DEFAULT_AMOUNT);
+  const [isCustom, setIsCustom] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const serviceFee = Math.ceil(amount * SERVICE_FEE_RATE * 100) / 100;
+  const total = Math.ceil((amount + serviceFee) * 100) / 100;
+
+  const handlePreset = useCallback((value: number) => {
+    setAmount(value);
+    setIsCustom(false);
+    setError(null);
+  }, []);
+
+  const handleCustom = useCallback(() => {
+    setIsCustom(true);
+    setError(null);
+    setTimeout(() => inputRef.current?.focus(), 0);
+  }, []);
+
+  const handleCustomInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/[^0-9]/g, "");
+    const value = parseInt(raw, 10);
+    if (isNaN(value)) {
+      setAmount(0);
+    } else {
+      setAmount(Math.min(value, MAX_AMOUNT));
+    }
+  }, []);
+
+  const handleCheckout = async () => {
+    if (!session?.user) {
+      await signIn("github", { callbackUrl: pathname });
+      return;
+    }
+
+    if (amount < MIN_AMOUNT) {
+      setError(`Minimum amount is $${MIN_AMOUNT}`);
+      return;
+    }
+    if (amount > MAX_AMOUNT) {
+      setError(`Maximum amount is $${MAX_AMOUNT.toLocaleString()}`);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/billing/stripe/checkout-custom", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount,
+          successUrl: `${pathname}?checkout=success`,
+          cancelUrl: `${pathname}?checkout=cancelled`,
+        }),
+      });
+
+      const payload = (await response.json().catch(() => null)) as
+        | { data?: { url?: string | null }; error?: { message?: string } }
+        | null;
+
+      if (!response.ok || !payload?.data?.url) {
+        throw new Error(payload?.error?.message || "Failed to create checkout");
+      }
+
+      window.location.href = payload.data.url;
+    } catch (checkoutError) {
+      setError(
+        checkoutError instanceof Error
+          ? checkoutError.message
+          : "Failed to create checkout"
+      );
+      setLoading(false);
+    }
+  };
+
+  const isValidAmount = amount >= MIN_AMOUNT && amount <= MAX_AMOUNT;
+
+  return (
+    <Card className="mx-auto w-full max-w-lg">
+      <CardHeader>
+        <CardTitle className="text-2xl">Buy AI Credits</CardTitle>
+        <CardDescription>
+          Purchase credits for AI Studio usage. $1 = 1 credit.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-8">
+        {/* Large price display */}
+        <div className="text-center">
+          <p className="text-6xl font-bold tracking-tight sm:text-7xl">
+            US${amount.toLocaleString()}.00
+          </p>
+        </div>
+
+        {/* Preset buttons */}
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          {PRESET_AMOUNTS.map((preset) => (
+            <button
+              key={preset}
+              onClick={() => handlePreset(preset)}
+              className={`rounded-lg border px-5 py-2.5 text-sm font-medium transition-colors ${
+                !isCustom && amount === preset
+                  ? "border-foreground bg-foreground text-background"
+                  : "border-border bg-background hover:bg-accent"
+              }`}
+            >
+              ${preset}
+            </button>
+          ))}
+          {isCustom ? (
+            <div className="flex items-center rounded-lg border border-foreground bg-foreground px-3 py-1.5">
+              <span className="text-sm font-medium text-background">$</span>
+              <input
+                ref={inputRef}
+                type="text"
+                inputMode="numeric"
+                value={amount || ""}
+                onChange={handleCustomInput}
+                className="w-20 bg-transparent text-center text-sm font-medium text-background outline-none placeholder:text-background/50"
+                placeholder="0"
+              />
+            </div>
+          ) : (
+            <button
+              onClick={handleCustom}
+              className="rounded-lg border border-border bg-background px-5 py-2.5 text-sm font-medium transition-colors hover:bg-accent"
+            >
+              Custom
+            </button>
+          )}
+        </div>
+
+        {/* Fee breakdown */}
+        {isValidAmount && (
+          <div className="rounded-lg border border-border/60 bg-muted/30 p-4">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Credits</span>
+              <span className="font-medium">${amount.toLocaleString()}.00</span>
+            </div>
+            <div className="mt-2 flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Service fee (5.5%)</span>
+              <span className="font-medium">${serviceFee.toFixed(2)}</span>
+            </div>
+            <div className="mt-3 flex items-center justify-between border-t border-border/60 pt-3">
+              <span className="font-semibold">Total</span>
+              <span className="text-lg font-bold">${total.toFixed(2)}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Error */}
+        {error && (
+          <p className="text-center text-sm text-destructive">{error}</p>
+        )}
+
+        {/* Actions */}
+        <div className="flex items-center justify-between border-t border-border/60 pt-6">
+          <Button
+            variant="outline"
+            onClick={() => {
+              setAmount(DEFAULT_AMOUNT);
+              setIsCustom(false);
+              setError(null);
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleCheckout}
+            disabled={loading || !isValidAmount}
+            className="bg-foreground text-background hover:bg-foreground/90"
+          >
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {session?.user ? "Continue to Payment" : "Sign in to Purchase"}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ---------------------
+// Product Card (for membership)
+// ---------------------
 
 function ProductCard({
   product,
@@ -129,6 +331,10 @@ function ProductCard({
   );
 }
 
+// ---------------------
+// Shared components
+// ---------------------
+
 function LedgerList() {
   const { ledger, balance } = useCredits();
 
@@ -145,7 +351,7 @@ function LedgerList() {
       <CardContent>
         {ledger.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            No credit activity yet. Purchase a package or use AI Studio to start generating records.
+            No credit activity yet. Purchase credits or use AI Studio to start generating records.
           </p>
         ) : (
           <div className="space-y-3">
@@ -263,11 +469,13 @@ function PricingExplanation({ pricing }: { pricing: PricingRule[] }) {
   );
 }
 
+// ---------------------
+// Page components
+// ---------------------
+
 export function CreditsPageClient({
-  products,
   pricing,
 }: {
-  products: Product[];
   pricing: PricingRule[];
 }) {
   const searchParams = useSearchParams();
@@ -326,16 +534,7 @@ export function CreditsPageClient({
 
       <BalanceOverview />
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        {products.map((product) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            ctaLabel="Buy credits"
-            accent="amber"
-          />
-        ))}
-      </div>
+      <AmountSelector />
 
       <PricingExplanation pricing={pricing} />
 

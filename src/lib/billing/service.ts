@@ -499,10 +499,10 @@ async function getOrCreateCheckoutRecord(stripeSession: Stripe.Checkout.Session)
   if (existing) return existing;
 
   const userId = stripeSession.metadata?.userId;
-  const productId = stripeSession.metadata?.productId;
+  const productId = stripeSession.metadata?.productId || null;
   const billingAccountId = stripeSession.metadata?.billingAccountId;
 
-  if (!userId || !productId || !billingAccountId) {
+  if (!userId || !billingAccountId) {
     throw new BillingConfigError(
       `Stripe checkout session ${stripeSession.id} is missing billing metadata`
     );
@@ -1133,9 +1133,85 @@ export async function createStripeCheckoutSession(input: {
   };
 }
 
+const SERVICE_FEE_RATE = 0.055;
+
+export async function createCustomAmountCheckoutSession(input: {
+  userId: string;
+  amountDollars: number;
+  successUrl: string;
+  cancelUrl: string;
+}) {
+  const { amountDollars } = input;
+  if (amountDollars < 5 || amountDollars > 10000) {
+    throw new BillingConfigError("Amount must be between $5 and $10,000");
+  }
+
+  const totalCents = Math.ceil(amountDollars * (1 + SERVICE_FEE_RATE) * 100);
+  const creditsMicrocredits = creditsToMicrocredits(amountDollars);
+
+  const billingAccount = await ensureBillingAccount(input.userId);
+  const stripeCustomerId = await getOrCreateStripeCustomer(input.userId);
+  const stripe = getStripe();
+  const metadata = {
+    userId: input.userId,
+    billingAccountId: billingAccount.id,
+    customAmount: "true",
+    creditsDollars: String(amountDollars),
+    creditsMicrocredits: String(creditsMicrocredits),
+  };
+
+  const session = await stripe.checkout.sessions.create({
+    mode: "payment",
+    customer: stripeCustomerId,
+    line_items: [
+      {
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: `${amountDollars} AI Credits`,
+            description: `Top-up ${amountDollars} credits for AI usage`,
+          },
+          unit_amount: totalCents,
+        },
+        quantity: 1,
+      },
+    ],
+    success_url: input.successUrl,
+    cancel_url: input.cancelUrl,
+    metadata,
+  });
+
+  await prisma.billingCheckoutSession.create({
+    data: {
+      userId: input.userId,
+      billingAccountId: billingAccount.id,
+      productId: null,
+      stripeCheckoutSessionId: session.id,
+      stripePaymentIntentId:
+        typeof session.payment_intent === "string"
+          ? session.payment_intent
+          : session.payment_intent?.id || null,
+      status: "PENDING",
+      amountTotal: session.amount_total ?? totalCents,
+      currency: "usd",
+      expiresAt: toDate(session.expires_at),
+      metadata: stringifyStripeObject(metadata),
+    },
+  });
+
+  return {
+    checkoutSessionId: session.id,
+    url: session.url,
+  };
+}
+
 async function handleTopUpCheckoutCompletion(
   checkoutRecord: Awaited<ReturnType<typeof getOrCreateCheckoutRecord>>
 ) {
+  if (!checkoutRecord.product) {
+    throw new BillingConfigError("Product checkout missing product reference");
+  }
+
   const grantAmount = productGrantMicrocredits(checkoutRecord.product);
 
   const grantResult = await grantCredits({
@@ -1186,7 +1262,36 @@ async function handleStripeCheckoutCompleted(event: Stripe.Event) {
     },
   });
 
-  if (checkoutRecord.product.type === BillingProductType.TOP_UP) {
+  // Custom amount checkout (no linked product)
+  if (session.metadata?.customAmount === "true") {
+    const creditsMicrocredits = BigInt(session.metadata.creditsMicrocredits || "0");
+    const creditsDollars = session.metadata.creditsDollars || "0";
+
+    const grantResult = await grantCredits({
+      userId: checkoutRecord.userId,
+      amountMicrocredits: creditsMicrocredits,
+      source: CreditLedgerEntrySource.TOP_UP,
+      sourceRef: checkoutRecord.stripeCheckoutSessionId,
+      description: `Top-up: $${creditsDollars} credits`,
+      checkoutSessionId: checkoutRecord.id,
+      metadata: {
+        checkoutSessionId: checkoutRecord.stripeCheckoutSessionId,
+        customAmount: true,
+        creditsDollars,
+      },
+    });
+
+    await prisma.billingCheckoutSession.update({
+      where: { id: checkoutRecord.id },
+      data: {
+        creditsGrantedMicrocredits: creditsMicrocredits,
+      },
+    });
+
+    return grantResult;
+  }
+
+  if (checkoutRecord.product?.type === BillingProductType.TOP_UP) {
     await handleTopUpCheckoutCompletion(checkoutRecord);
     return;
   }

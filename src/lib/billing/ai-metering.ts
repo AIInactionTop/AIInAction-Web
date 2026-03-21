@@ -79,6 +79,7 @@ export async function createMeteredChatResponse(input: {
     system: input.systemPrompt,
     messages: await convertToModelMessages(input.messages),
     maxOutputTokens: input.maxOutputTokens,
+    maxRetries: 0,
     onFinish: async ({ usage, finishReason }) => {
       if (finishReason === "error") {
         return;
