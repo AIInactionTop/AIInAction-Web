@@ -1262,6 +1262,43 @@ async function handleStripeCheckoutCompleted(event: Stripe.Event) {
     },
   });
 
+  // Marketplace purchase (Stripe Connect)
+  if (session.metadata?.marketplacePurchase === "true") {
+    const { itemId, buyerId, itemPrice, itemCurrency } = session.metadata;
+    if (!itemId || !buyerId) {
+      console.error("Marketplace webhook missing metadata", session.metadata);
+      return;
+    }
+
+    const existingPurchase = await prisma.marketplacePurchase.findUnique({
+      where: { userId_itemId: { userId: buyerId, itemId } },
+    });
+    if (existingPurchase) return;
+
+    const paymentIntentId =
+      typeof session.payment_intent === "string"
+        ? session.payment_intent
+        : session.payment_intent?.id || null;
+
+    await prisma.$transaction([
+      prisma.marketplacePurchase.create({
+        data: {
+          userId: buyerId,
+          itemId,
+          price: parseInt(itemPrice || "0", 10),
+          currency: itemCurrency || "usd",
+          stripePaymentIntentId: paymentIntentId,
+        },
+      }),
+      prisma.marketplaceItem.update({
+        where: { id: itemId },
+        data: { salesCount: { increment: 1 } },
+      }),
+    ]);
+
+    return;
+  }
+
   // Custom amount checkout (no linked product)
   if (session.metadata?.customAmount === "true") {
     const creditsMicrocredits = BigInt(session.metadata.creditsMicrocredits || "0");

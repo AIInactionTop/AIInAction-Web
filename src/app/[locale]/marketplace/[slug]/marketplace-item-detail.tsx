@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import {
   Star, ExternalLink, ShoppingCart, Check, Trash2, Pencil,
-  Sparkles, FileCode, Package, Wrench, ArrowLeft,
+  Sparkles, FileCode, Package, Wrench, ArrowLeft, Loader2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -46,7 +46,7 @@ type ItemDetail = {
   createdAt: string;
   hasPurchased: boolean;
   userReview: { id: string; rating: number; comment: string | null } | null;
-  seller: { id: string; name: string | null; image: string | null; bio: string | null };
+  seller: { id: string; name: string | null; image: string | null; bio: string | null; stripeConnectAccountId: string | null };
   reviews: Review[];
 };
 
@@ -108,9 +108,35 @@ export function MarketplaceItemDetail({
   const TypeIcon = typeIcons[item.type] || Package;
 
   const handlePurchase = () => {
+    if (item.price === 0) {
+      startPurchase(async () => {
+        await purchaseMarketplaceItem(item.id);
+        router.refresh();
+      });
+      return;
+    }
+
     startPurchase(async () => {
-      await purchaseMarketplaceItem(item.id);
-      router.refresh();
+      try {
+        const response = await fetch("/api/marketplace/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            itemId: item.id,
+            successUrl: `${window.location.pathname}?checkout=success`,
+            cancelUrl: `${window.location.pathname}?checkout=cancelled`,
+          }),
+        });
+
+        const payload = await response.json().catch(() => null);
+        if (!response.ok || !payload?.data?.url) {
+          throw new Error(payload?.error?.message || "Failed to create checkout");
+        }
+
+        window.location.href = payload.data.url;
+      } catch (err) {
+        alert(err instanceof Error ? err.message : "Checkout failed");
+      }
     });
   };
 
@@ -133,8 +159,24 @@ export function MarketplaceItemDetail({
     });
   };
 
+  const checkoutStatus = typeof window !== "undefined"
+    ? new URLSearchParams(window.location.search).get("checkout")
+    : null;
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-16 lg:px-8">
+      {checkoutStatus === "success" && (
+        <div className="mb-4 flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300">
+          <Check className="h-4 w-4 shrink-0" />
+          Payment completed. Thank you for your purchase!
+        </div>
+      )}
+      {checkoutStatus === "cancelled" && (
+        <div className="mb-4 rounded-lg border border-border/60 bg-card/50 px-4 py-3 text-sm text-muted-foreground">
+          Checkout was cancelled.
+        </div>
+      )}
+
       {/* Back link */}
       <Link
         href="/marketplace"
@@ -310,13 +352,22 @@ export function MarketplaceItemDetail({
                   <Check className="h-4 w-4" />
                   {t("purchased")}
                 </Button>
+              ) : !item.seller.stripeConnectAccountId && item.price > 0 ? (
+                <Button className="w-full gap-2" disabled>
+                  <ShoppingCart className="h-4 w-4" />
+                  {t("sellerNotConnected")}
+                </Button>
               ) : (
                 <Button
                   className="w-full gap-2"
                   onClick={handlePurchase}
                   disabled={isPurchasing || !session?.user}
                 >
-                  <ShoppingCart className="h-4 w-4" />
+                  {isPurchasing ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <ShoppingCart className="h-4 w-4" />
+                  )}
                   {isPurchasing ? t("purchasing") : item.price === 0 ? t("getFree") : t("buyNow")}
                 </Button>
               )}

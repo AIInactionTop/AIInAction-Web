@@ -633,6 +633,7 @@
     "purchasing": "处理中...",
     "getFree": "免费获取",
     "buyNow": "立即购买",
+    "sellerNotConnected": "卖家尚未开通收款",
     "viewDemo": "查看演示",
     "viewSource": "查看源码"
   },

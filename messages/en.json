@@ -633,6 +633,7 @@
     "purchasing": "Processing...",
     "getFree": "Get for Free",
     "buyNow": "Buy Now",
+    "sellerNotConnected": "Seller has not enabled payments",
     "viewDemo": "View Demo",
     "viewSource": "View Source"
   },

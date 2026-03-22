@@ -104,7 +104,7 @@ export async function getMarketplaceItemBySlug(slug: string, userId?: string) {
   const item = await prisma.marketplaceItem.findUnique({
     where: { slug },
     include: {
-      seller: { select: { id: true, name: true, image: true, bio: true } },
+      seller: { select: { id: true, name: true, image: true, bio: true, stripeConnectAccountId: true } },
       reviews: {
         include: { user: { select: { id: true, name: true, image: true } } },
         orderBy: { createdAt: "desc" },
