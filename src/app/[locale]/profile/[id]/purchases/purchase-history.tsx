@@ -45,13 +45,11 @@ function formatPrice(price: number, currency: string, locale: string) {
 
 export function PurchaseHistory({
   purchases,
-  total,
   page,
   totalPages,
   stats,
 }: {
   purchases: Purchase[];
-  total: number;
   page: number;
   totalPages: number;
   stats: Stats;

@@ -37,7 +37,6 @@ export default async function PurchasesPage({ params, searchParams }: Props) {
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-16 lg:px-8">
       <PurchaseHistory
         purchases={JSON.parse(JSON.stringify(purchaseData.purchases))}
-        total={purchaseData.total}
         page={purchaseData.page}
         totalPages={purchaseData.totalPages}
         stats={JSON.parse(JSON.stringify(stats))}

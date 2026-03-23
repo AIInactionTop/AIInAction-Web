@@ -15,7 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { purchaseMarketplaceItem, submitMarketplaceReview, deleteMarketplaceItem } from "@/actions/marketplace";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 type Review = {
   id: string;
@@ -98,6 +98,7 @@ export function MarketplaceItemDetail({
   currentUserId: string | null;
 }) {
   const t = useTranslations("marketplace");
+  const locale = useLocale();
   const router = useRouter();
   const { data: session } = useSession();
   const [isPurchasing, startPurchase] = useTransition();
@@ -360,7 +361,7 @@ export function MarketplaceItemDetail({
                       <div className="flex items-center justify-between">
                         <span className="flex items-center gap-1.5 text-muted-foreground">
                           <CalendarDays className="h-3.5 w-3.5" />
-                          {t("purchasedOn", { date: new Date(item.purchaseInfo.createdAt).toLocaleDateString() })}
+                          {t("purchasedOn", { date: new Date(item.purchaseInfo.createdAt).toLocaleDateString(locale) })}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
