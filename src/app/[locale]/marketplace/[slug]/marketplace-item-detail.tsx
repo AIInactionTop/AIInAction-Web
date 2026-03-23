@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import {
   Star, ExternalLink, ShoppingCart, Check, Trash2, Pencil,
   Sparkles, FileCode, Package, Wrench, ArrowLeft, Loader2,
+  CalendarDays, CreditCard,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,7 @@ type ItemDetail = {
   reviewsCount: number;
   createdAt: string;
   hasPurchased: boolean;
+  purchaseInfo: { price: number; currency: string; createdAt: string } | null;
   userReview: { id: string; rating: number; comment: string | null } | null;
   seller: { id: string; name: string | null; image: string | null; bio: string | null; stripeConnectAccountId: string | null };
   reviews: Review[];
@@ -348,10 +350,38 @@ export function MarketplaceItemDetail({
                   </Button>
                 </div>
               ) : item.hasPurchased ? (
-                <Button className="w-full gap-2" disabled>
-                  <Check className="h-4 w-4" />
-                  {t("purchased")}
-                </Button>
+                item.purchaseInfo ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm font-medium text-emerald-700 dark:text-emerald-300">
+                      <Check className="h-4 w-4 shrink-0" />
+                      {t("purchased")}
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="flex items-center gap-1.5 text-muted-foreground">
+                          <CalendarDays className="h-3.5 w-3.5" />
+                          {t("purchasedOn", { date: new Date(item.purchaseInfo.createdAt).toLocaleDateString() })}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">{t("pricePaid")}</span>
+                        <span className="font-medium">{formatPrice(item.purchaseInfo.price, item.purchaseInfo.currency)}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">{t("paymentMethod")}</span>
+                        <span className="flex items-center gap-1.5 font-medium">
+                          <CreditCard className="h-3.5 w-3.5" />
+                          {item.purchaseInfo.price > 0 ? t("paidViaStripe") : t("freeAcquired")}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <Button className="w-full gap-2" disabled>
+                    <Check className="h-4 w-4" />
+                    {t("purchased")}
+                  </Button>
+                )
               ) : !item.seller.stripeConnectAccountId && item.price > 0 ? (
                 <Button className="w-full gap-2" disabled>
                   <ShoppingCart className="h-4 w-4" />
