@@ -61,6 +61,44 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
+    async signIn({ user, account }) {
+      // Auto-link accounts with the same email across providers
+      if (!account || !user.email) return true;
+
+      const existingUser = await prisma.user.findUnique({
+        where: { email: user.email },
+        include: { accounts: true },
+      });
+
+      if (
+        existingUser &&
+        !existingUser.accounts.some(
+          (a) => a.provider === account.provider
+        )
+      ) {
+        // Link this new provider to the existing user
+        await prisma.account.create({
+          data: {
+            userId: existingUser.id,
+            type: account.type,
+            provider: account.provider,
+            providerAccountId: account.providerAccountId,
+            refresh_token: account.refresh_token,
+            access_token: account.access_token,
+            expires_at: account.expires_at,
+            token_type: account.token_type,
+            scope: account.scope,
+            id_token: account.id_token,
+            session_state: account.session_state as string | null,
+          },
+        });
+        // Update user info to point to existing user
+        user.id = existingUser.id;
+        return true;
+      }
+
+      return true;
+    },
     session({ session, user }) {
       if (session.user) {
         session.user.id = user.id;
