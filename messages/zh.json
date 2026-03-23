@@ -237,8 +237,26 @@
   "login": {
     "title": "欢迎回来",
     "subtitle": "登录以跟踪进度和分享项目",
+    "emailPlaceholder": "输入邮箱地址",
+    "sendCode": "发送验证码",
+    "enterCode": "输入验证码",
+    "codeSent": "验证码已发送至 {email}",
+    "verify": "验证并登录",
+    "resendCode": "重新发送",
+    "resendIn": "{seconds}秒后重发",
     "continueGithub": "使用 GitHub 继续",
-    "terms": "登录即表示你同意我们的服务条款和隐私政策。"
+    "continueGoogle": "使用 Google 继续",
+    "orDivider": "或",
+    "terms": "登录即表示你同意我们的服务条款和隐私政策。",
+    "brand": {
+      "tagline": "通过构建真实项目学习 AI",
+      "description": "加入创作者社区，通过实战挑战项目学习 AI。"
+    },
+    "stats": {
+      "challenges": "挑战项目",
+      "builders": "创作者",
+      "projects": "项目作品"
+    }
   },
   "notFound": {
     "code": "404",

@@ -237,8 +237,26 @@
   "login": {
     "title": "Welcome back",
     "subtitle": "Sign in to track your progress and share projects",
+    "emailPlaceholder": "Enter your email",
+    "sendCode": "Send verification code",
+    "enterCode": "Enter verification code",
+    "codeSent": "We sent a 6-digit code to {email}",
+    "verify": "Verify & Sign in",
+    "resendCode": "Resend code",
+    "resendIn": "Resend in {seconds}s",
     "continueGithub": "Continue with GitHub",
-    "terms": "By signing in, you agree to our Terms of Service and Privacy Policy."
+    "continueGoogle": "Continue with Google",
+    "orDivider": "OR",
+    "terms": "By signing in, you agree to our Terms of Service and Privacy Policy.",
+    "brand": {
+      "tagline": "Learn AI by building real-world projects",
+      "description": "Join a community of builders learning AI through hands-on challenge projects."
+    },
+    "stats": {
+      "challenges": "Challenges",
+      "builders": "Builders",
+      "projects": "Projects"
+    }
   },
   "notFound": {
     "code": "404",
