@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Github, Moon, Sun, Zap, Plus, ChevronDown, Building2, Coins, Crown, UserCircle, LogOut } from "lucide-react";
+import { Menu, X, Github, Moon, Sun, Zap, Plus, ChevronDown, Building2, Coins, Crown, UserCircle, LogOut, Receipt } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { signIn, signOut, useSession } from "next-auth/react";
@@ -194,6 +194,12 @@ export function Header() {
                     Membership
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href={`/profile/${session.user.id}/purchases` as never}>
+                    <Receipt className="mr-2 h-4 w-4" />
+                    {tc("purchaseHistory")}
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href={`/profile/${session.user.id}` as never}>
@@ -329,6 +335,14 @@ export function Header() {
                     className="rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                   >
                     Membership
+                  </Link>
+                  <Link
+                    href={`/profile/${session.user.id}/purchases` as never}
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    <Receipt className="mr-2 h-4 w-4" />
+                    {tc("purchaseHistory")}
                   </Link>
                 </>
               )}
