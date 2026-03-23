@@ -116,21 +116,24 @@ export async function getMarketplaceItemBySlug(slug: string, userId?: string) {
   if (!item) return null;
 
   let hasPurchased = false;
+  let purchaseInfo: { price: number; currency: string; createdAt: Date } | null = null;
   let userReview = null;
   if (userId) {
     const [purchase, review] = await Promise.all([
       prisma.marketplacePurchase.findUnique({
         where: { userId_itemId: { userId, itemId: item.id } },
+        select: { price: true, currency: true, createdAt: true },
       }),
       prisma.marketplaceReview.findUnique({
         where: { userId_itemId: { userId, itemId: item.id } },
       }),
     ]);
     hasPurchased = !!purchase;
+    purchaseInfo = purchase;
     userReview = review;
   }
 
-  return { ...item, hasPurchased, userReview };
+  return { ...item, hasPurchased, purchaseInfo, userReview };
 }
 
 export async function getMarketplaceStats() {
@@ -155,16 +158,55 @@ export async function getUserMarketplaceItems(userId: string) {
   });
 }
 
-export async function getUserPurchases(userId: string) {
-  return prisma.marketplacePurchase.findMany({
-    where: { userId },
-    include: {
-      item: {
-        include: {
-          seller: { select: { id: true, name: true, image: true } },
+export async function getUserPurchases(userId: string, page = 1, pageSize = 20) {
+  const where = { userId };
+  const [purchases, total] = await Promise.all([
+    prisma.marketplacePurchase.findMany({
+      where,
+      include: {
+        item: {
+          select: {
+            title: true,
+            slug: true,
+            imageUrl: true,
+            type: true,
+          },
         },
       },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    }),
+    prisma.marketplacePurchase.count({ where }),
+  ]);
+
+  return { purchases, total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
+}
+
+export async function getUserPurchaseStats(userId: string) {
+  const [currencyTotals, lastPurchase] = await Promise.all([
+    prisma.marketplacePurchase.groupBy({
+      by: ["currency"],
+      where: { userId },
+      _sum: { price: true },
+      _count: true,
+    }),
+    prisma.marketplacePurchase.findFirst({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      select: { createdAt: true },
+    }),
+  ]);
+
+  const totalCount = currencyTotals.reduce((sum, g) => sum + g._count, 0);
+
+  return {
+    totals: currencyTotals.map((g) => ({
+      currency: g.currency,
+      amount: g._sum.price || 0,
+      count: g._count,
+    })),
+    totalCount,
+    lastPurchaseDate: lastPurchase?.createdAt || null,
+  };
 }
