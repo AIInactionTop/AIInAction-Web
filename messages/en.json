@@ -20,7 +20,8 @@
     "share": "Share",
     "fork": "Fork",
     "challenges": "challenges",
-    "all": "All"
+    "all": "All",
+    "purchaseHistory": "Purchase History"
   },
   "nav": {
     "learn": "Learn",
@@ -653,7 +654,12 @@
     "buyNow": "Buy Now",
     "sellerNotConnected": "Seller has not enabled payments",
     "viewDemo": "View Demo",
-    "viewSource": "View Source"
+    "viewSource": "View Source",
+    "purchasedOn": "Purchased on {date}",
+    "pricePaid": "Price Paid",
+    "paymentMethod": "Payment Method",
+    "paidViaStripe": "Paid via Stripe",
+    "freeAcquired": "Free"
   },
   "marketplaceForm": {
     "createTitle": "Publish to Marketplace",
@@ -688,6 +694,16 @@
     "addFeature": "Add feature",
     "createButton": "Publish Listing",
     "updateButton": "Update Listing"
+  },
+  "purchases": {
+    "title": "Purchase History",
+    "totalSpent": "Total Spent",
+    "totalCount": "Purchases",
+    "lastPurchase": "Last Purchase",
+    "noPurchases": "Never",
+    "empty": "No purchases yet",
+    "browseMarketplace": "Browse Marketplace",
+    "page": "Page {current} of {total}"
   },
   "aiStudio": {
     "title": "AI Studio",
