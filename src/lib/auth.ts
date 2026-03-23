@@ -4,8 +4,19 @@ import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import Resend from "next-auth/providers/resend";
 import { PrismaAdapter } from "@auth/prisma-adapter";
+import { ProxyAgent, setGlobalDispatcher } from "undici";
 import { prisma } from "./prisma";
 import { sendWelcomeEmail, sendOtpEmail } from "./email";
+
+// Set global proxy for all fetch calls (needed for Google OAuth in China)
+const proxyUrl =
+  process.env.HTTPS_PROXY ||
+  process.env.HTTP_PROXY ||
+  process.env.https_proxy ||
+  process.env.http_proxy;
+if (proxyUrl) {
+  setGlobalDispatcher(new ProxyAgent(proxyUrl));
+}
 
 function generateOtpCode(): string {
   return randomInt(100000, 1000000).toString();
