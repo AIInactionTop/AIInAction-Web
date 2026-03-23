@@ -57,13 +57,25 @@ function parseOutlineFromText(text: string): PathOutline | null {
 }
 
 function parseChallengeDetailFromText(text: string) {
-  const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
-  if (!jsonMatch) return null;
-  try {
-    return JSON.parse(jsonMatch[1]);
-  } catch {
-    return null;
+  // Try ```json ... ``` fences
+  const jsonFenceMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
+  if (jsonFenceMatch) {
+    try { return JSON.parse(jsonFenceMatch[1]); } catch { /* fall through */ }
   }
+
+  // Try ``` ... ``` fences without language hint
+  const fenceMatch = text.match(/```\s*(\{[\s\S]*?\})\s*```/);
+  if (fenceMatch) {
+    try { return JSON.parse(fenceMatch[1]); } catch { /* fall through */ }
+  }
+
+  // Try extracting a raw JSON object from the text
+  const jsonObjectMatch = text.match(/\{[\s\S]*\}/);
+  if (jsonObjectMatch) {
+    try { return JSON.parse(jsonObjectMatch[0]); } catch { /* fall through */ }
+  }
+
+  return null;
 }
 
 function loadMessages(): UIMessage[] {
@@ -98,6 +110,10 @@ export function AIStudioClient({ categories, locale }: Props) {
   const { balance, refreshCredits } = useCredits();
   const availableCredits = balance?.balance.credits ?? null;
 
+  // Refs to break circular dependency and avoid stale closures
+  const detailChatRef = useRef<ReturnType<typeof useChat>>(null!);
+  const triggerDetailGenerationRef = useRef<(c: OutlineChallenge) => void>(null!);
+
   const outlineChat = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat/generate-outline" }),
     onFinish: ({ message }) => {
@@ -110,22 +126,6 @@ export function AIStudioClient({ categories, locale }: Props) {
     },
     onError: (error) => setLocalErrorMessage(normalizeChatError(error.message)),
   });
-
-  const triggerDetailGeneration = useCallback((challenge: OutlineChallenge) => {
-    generatingChallengeRef.current = challenge.id;
-    setGeneratingChallengeId(challenge.id);
-
-    const { pathOutline: currentOutline } = useAIStudioStore.getState();
-    const context = currentOutline
-      ? `Learning Path: "${currentOutline.title}"\nChallenge to expand: "${challenge.title}" - ${challenge.summary}\nDifficulty: ${challenge.difficulty}\n\nPlease generate the full challenge details.`
-      : "";
-
-    detailChat.setMessages([]);
-    setTimeout(() => {
-      detailChat.sendMessage({ text: context });
-    }, 0);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const detailChat = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat/generate-challenge" }),
@@ -148,13 +148,11 @@ export function AIStudioClient({ categories, locale }: Props) {
           isDetailGenerated: true,
         });
       } else if (challengeId) {
-        // Parse failed — mark as generated to prevent infinite retry loop
-        useAIStudioStore.getState().updateChallenge(challengeId, {
-          isDetailGenerated: true,
-        });
+        // Parse failed — do NOT mark as generated so user can retry
         setLocalErrorMessage(
-          `Failed to parse generated content for challenge. You can retry individually.`
+          `Failed to parse generated content for challenge. Raw response logged to console. You can retry.`
         );
+        console.error("[AI Studio] Detail parse failed. Raw text:", text);
         isGeneratingAllRef.current = false;
       }
 
@@ -167,7 +165,7 @@ export function AIStudioClient({ categories, locale }: Props) {
         if (!state.pathOutline) return;
         const ungenerated = state.pathOutline.challenges.filter((c) => !c.isDetailGenerated);
         if (ungenerated.length > 0) {
-          setTimeout(() => triggerDetailGeneration(ungenerated[0]), 500);
+          setTimeout(() => triggerDetailGenerationRef.current(ungenerated[0]), 500);
         } else {
           state.setPhase("done");
           isGeneratingAllRef.current = false;
@@ -182,6 +180,26 @@ export function AIStudioClient({ categories, locale }: Props) {
       setLocalErrorMessage(normalizeChatError(error.message));
     },
   });
+  detailChatRef.current = detailChat;
+
+  const triggerDetailGeneration = useCallback((challenge: OutlineChallenge) => {
+    generatingChallengeRef.current = challenge.id;
+    setGeneratingChallengeId(challenge.id);
+
+    const { pathOutline: currentOutline } = useAIStudioStore.getState();
+    const context = currentOutline
+      ? `Learning Path: "${currentOutline.title}"\nChallenge to expand: "${challenge.title}" - ${challenge.summary}\nDifficulty: ${challenge.difficulty}\n\nPlease generate the full challenge details.`
+      : "";
+
+    // Use ref to always get the current detailChat instance
+    const chat = detailChatRef.current;
+    chat.setMessages([]);
+    // Wait for state flush before sending new message
+    requestAnimationFrame(() => {
+      detailChatRef.current.sendMessage({ text: context });
+    });
+  }, []);
+  triggerDetailGenerationRef.current = triggerDetailGeneration;
 
   const chatErrorMessage = normalizeChatError(
     outlineChat.error?.message || detailChat.error?.message || ""
@@ -224,6 +242,13 @@ export function AIStudioClient({ categories, locale }: Props) {
 
   const isOutlineLoading = outlineChat.status === "submitted" || outlineChat.status === "streaming";
   const isDetailLoading = detailChat.status === "submitted" || detailChat.status === "streaming";
+
+  // Extract streaming text from the detail chat for live display
+  const detailStreamingText = (() => {
+    const lastAssistant = detailChat.messages.filter((m) => m.role === "assistant").at(-1);
+    if (!lastAssistant) return "";
+    return getTextFromMessage(lastAssistant);
+  })();
 
   const handleSendMessage = useCallback(
     (content: string) => {
@@ -303,6 +328,7 @@ export function AIStudioClient({ categories, locale }: Props) {
           locale={locale}
           isDetailLoading={isDetailLoading}
           generatingChallengeId={generatingChallengeId}
+          detailStreamingText={detailStreamingText}
           onGenerateDetails={handleGenerateDetails}
           onGenerateAll={handleGenerateAll}
         />

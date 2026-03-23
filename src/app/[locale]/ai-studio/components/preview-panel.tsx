@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, ChevronDown, ChevronRight, Loader2, Save, Globe, Sparkles } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import { useAIStudioStore, type OutlineChallenge } from "@/stores/ai-studio-store";
 import { saveAILearningPath } from "@/actions/ai-studio";
 import { ChallengeEditor } from "./challenge-editor";
@@ -21,11 +22,16 @@ type Props = {
   locale: string;
   isDetailLoading: boolean;
   generatingChallengeId: string | null;
+  detailStreamingText: string;
   onGenerateDetails: (challenge: OutlineChallenge) => void;
   onGenerateAll: () => void;
 };
 
-export function PreviewPanel({ categories, locale, isDetailLoading, generatingChallengeId, onGenerateDetails, onGenerateAll }: Props) {
+function stripJsonBlocks(text: string) {
+  return text.replace(/```json\s*[\s\S]*?\s*```/g, "").trim();
+}
+
+export function PreviewPanel({ categories, locale, isDetailLoading, generatingChallengeId, detailStreamingText, onGenerateDetails, onGenerateAll }: Props) {
   const t = useTranslations("aiStudio");
   const { pathOutline, phase, updatePathField, updateChallenge } = useAIStudioStore();
   const [expandedChallenges, setExpandedChallenges] = useState<Set<string>>(new Set());
@@ -153,25 +159,30 @@ export function PreviewPanel({ categories, locale, isDetailLoading, generatingCh
                     challenge={challenge}
                     onChange={(updates) => updateChallenge(challenge.id, updates)}
                   />
+                ) : isDetailLoading && generatingChallengeId === challenge.id ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      {t("generatingDetails")}
+                    </div>
+                    {detailStreamingText && (
+                      <div className="prose prose-sm dark:prose-invert max-w-none rounded-md border border-border p-3 bg-muted/30">
+                        <ReactMarkdown>{stripJsonBlocks(detailStreamingText)}</ReactMarkdown>
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <div className="space-y-2">
                     <p className="text-sm text-muted-foreground">{challenge.summary}</p>
-                    {isDetailLoading && generatingChallengeId === challenge.id ? (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                        {t("generatingDetails")}
-                      </div>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleGenerateDetail(challenge)}
-                        disabled={isDetailLoading}
-                      >
-                        <Sparkles className="mr-2 h-3 w-3" />
-                        {t("generateDetails")}
-                      </Button>
-                    )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleGenerateDetail(challenge)}
+                      disabled={isDetailLoading}
+                    >
+                      <Sparkles className="mr-2 h-3 w-3" />
+                      {t("generateDetails")}
+                    </Button>
                   </div>
                 )}
               </div>
