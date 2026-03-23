@@ -29,21 +29,27 @@ Redesign the login page with a split-screen layout, adding email verification co
 
 ## Technical Design
 
-### 1. NextAuth Email Provider (OTP via Resend)
+### 1. NextAuth Resend Provider (OTP Code)
 
 **File:** `src/lib/auth.ts`
 
-Add NextAuth's built-in Email provider configured to send a 6-digit verification code (not a magic link):
+Add NextAuth's built-in Resend provider with custom OTP flow:
 
 ```typescript
-import Email from "next-auth/providers/nodemailer";
+import Resend from "next-auth/providers/resend";
 ```
 
-- Use Resend as the SMTP transport (Resend supports SMTP)
-- Custom `sendVerificationRequest` function to send a branded email with the 6-digit code
-- Configure `maxAge` for code expiry (10 minutes)
+**OTP flow (not magic link):**
 
-**Database:** NextAuth's `VerificationToken` model is already in the Prisma schema (standard NextAuth adapter model). No schema changes needed.
+NextAuth's default email flow uses magic links. To implement a typed 6-digit code flow:
+
+1. **Custom token generation:** Override `generateVerificationToken` to produce a 6-digit numeric code instead of the default long hash
+2. **Custom `sendVerificationRequest`:** Send a branded email containing the 6-digit code (not a clickable link)
+3. **Custom verification API route:** Create `src/app/api/auth/verify-otp/route.ts` that accepts `{ email, code }` via POST, looks up the `VerificationToken`, validates the code, and calls NextAuth's `signIn("credentials")` or directly creates a session
+4. **Login page form:** After sending the code, the form switches to a 6-digit input. On submit, it POSTs to the custom verify endpoint instead of relying on a magic link click
+5. Configure `maxAge: 600` for code expiry (10 minutes)
+
+**Database:** NextAuth's `VerificationToken` model already exists in `prisma/schema.prisma`. No schema changes needed.
 
 ### 2. Google OAuth Provider
 
@@ -118,6 +124,7 @@ Add/update login section keys:
 | `messages/en.json` | Add login i18n keys |
 | `messages/zh.json` | Add login i18n keys |
 | `.env` | Add `GOOGLE_ID`, `GOOGLE_SECRET` |
+| `src/app/api/auth/verify-otp/route.ts` | New: custom OTP verification endpoint |
 | `prisma/schema.prisma` | Verify VerificationToken model exists |
 
 ## Out of Scope
