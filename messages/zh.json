@@ -712,7 +712,25 @@
     "step": "步骤",
     "confirmOutline": "大纲看起来不错，请为所有挑战生成详细内容。",
     "saved": "学习路径保存成功！",
-    "published": "学习路径发布成功！"
+    "published": "学习路径发布成功！",
+    "hub": {
+      "title": "AI 工作室",
+      "subtitle": "AI 驱动的智能助手，帮助你学习、构建和创作。所有 Agent 均消耗积分。",
+      "available": "可用",
+      "comingSoon": "即将推出",
+      "challengeAgent": {
+        "name": "挑战 Agent",
+        "description": "描述你的学习目标，AI 将为你创建包含渐进式挑战的个性化学习路径。"
+      },
+      "prototypeAgent": {
+        "name": "原型 Agent",
+        "description": "借助 AI 快速原型设计和迭代 UI 界面。"
+      },
+      "writerAgent": {
+        "name": "写作 Agent",
+        "description": "生成和优化技术文档、博客文章和教程。"
+      }
+    }
   },
   "learn": {
     "title": "学习",

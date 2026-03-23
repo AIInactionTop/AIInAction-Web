@@ -712,7 +712,25 @@
     "step": "Step",
     "confirmOutline": "The outline looks good, please generate the details for all challenges.",
     "saved": "Learning path saved successfully!",
-    "published": "Learning path published successfully!"
+    "published": "Learning path published successfully!",
+    "hub": {
+      "title": "AI Studio",
+      "subtitle": "AI-powered agents to help you learn, build, and create. All agents consume credits.",
+      "available": "Available",
+      "comingSoon": "Coming Soon",
+      "challengeAgent": {
+        "name": "Challenge Agent",
+        "description": "Describe your learning goal and AI will create a personalized learning path with progressive challenges."
+      },
+      "prototypeAgent": {
+        "name": "Prototype Agent",
+        "description": "Quickly prototype and iterate on UI designs with AI assistance."
+      },
+      "writerAgent": {
+        "name": "Writer Agent",
+        "description": "Generate and refine technical documentation, blog posts, and tutorials."
+      }
+    }
   },
   "learn": {
     "title": "Learn",
