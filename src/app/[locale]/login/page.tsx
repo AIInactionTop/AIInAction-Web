@@ -10,11 +10,7 @@ async function getLoginStats() {
   return { challenges, builders, projects };
 }
 
-export default async function LoginPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ verify?: string }>;
-}) {
-  const [stats, params] = await Promise.all([getLoginStats(), searchParams]);
-  return <LoginForm stats={stats} initialVerify={params.verify === "1"} />;
+export default async function LoginPage() {
+  const stats = await getLoginStats();
+  return <LoginForm stats={stats} />;
 }

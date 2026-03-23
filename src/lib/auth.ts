@@ -1,3 +1,4 @@
+import { randomInt } from "crypto";
 import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
@@ -7,8 +8,7 @@ import { prisma } from "./prisma";
 import { sendWelcomeEmail, sendOtpEmail } from "./email";
 
 function generateOtpCode(): string {
-  // Generate a 6-digit numeric code
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return randomInt(100000, 1000000).toString();
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -59,7 +59,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   pages: {
     signIn: "/login",
-    verifyRequest: "/login?verify=1",
   },
   events: {
     async createUser({ user }) {

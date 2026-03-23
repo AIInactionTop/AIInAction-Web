@@ -1,8 +1,12 @@
 "use server";
 
 import { signIn } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 export async function sendOtpCode(email: string) {
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { success: false, error: "Invalid email" };
+  }
   try {
     await signIn("resend", {
       email,
@@ -18,13 +22,13 @@ export async function sendOtpCode(email: string) {
   }
 }
 
-export async function getOtpCallbackUrl(email: string, code: string) {
-  // Construct the NextAuth callback URL that verifies the token.
-  // This is the same URL that magic links point to — we just build it manually.
+export async function verifyOtpCode(email: string, code: string) {
+  // Redirect server-side to the NextAuth callback URL.
+  // This prevents the client from seeing or manipulating the callback URL.
   const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
   const callbackUrl = new URL("/api/auth/callback/resend", baseUrl);
   callbackUrl.searchParams.set("token", code);
   callbackUrl.searchParams.set("email", email);
   callbackUrl.searchParams.set("callbackUrl", "/");
-  return callbackUrl.toString();
+  redirect(callbackUrl.toString());
 }

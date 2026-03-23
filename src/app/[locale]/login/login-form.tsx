@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
-import { sendOtpCode, getOtpCallbackUrl } from "@/actions/auth";
+import { sendOtpCode, verifyOtpCode } from "@/actions/auth";
 
 interface LoginFormProps {
   stats: {
@@ -15,16 +15,13 @@ interface LoginFormProps {
     builders: number;
     projects: number;
   };
-  initialVerify?: boolean;
 }
 
 type FormState = "email" | "otp";
 
-export function LoginForm({ stats, initialVerify }: LoginFormProps) {
+export function LoginForm({ stats }: LoginFormProps) {
   const t = useTranslations("login");
-  const [formState, setFormState] = useState<FormState>(
-    initialVerify ? "otp" : "email"
-  );
+  const [formState, setFormState] = useState<FormState>("email");
   const [email, setEmail] = useState("");
   const [otpCode, setOtpCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -62,11 +59,8 @@ export function LoginForm({ stats, initialVerify }: LoginFormProps) {
     setIsLoading(true);
     setError("");
     try {
-      // Get the NextAuth callback URL with the OTP code embedded.
-      // Navigating to this URL triggers NextAuth's token verification
-      // (same mechanism as clicking a magic link).
-      const callbackUrl = await getOtpCallbackUrl(email, otpCode);
-      window.location.href = callbackUrl;
+      // Server action redirects to NextAuth callback URL server-side
+      await verifyOtpCode(email, otpCode);
     } catch {
       setError("Verification failed");
       setIsLoading(false);
