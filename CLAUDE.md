@@ -49,6 +49,8 @@ GITHUB_SECRET     # GitHub OAuth app client secret
 NEXTAUTH_URL      # Base URL (e.g. http://localhost:3000)
 AI_GATEWAY_API_KEY # Vercel AI Gateway API key (routes all AI calls)
 RESEND_API_KEY    # Resend API key for sending emails
+GOOGLE_ID         # Google OAuth client ID
+GOOGLE_SECRET     # Google OAuth client secret
 ```
 
 ### UI
