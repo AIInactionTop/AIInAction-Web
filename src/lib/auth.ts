@@ -111,7 +111,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   events: {
     async createUser({ user }) {
-      if (user.email) {
+      // Skip welcome email for email OTP users — they just received a
+      // verification code email and sending two emails at once causes bounces.
+      // Only send welcome emails for OAuth sign-ups (GitHub, Google).
+      const hasOAuthAccount = await prisma.account.findFirst({
+        where: { userId: user.id! },
+      });
+      if (user.email && hasOAuthAccount) {
         try {
           await sendWelcomeEmail(user.name || "", user.email);
         } catch {

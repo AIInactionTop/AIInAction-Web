@@ -59,8 +59,9 @@ export function LoginForm({ stats }: LoginFormProps) {
     setIsLoading(true);
     setError("");
     try {
-      // Server action redirects to NextAuth callback URL server-side
-      await verifyOtpCode(email, otpCode);
+      const result = await verifyOtpCode(email, otpCode);
+      // Full browser navigation so NextAuth can set session cookies
+      window.location.href = result.url;
     } catch {
       setError("Verification failed");
       setIsLoading(false);
