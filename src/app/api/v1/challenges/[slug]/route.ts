@@ -6,7 +6,8 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = decodeURIComponent(rawSlug);
 
   const challenge = await prisma.challenge.findUnique({
     where: { slug },
@@ -49,7 +50,8 @@ export async function PUT(
   const { user, error } = await requireAuth(request);
   if (error) return error;
 
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = decodeURIComponent(rawSlug);
 
   const existing = await prisma.challenge.findUnique({ where: { slug } });
   if (!existing) return jsonError("NOT_FOUND", "Challenge not found", 404);

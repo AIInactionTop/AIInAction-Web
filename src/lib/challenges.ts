@@ -121,8 +121,9 @@ export async function getChallenges(filters: ChallengeFilters = {}, locale?: str
 }
 
 export async function getChallengeBySlug(slug: string, locale?: string) {
+  const decodedSlug = decodeURIComponent(slug);
   const challenge = await prisma.challenge.findUnique({
-    where: { slug },
+    where: { slug: decodedSlug },
     include: {
       category: true,
       tags: { include: { tag: true } },
@@ -151,8 +152,9 @@ export async function getChallengeComments(challengeId: string, page = 1, pageSi
 }
 
 export async function getChallengesByPath(pathSlug: string, locale?: string) {
+  const decodedSlug = decodeURIComponent(pathSlug);
   const challenges = await prisma.challenge.findMany({
-    where: { path: { slug: pathSlug } },
+    where: { path: { slug: decodedSlug } },
     include: {
       category: true,
       tags: { include: { tag: true } },
@@ -170,8 +172,9 @@ export async function getAllPaths() {
 }
 
 export async function getPathBySlug(slug: string) {
+  const decodedSlug = decodeURIComponent(slug);
   return prisma.learningPath.findUnique({
-    where: { slug },
+    where: { slug: decodedSlug },
   });
 }
 

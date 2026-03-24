@@ -11,7 +11,7 @@ import { translateChallenge, type ChallengeContent } from "@/lib/ai";
 function slugify(text: string): string {
   return text
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/[^\p{L}\p{N}]+/gu, "-")
     .replace(/^-|-$/g, "");
 }
 

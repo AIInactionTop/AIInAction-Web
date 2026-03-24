@@ -12,7 +12,8 @@ export async function POST(
   const { user, error } = await requireAuth(request);
   if (error) return error;
 
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = decodeURIComponent(rawSlug);
 
   const challenge = await prisma.challenge.findUnique({
     where: { slug },
